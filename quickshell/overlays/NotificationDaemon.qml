@@ -4,20 +4,11 @@ import Quickshell.Wayland
 import QtQuick
 import "../theme"
 import "../components"
+import "../services"
 
-// Owns org.freedesktop.Notifications and shows compact toasts top-right.
+// Compact toasts for the shared notification server.
 Scope {
     id: root
-
-    NotificationServer {
-        id: server
-        keepOnReload: true
-        bodySupported: true
-        imageSupported: true
-        actionsSupported: true
-
-        onNotification: (n) => { n.tracked = true }
-    }
 
     Variants {
         model: Quickshell.screens
@@ -38,7 +29,7 @@ Scope {
             }
             implicitWidth: 304
             implicitHeight: column.implicitHeight
-            visible: server.trackedNotifications.values.length > 0
+            visible: Notifications.count > 0
             color: "transparent"
             exclusiveZone: 0
             WlrLayershell.layer: WlrLayer.Overlay
@@ -50,7 +41,7 @@ Scope {
                 spacing: 8
 
                 Repeater {
-                    model: server.trackedNotifications
+                    model: Notifications.tracked
 
                     GlassPanel {
                         id: note

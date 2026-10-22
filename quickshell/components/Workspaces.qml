@@ -2,15 +2,14 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Roman-numeral workspace strip. Active is the only accent; occupied
+// Numeric workspace strip. Active is the only accent; occupied
 // workspaces are quieter, empty ones recede almost completely.
 Row {
     id: root
 
-    spacing: 9
+    spacing: 10
 
     readonly property var all: Niri.workspaces
-    readonly property var numerals: ["I", "II", "III", "IV", "V"]
 
     function goTo(idx) {
         Niri.focusWorkspace(idx);
@@ -38,7 +37,7 @@ Row {
                 return false;
             }
 
-            text: root.numerals[index]
+            text: String(index + 1)
             color: selected ? Theme.accent : hover.hovered ? Theme.fg : used ? Theme.fg : Theme.fgDim
             opacity: selected ? 1 : hover.hovered ? 1 : used ? 0.8 : 0.35
             font.family: Theme.font

@@ -24,22 +24,66 @@ ShellRoot {
 
     Launcher { id: launcher }
     PowerMenu { id: power }
+    ControlCenter { id: controlCenter }
+    NotificationCenter { id: notificationCenter }
     NotificationDaemon {}
 
     IpcHandler {
         target: "shell"
 
         function toggleLauncher() {
-            launcher.toggle();
+            if (launcher.visible) {
+                launcher.close();
+                return;
+            }
+            power.close();
+            controlCenter.close();
+            notificationCenter.close();
+            launcher.open();
         }
 
         function togglePower() {
-            power.toggle();
+            if (power.visible) {
+                power.close();
+                return;
+            }
+            launcher.close();
+            controlCenter.close();
+            notificationCenter.close();
+            power.open();
+        }
+
+        function toggleNotifications() {
+            if (notificationCenter.visible) {
+                notificationCenter.close();
+                return;
+            }
+            launcher.close();
+            power.close();
+            controlCenter.close();
+            notificationCenter.open();
+        }
+
+        function toggleControl() {
+            if (controlCenter.visible) {
+                controlCenter.close();
+                return;
+            }
+            launcher.close();
+            power.close();
+            notificationCenter.close();
+            controlCenter.open();
         }
 
         function closeOverlays() {
             launcher.close();
             power.close();
+            controlCenter.close();
+            notificationCenter.close();
+        }
+
+        function clearNotifications() {
+            Notifications.clearAll();
         }
     }
 }

@@ -1,8 +1,8 @@
 # niri-rice
 
 A from-scratch **Niri + Quickshell** desktop. The compositor is Niri; the
-bar, launcher, power menu, and notifications are custom QML in
-`quickshell/`. No Waybar, no AGS, no KDE.
+top bar, launcher, system drawer, power menu, and notifications are custom
+QML in `quickshell/`. No Waybar, no AGS, no KDE.
 
 ## Layout
 
@@ -11,9 +11,10 @@ niri/config.kdl              compositor config
 quickshell/                  qs -c niri
   shell.qml                  entry point
   theme/Theme.qml            palette, type, glyphs, motion
-  services/                  Niri IPC, sysstats, network, bluetooth, battery
+  services/                  Niri IPC, sysstats, weather, brightness, disk,
+                             network, bluetooth, battery, notifications
   components/                bar widgets
-  overlays/                  launcher, power menu, notifications
+  overlays/                  launcher, system drawer, power menu, notifications
 scripts/install.sh           install niri, switch login manager, remove old stack
 ```
 
@@ -40,6 +41,39 @@ Reload after edits:
 
 ```
 niri msg action load-config-file
+```
+
+Quickshell watches its QML files and hot-reloads them. If a reload leaves the
+IPC socket unresponsive, restart the shell cleanly:
+
+```
+systemctl --user restart niri-quickshell 2>/dev/null || qs -n -c niri -d
+```
+
+## Bar
+
+Left to right:
+
+- Arch mark: opens the launcher.
+- Numeric workspaces `1..5`; the active workspace is pink.
+- Center: `date · time · weather`, with current conditions from wttr.in.
+- `<`: opens the system drawer (network, Bluetooth, battery, volume and
+  brightness sliders, lock screen).
+- Volume, brightness, root-disk, RAM, and CPU readouts.
+- Bell: notification history and do-not-disturb.
+- Power: session menu.
+
+The bar is deliberately minimal. Wi-Fi, Bluetooth, and battery live in the
+system drawer instead of taking permanent space.
+
+Useful IPC while developing:
+
+```
+qs -c niri ipc call shell toggleLauncher
+qs -c niri ipc call shell toggleControl
+qs -c niri ipc call shell toggleNotifications
+qs -c niri ipc call shell togglePower
+qs -c niri ipc call shell closeOverlays
 ```
 
 ## Install / teardown
@@ -88,12 +122,14 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
 
 ## Notes / next
 
-- The palette is currently lifted from `~/.config/hypr/scheme/current.conf`
-  (lavender Material You). Swap `quickshell/theme/Theme.qml` or generate it
-  later with matugen.
-- Notifications are owned by Quickshell (`NotificationServer`). Caelestia is
-  still running under Hyprland during development; it will not start under
+- The palette is matched to the supplied compact bar reference: near-black
+  surfaces, pink active state, and pale-gold system readouts. Swap
+  `quickshell/theme/Theme.qml` or generate it later with matugen.
+- Notifications are owned by Quickshell. The toast overlay and history panel
+  share one `NotificationServer` singleton so they do not fight for the
+  `org.freedesktop.Notifications` bus name. Caelestia is not started under
   Niri.
-- v1: Quickshell lock screen (`WlSessionLock` + PAM), media/calendar popups,
+- v0 locking/idle/wallpaper still uses `swaylock`, `swayidle`, and `swaybg`.
+  v1: Quickshell lock screen (`WlSessionLock` + PAM), media/calendar popups,
   animated wallpaper via `awww`, and sprite widgets (`AnimatedSprite` /
   `SpriteSequence`).

@@ -4,7 +4,7 @@ import Quickshell.Wayland
 import "../theme"
 
 // Compact full-width top bar, one layer-shell surface per monitor.
-// Reference language: no floating card, no pill containers, accent-as-state.
+// Reference language: numeric workspaces, date · time · weather, metrics.
 PanelWindow {
     id: root
 
@@ -26,37 +26,63 @@ PanelWindow {
         color: Theme.bgBar
     }
 
-    // Left: only the workspace indicator. Launcher stays on Super+D.
+    Rectangle {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+        height: 1
+        color: "#12ffffff"
+    }
+
     Row {
         anchors.left: parent.left
-        anchors.leftMargin: 12
+        anchors.leftMargin: 14
         anchors.verticalCenter: parent.verticalCenter
         spacing: 10
+
+        BarButton {
+            glyph: Theme.gArch
+            textColor: Theme.fg
+            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleLauncher"])
+        }
 
         Workspaces {}
     }
 
-    // Center: date › time.
     Clock {
         anchors.centerIn: parent
     }
 
-    // Right: quiet system glyphs, tray, session.
     Row {
         anchors.right: parent.right
-        anchors.rightMargin: 8
+        anchors.rightMargin: 10
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 1
+        spacing: 3
+
+        BarButton {
+            glyph: Theme.gChevronLeft
+            textColor: Theme.fgDim
+            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleControl"])
+        }
 
         Volume {}
-        NetworkIndicator {}
-        BluetoothIndicator {}
-        BatteryIndicator {}
-        Tray {}
+        BrightnessIndicator {}
+        DiskIndicator {}
+        RamIndicator {}
+        CpuIndicator {}
+
+        BarButton {
+            glyph: Theme.gBell
+            textColor: Theme.fgDim
+            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleNotifications"])
+        }
 
         BarButton {
             glyph: Theme.gPower
             textColor: Theme.fgDim
+            hoverColor: Theme.red
             onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "togglePower"])
         }
     }

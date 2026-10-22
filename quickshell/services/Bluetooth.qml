@@ -12,6 +12,11 @@ Singleton {
     property bool powered: false
     property int connectedCount: 0
 
+    function setPowered(on) {
+        root.powered = on;
+        Quickshell.execDetached(["bluetoothctl", "power", on ? "on" : "off"]);
+    }
+
     function parse(raw) {
         const parts = (raw || "").split("===");
         const show = parts[0] || "";

@@ -2,12 +2,11 @@ pragma Singleton
 
 import QtQuick
 
-// Palette lifted from ~/.config/hypr/scheme/current.conf so the new shell
-// starts out matching the wallpaper. Swap these values (or generate them
-// with matugen later) and the whole shell follows.
+// Palette matched to the compact reference bar: near-black translucent
+// surfaces, pink active state, and pale-gold system readouts. Swap these
+// values (or generate them with matugen later) and the shell follows.
 //
-// Visual language borrowed from ImJustDoingMyPart/dotfiles: near-black
-// translucent surfaces, 4px geometry, JetBrains Mono, and accent-as-state.
+// Visual language: 4px geometry, JetBrains Mono, accent-as-state.
 QtObject {
     // surfaces
     readonly property color bg: "#0c0b10"
@@ -15,23 +14,23 @@ QtObject {
     readonly property color bgPanel: "#f217161c"
     readonly property color bgHover: "#1fffffff"
     readonly property color surface: "#0fffffff"
-    readonly property color accentSoft: "#40c2c1ff"
+    readonly property color accentSoft: "#40f2a8c4"
     readonly property color border: "#26ffffff"
 
     // text
-    readonly property color fg: "#e5e1e7"
-    readonly property color fgDim: "#918f9a"
+    readonly property color fg: "#ded9e2"
+    readonly property color fgDim: "#918c98"
 
     // accents
-    readonly property color accent: "#c2c1ff"
-    readonly property color accent2: "#f5b2e0"
+    readonly property color accent: "#f2a8c4"
+    readonly property color accent2: "#c2c1ff"
     readonly property color red: "#ffb4ab"
     readonly property color green: "#b5ccba"
-    readonly property color yellow: "#e0c2f9"
-    readonly property color blue: "#b0b8ff"
+    readonly property color yellow: "#e5c79a"
+    readonly property color blue: "#a9c7e8"
 
     // geometry
-    readonly property int barHeight: 28
+    readonly property int barHeight: 30
     readonly property int radius: 4
     readonly property int gap: 8
 
@@ -49,7 +48,14 @@ QtObject {
 
     // Nerd Font glyphs (same codepoints as the existing bar)
     readonly property string gApps: "\uF009"
+    readonly property string gArch: "\uF303"
     readonly property string gPower: "\uF011"
+    readonly property string gBell: "\uF0F3"
+    readonly property string gChevronLeft: "\uF053"
+    readonly property string gBrightness: "\uF185"
+    readonly property string gDisk: "\uF0A0"
+    readonly property string gRam: "\uF1C0"
+    readonly property string gCpu: "\uF2DB"
     readonly property string gVolHigh: "\uF028"
     readonly property string gVolLow: "\uF027"
     readonly property string gMuted: "\uF026"

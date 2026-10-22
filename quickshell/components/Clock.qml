@@ -1,8 +1,9 @@
 import Quickshell
 import QtQuick
 import "../theme"
+import "../services"
 
-// Terminal-style center block: date › time. No box, no blinking colon.
+// Terminal-style center block: date · time · weather. No box, no blinking.
 Row {
     id: root
 
@@ -23,9 +24,9 @@ Row {
 
     Text {
         anchors.verticalCenter: parent.verticalCenter
-        text: "›"
-        color: Theme.accent2
-        opacity: 0.55
+        text: "·"
+        color: Theme.fgDim
+        opacity: 0.6
         font.family: Theme.font
         font.pixelSize: Theme.size
     }
@@ -37,5 +38,37 @@ Row {
         font.family: Theme.font
         font.pixelSize: Theme.sizeBig
         font.bold: true
+    }
+
+    Text {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: Weather.available
+        text: "·"
+        color: Theme.fgDim
+        opacity: 0.6
+        font.family: Theme.font
+        font.pixelSize: Theme.size
+    }
+
+    Row {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: Weather.available
+        spacing: 6
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: Weather.icon
+            color: Theme.yellow
+            font.family: Theme.font
+            font.pixelSize: Theme.size
+        }
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: Weather.label
+            color: Theme.fg
+            font.family: Theme.font
+            font.pixelSize: Theme.size
+        }
     }
 }

@@ -14,6 +14,7 @@ BarButton {
     glyph: muted ? Theme.gMuted : (vol < 0.4 ? Theme.gVolLow : Theme.gVolHigh)
     label: audio ? (muted ? "off" : Math.round(vol * 100) + "%") : "--"
     textColor: muted ? Theme.fgDim : Theme.fg
+    glyphColor: muted ? Theme.fgDim : Theme.yellow
 
     onClicked: {
         if (audio)

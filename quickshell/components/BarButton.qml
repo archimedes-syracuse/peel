@@ -9,6 +9,7 @@ Item {
     property string glyph: ""
     property string label: ""
     property color textColor: Theme.fg
+    property color glyphColor: textColor
     property color hoverColor: Theme.accent
     signal clicked()
 
@@ -24,7 +25,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.glyph !== ""
             text: root.glyph
-            color: hover.hovered ? root.hoverColor : root.textColor
+            color: hover.hovered ? root.hoverColor : root.glyphColor
             font.family: Theme.font
             font.pixelSize: Theme.iconSize
 
