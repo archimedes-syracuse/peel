@@ -66,7 +66,7 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 // ── session startup ──────────────────────────────────────────────────
 spawn-at-startup "swaybg" "-i" "/home/nimd/Pictures/wallpaper.png" "-m" "fill"
 spawn-at-startup "qs" "-c" "niri"
-spawn-at-startup "xwayland-satellite"
+// niri 26.04 spawns xwayland-satellite itself when it is in PATH; don't start a second one.
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 spawn-at-startup "swayidle" "-w" "timeout" "300" "swaylock -f" "timeout" "360" "niri msg action power-off-monitors" "before-sleep" "swaylock -f"
 

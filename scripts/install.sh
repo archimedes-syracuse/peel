@@ -32,6 +32,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 INSTALL_PKGS=(
     niri
+    quickshell
     xwayland-satellite
     greetd
     greetd-tuigreet
@@ -41,6 +42,8 @@ INSTALL_PKGS=(
     swaylock
     polkit-gnome
     qt6-imageformats
+    brightnessctl
+    playerctl
 )
 if [[ $WITH_MANGO -eq 1 ]]; then
     INSTALL_PKGS+=(mangowm)
