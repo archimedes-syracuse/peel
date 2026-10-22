@@ -79,6 +79,11 @@ pacman -S --needed --noconfirm "${INSTALL_PKGS[@]}"
 
 # ── 2. symlinks ───────────────────────────────────────────────────────
 mkdir -p "$USER_HOME/.config/quickshell"
+install -d -o "$USER_NAME" -g "$USER_NAME" "$USER_HOME/Pictures/Screenshots"
+
+if [[ ! -f "$USER_HOME/Pictures/wallpaper.png" ]]; then
+    echo "WARN: $USER_HOME/Pictures/wallpaper.png is missing; swaybg will have nothing to show."
+fi
 
 if [[ -e "$USER_HOME/.config/niri" && ! -L "$USER_HOME/.config/niri" ]]; then
     echo "ERROR: $USER_HOME/.config/niri exists and is not a symlink. Move it aside first."
@@ -117,10 +122,13 @@ command = "tuigreet --time --remember --remember-user-session --sessions /usr/sh
 user = "greeter"
 EOF
 
-systemctl enable greetd.service
-# Do not stop plasmalogin now; this session is still using Hyprland.
-# The package removal below deletes plasmalogin, and greetd takes over on reboot.
+# Disable the old DM first so it releases the display-manager.service alias.
+# Do not stop it now; this session is still using Hyprland. The package
+# removal below deletes plasmalogin, and greetd takes over on reboot.
 systemctl disable plasmalogin.service 2>/dev/null || true
+rm -f /etc/systemd/system/display-manager.service
+systemctl enable greetd.service
+systemctl is-enabled greetd.service
 
 # ── 5. remove Hyprland ────────────────────────────────────────────────
 pacman -Rns --noconfirm "${REMOVE_HYPR[@]}"

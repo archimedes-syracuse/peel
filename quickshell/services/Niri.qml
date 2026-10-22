@@ -66,7 +66,7 @@ Singleton {
                 }
             }
         }
-        onExited: {
+        onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0)
                 root.available = false;
         }
