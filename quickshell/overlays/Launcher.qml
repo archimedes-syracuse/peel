@@ -2,8 +2,9 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../theme"
+import "../components"
 
-// Fullscreen app launcher. Keyboard focus is taken only while open.
+// Centered app launcher. Keyboard focus is taken only while open.
 PanelWindow {
     id: root
 
@@ -58,7 +59,7 @@ PanelWindow {
                 out.push(entry);
         }
         out.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        return out.slice(0, 8);
+        return out.slice(0, 6);
     }
 
     onResultsChanged: sel = 0
@@ -72,7 +73,7 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
-            card.scale = 0.96;
+            card.scale = 0.98;
             card.opacity = 0;
             intro.restart();
         }
@@ -80,13 +81,13 @@ PanelWindow {
 
     Timer {
         id: focusTimer
-        interval: 60
+        interval: 50
         onTriggered: input.forceActiveFocus()
     }
 
     Rectangle {
         anchors.fill: parent
-        color: "#99070a10"
+        color: "#66070a10"
 
         MouseArea {
             anchors.fill: parent
@@ -94,58 +95,54 @@ PanelWindow {
         }
     }
 
-    Rectangle {
+    GlassPanel {
         id: card
 
-        width: Math.min(640, root.width - 120)
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: root.height * 0.16
-        implicitHeight: column.implicitHeight + 20
-        color: Theme.bgPanel
-        radius: 12
-        border.width: 1
-        border.color: Theme.border
+        width: Math.min(600, root.width - 120)
+        anchors.centerIn: parent
+        implicitHeight: column.implicitHeight + 24
+        radius: 6
+        borderWidth: 2
 
         MouseArea { anchors.fill: parent }
 
         ParallelAnimation {
             id: intro
-            NumberAnimation { target: card; property: "scale"; to: 1; duration: 180; easing.type: Easing.OutCubic }
-            NumberAnimation { target: card; property: "opacity"; to: 1; duration: 140 }
+            NumberAnimation { target: card; property: "scale"; to: 1; duration: 160; easing.type: Easing.OutCubic }
+            NumberAnimation { target: card; property: "opacity"; to: 1; duration: 120 }
         }
 
         Column {
             id: column
             anchors.fill: parent
             anchors.margins: 10
-            spacing: 6
+            spacing: 5
 
             Rectangle {
                 width: parent.width
-                height: 46
-                radius: 8
-                color: Theme.bgHover
+                height: 42
+                radius: Theme.radius
+                color: Theme.surface
 
                 Text {
-                    id: searchIcon
                     anchors.left: parent.left
-                    anchors.leftMargin: 14
+                    anchors.leftMargin: 13
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Theme.gSearch
-                    color: Theme.fgDim
+                    text: "›"
+                    color: Theme.accent
                     font.family: Theme.font
-                    font.pixelSize: 18
+                    font.pixelSize: Theme.sizeBig
                 }
 
                 TextInput {
                     id: input
-                    anchors.left: searchIcon.right
-                    anchors.leftMargin: 10
+                    anchors.left: parent.left
+                    anchors.leftMargin: 30
                     anchors.right: parent.right
-                    anchors.rightMargin: 14
+                    anchors.rightMargin: 12
                     anchors.verticalCenter: parent.verticalCenter
                     font.family: Theme.font
-                    font.pixelSize: Theme.sizeTitle
+                    font.pixelSize: Theme.sizeBig
                     color: Theme.fg
                     selectionColor: Theme.accent
                     selectedTextColor: Theme.bg
@@ -157,6 +154,16 @@ PanelWindow {
                     Keys.onDownPressed: root.sel = Math.min(root.results.length - 1, root.sel + 1)
                     Keys.onUpPressed: root.sel = Math.max(0, root.sel - 1)
                 }
+
+                Text {
+                    anchors.left: input.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: input.text === ""
+                    text: "Search…"
+                    color: Theme.fgDim
+                    font.family: Theme.font
+                    font.pixelSize: Theme.sizeBig
+                }
             }
 
             Text {
@@ -165,8 +172,8 @@ PanelWindow {
                 color: Theme.fgDim
                 font.family: Theme.font
                 font.pixelSize: Theme.size
-                leftPadding: 12
-                topPadding: 6
+                leftPadding: 10
+                topPadding: 5
             }
 
             Repeater {
@@ -174,20 +181,54 @@ PanelWindow {
 
                 Rectangle {
                     width: column.width
-                    height: 34
-                    radius: 8
-                    color: index === root.sel ? Theme.accent : "transparent"
+                    height: 32
+                    radius: Theme.radius
+                    color: index === root.sel ? Theme.accentSoft : "transparent"
 
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
+                    Rectangle {
                         anchors.left: parent.left
-                        anchors.leftMargin: 12
-                        width: parent.width - 24
-                        text: modelData.name
-                        color: index === root.sel ? Theme.bg : Theme.fg
-                        font.family: Theme.font
-                        font.pixelSize: Theme.size
-                        elide: Text.ElideRight
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 2
+                        height: parent.height - 8
+                        radius: 1
+                        color: Theme.accent
+                        visible: index === root.sel
+                    }
+
+                    Behavior on color { ColorAnimation { duration: Theme.duration } }
+
+                    Row {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            leftMargin: 10
+                            rightMargin: 10
+                        }
+                        spacing: 8
+
+                        Image {
+                            id: appIcon
+                            width: 18
+                            height: 18
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: modelData.icon ? Quickshell.iconPath(modelData.icon, true) : ""
+                            sourceSize.width: 18
+                            sourceSize.height: 18
+                            smooth: true
+                            fillMode: Image.PreserveAspectFit
+                            visible: source !== ""
+                        }
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - (appIcon.visible ? appIcon.width + parent.spacing : 0)
+                            text: modelData.name
+                            color: Theme.fg
+                            font.family: Theme.font
+                            font.pixelSize: Theme.size
+                            elide: Text.ElideRight
+                        }
                     }
 
                     MouseArea {

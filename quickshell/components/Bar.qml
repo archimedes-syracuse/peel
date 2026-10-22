@@ -3,7 +3,8 @@ import Quickshell
 import Quickshell.Wayland
 import "../theme"
 
-// Floating top bar, one layer-shell surface per monitor.
+// Compact full-width top bar, one layer-shell surface per monitor.
+// Reference language: no floating card, no pill containers, accent-as-state.
 PanelWindow {
     id: root
 
@@ -15,99 +16,37 @@ PanelWindow {
         left: true
         right: true
     }
-    margins {
-        top: Theme.gap
-        left: Theme.gap
-        right: Theme.gap
-    }
     implicitHeight: Theme.barHeight
-    exclusiveZone: Theme.barHeight + Theme.gap
+    exclusiveZone: Theme.barHeight
     color: "transparent"
     WlrLayershell.namespace: "niri-shell-bar"
 
     Rectangle {
-        id: bg
-
         anchors.fill: parent
-        radius: Theme.radius
         color: Theme.bgBar
-        border.width: 1
-        border.color: Theme.border
-        opacity: 0
-        Component.onCompleted: opacity = 1
-        Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
-
-        // thin gradient hairline along the bottom edge
-        Rectangle {
-            anchors {
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-                margins: 1
-            }
-            height: 1
-            radius: 1
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-                GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 0.25; color: Theme.accent }
-                GradientStop { position: 0.50; color: Theme.accent2 }
-                GradientStop { position: 0.75; color: Theme.accent }
-                GradientStop { position: 1.0; color: "transparent" }
-            }
-        }
     }
 
-    // left
+    // Left: only the workspace indicator. Launcher stays on Super+D.
     Row {
-        anchors.left: bg.left
-        anchors.leftMargin: 8
-        anchors.verticalCenter: bg.verticalCenter
-        spacing: 4
-
-        BarButton {
-            glyph: Theme.gApps
-            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleLauncher"])
-        }
-
-        Rectangle {
-            width: 1
-            height: 16
-            color: Theme.border
-            anchors.verticalCenter: parent.verticalCenter
-        }
+        anchors.left: parent.left
+        anchors.leftMargin: 12
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 10
 
         Workspaces {}
-
-        Rectangle {
-            width: 1
-            height: 16
-            color: Theme.border
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        ActiveWindow {}
     }
 
+    // Center: date › time.
     Clock {
-        anchors.centerIn: bg
+        anchors.centerIn: parent
     }
 
-    // right
+    // Right: quiet system glyphs, tray, session.
     Row {
-        anchors.right: bg.right
-        anchors.rightMargin: 7
-        anchors.verticalCenter: bg.verticalCenter
-        spacing: 2
-
-        SysMeters {}
-
-        Rectangle {
-            width: 1
-            height: 16
-            color: Theme.border
-            anchors.verticalCenter: parent.verticalCenter
-        }
+        anchors.right: parent.right
+        anchors.rightMargin: 8
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 1
 
         Volume {}
         NetworkIndicator {}
@@ -115,15 +54,9 @@ PanelWindow {
         BatteryIndicator {}
         Tray {}
 
-        Rectangle {
-            width: 1
-            height: 16
-            color: Theme.border
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
         BarButton {
             glyph: Theme.gPower
+            textColor: Theme.fgDim
             onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "togglePower"])
         }
     }

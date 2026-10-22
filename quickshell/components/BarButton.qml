@@ -1,43 +1,45 @@
 import QtQuick
 import "../theme"
 
-// Small hoverable glyph/label button used across the bar.
-Rectangle {
+// Compact glyph/label button. No chrome: hover and state are communicated
+// only by text colour, like the reference bar's right-hand modules.
+Item {
     id: root
 
     property string glyph: ""
     property string label: ""
     property color textColor: Theme.fg
+    property color hoverColor: Theme.accent
     signal clicked()
 
-    implicitWidth: content.implicitWidth + 14
-    implicitHeight: 24
-    radius: 7
-    color: hover.hovered ? Theme.bgHover : "transparent"
-
-    Behavior on color { ColorAnimation { duration: Theme.duration } }
+    implicitWidth: content.implicitWidth + 10
+    implicitHeight: 22
 
     Row {
         id: content
         anchors.centerIn: parent
-        spacing: 6
+        spacing: 5
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.glyph !== ""
             text: root.glyph
-            color: root.textColor
+            color: hover.hovered ? root.hoverColor : root.textColor
             font.family: Theme.font
             font.pixelSize: Theme.iconSize
+
+            Behavior on color { ColorAnimation { duration: Theme.duration } }
         }
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.label !== ""
             text: root.label
-            color: root.textColor
+            color: hover.hovered ? root.hoverColor : root.textColor
             font.family: Theme.font
-            font.pixelSize: Theme.size
+            font.pixelSize: Theme.sizeSmall
+
+            Behavior on color { ColorAnimation { duration: Theme.duration } }
         }
     }
 

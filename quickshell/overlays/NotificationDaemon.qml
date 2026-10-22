@@ -3,8 +3,9 @@ import Quickshell.Services.Notifications
 import Quickshell.Wayland
 import QtQuick
 import "../theme"
+import "../components"
 
-// Owns org.freedesktop.Notifications and shows toasts top-right.
+// Owns org.freedesktop.Notifications and shows compact toasts top-right.
 Scope {
     id: root
 
@@ -32,10 +33,10 @@ Scope {
                 right: true
             }
             margins {
-                top: Theme.barHeight + Theme.gap * 2
+                top: Theme.barHeight + Theme.gap
                 right: Theme.gap
             }
-            implicitWidth: 330
+            implicitWidth: 304
             implicitHeight: column.implicitHeight
             visible: server.trackedNotifications.values.length > 0
             color: "transparent"
@@ -51,20 +52,20 @@ Scope {
                 Repeater {
                     model: server.trackedNotifications
 
-                    Rectangle {
+                    GlassPanel {
                         id: note
 
                         width: column.width
-                        implicitHeight: body.implicitHeight + 24
-                        radius: 10
-                        color: Theme.bgPanel
-                        border.width: 1
-                        border.color: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.border
+                        implicitHeight: body.implicitHeight + 20
+                        radius: 6
+                        borderWidth: 2
+                        borderStart: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.accent
+                        borderEnd: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.accent2
 
                         Column {
                             id: body
                             anchors.fill: parent
-                            anchors.margins: 12
+                            anchors.margins: 10
                             spacing: 4
 
                             Text {
@@ -72,7 +73,7 @@ Scope {
                                 text: modelData.appName || "notification"
                                 color: Theme.accent
                                 font.family: Theme.font
-                                font.pixelSize: 10
+                                font.pixelSize: Theme.sizeSmall
                                 font.bold: true
                             }
 
@@ -81,8 +82,7 @@ Scope {
                                 text: modelData.summary
                                 color: Theme.fg
                                 font.family: Theme.font
-                                font.pixelSize: Theme.size
-                                font.bold: true
+                                font.pixelSize: Theme.sizeBig
                                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                             }
 

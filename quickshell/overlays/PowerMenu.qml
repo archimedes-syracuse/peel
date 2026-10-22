@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "../theme"
+import "../components"
 
 // Session menu: lock, suspend, logout, reboot, shutdown.
 PanelWindow {
@@ -43,7 +44,7 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
-            card.scale = 0.96;
+            card.scale = 0.98;
             card.opacity = 0;
             intro.restart();
         }
@@ -56,7 +57,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: "#99070a10"
+        color: "#66070a10"
 
         MouseArea {
             anchors.fill: parent
@@ -64,38 +65,36 @@ PanelWindow {
         }
     }
 
-    Rectangle {
+    GlassPanel {
         id: card
 
-        width: 360
-        implicitHeight: column.implicitHeight + 24
+        width: 300
+        implicitHeight: column.implicitHeight + 22
         anchors.centerIn: parent
-        color: Theme.bgPanel
-        radius: 14
-        border.width: 1
-        border.color: Theme.border
+        radius: 6
+        borderWidth: 2
 
         MouseArea { anchors.fill: parent }
 
         ParallelAnimation {
             id: intro
-            NumberAnimation { target: card; property: "scale"; to: 1; duration: 180; easing.type: Easing.OutCubic }
-            NumberAnimation { target: card; property: "opacity"; to: 1; duration: 140 }
+            NumberAnimation { target: card; property: "scale"; to: 1; duration: 160; easing.type: Easing.OutCubic }
+            NumberAnimation { target: card; property: "opacity"; to: 1; duration: 120 }
         }
 
         Column {
             id: column
             anchors.fill: parent
-            anchors.margins: 12
-            spacing: 6
+            anchors.margins: 10
+            spacing: 2
 
             Text {
                 text: "session"
-                color: Theme.fgDim
+                color: Theme.accent
                 font.family: Theme.font
                 font.pixelSize: Theme.size
-                leftPadding: 6
-                bottomPadding: 4
+                leftPadding: 8
+                bottomPadding: 6
             }
 
             Repeater {
@@ -109,11 +108,21 @@ PanelWindow {
 
                 Rectangle {
                     width: column.width
-                    height: 38
-                    radius: 9
-                    color: hover.hovered ? Theme.bgHover : "transparent"
+                    height: 34
+                    radius: Theme.radius
+                    color: hover.hovered ? Theme.accentSoft : "transparent"
 
                     Behavior on color { ColorAnimation { duration: Theme.duration } }
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 2
+                        height: parent.height - 8
+                        radius: 1
+                        color: Theme.accent
+                        visible: hover.hovered
+                    }
 
                     Row {
                         anchors.verticalCenter: parent.verticalCenter
@@ -126,7 +135,7 @@ PanelWindow {
                             text: modelData.glyph
                             color: modelData.label === "reboot" || modelData.label === "shutdown" ? Theme.red : Theme.fg
                             font.family: Theme.font
-                            font.pixelSize: 16
+                            font.pixelSize: Theme.iconSize
                         }
 
                         Text {

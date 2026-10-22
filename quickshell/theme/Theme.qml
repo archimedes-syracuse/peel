@@ -5,12 +5,17 @@ import QtQuick
 // Palette lifted from ~/.config/hypr/scheme/current.conf so the new shell
 // starts out matching the wallpaper. Swap these values (or generate them
 // with matugen later) and the whole shell follows.
+//
+// Visual language borrowed from ImJustDoingMyPart/dotfiles: near-black
+// translucent surfaces, 4px geometry, JetBrains Mono, and accent-as-state.
 QtObject {
     // surfaces
-    readonly property color bg: "#131317"
-    readonly property color bgBar: "#e6131317"
-    readonly property color bgPanel: "#f21c1b1f"
+    readonly property color bg: "#0c0b10"
+    readonly property color bgBar: "#ee0c0b10"
+    readonly property color bgPanel: "#f217161c"
     readonly property color bgHover: "#1fffffff"
+    readonly property color surface: "#0fffffff"
+    readonly property color accentSoft: "#40c2c1ff"
     readonly property color border: "#26ffffff"
 
     // text
@@ -26,8 +31,8 @@ QtObject {
     readonly property color blue: "#b0b8ff"
 
     // geometry
-    readonly property int barHeight: 38
-    readonly property int radius: 12
+    readonly property int barHeight: 28
+    readonly property int radius: 4
     readonly property int gap: 8
 
     // type
@@ -35,12 +40,12 @@ QtObject {
     readonly property int sizeSmall: 10
     readonly property int size: 12
     readonly property int sizeBig: 13
-    readonly property int sizeTitle: 18
+    readonly property int sizeTitle: 16
     readonly property int iconSize: 15
 
     // motion
-    readonly property int duration: 160
-    readonly property int durationSlow: 420
+    readonly property int duration: 150
+    readonly property int durationSlow: 300
 
     // Nerd Font glyphs (same codepoints as the existing bar)
     readonly property string gApps: "\uF009"

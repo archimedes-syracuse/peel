@@ -2,14 +2,15 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Five Niri workspace pills. The active one expands and fills with the
-// accent; occupied-but-hidden ones get a faint surface.
+// Roman-numeral workspace strip. Active is the only accent; occupied
+// workspaces are quieter, empty ones recede almost completely.
 Row {
     id: root
 
-    spacing: 4
+    spacing: 9
 
     readonly property var all: Niri.workspaces
+    readonly property var numerals: ["I", "II", "III", "IV", "V"]
 
     function goTo(idx) {
         Niri.focusWorkspace(idx);
@@ -18,8 +19,8 @@ Row {
     Repeater {
         model: 5
 
-        Rectangle {
-            id: pill
+        Text {
+            id: label
 
             readonly property bool used: {
                 for (let i = 0; i < root.all.length; i++) {
@@ -37,25 +38,18 @@ Row {
                 return false;
             }
 
-            width: selected ? 28 : used ? 20 : 16
-            height: 20
-            radius: 6
-            color: selected ? Theme.accent : used ? Theme.bgHover : "transparent"
+            text: root.numerals[index]
+            color: selected ? Theme.accent : hover.hovered ? Theme.fg : used ? Theme.fg : Theme.fgDim
+            opacity: selected ? 1 : hover.hovered ? 1 : used ? 0.8 : 0.35
+            font.family: Theme.font
+            font.pixelSize: Theme.size
+            font.bold: selected
 
-            Behavior on width { NumberAnimation { duration: Theme.duration; easing.type: Easing.OutCubic } }
             Behavior on color { ColorAnimation { duration: Theme.duration } }
-
-            Text {
-                anchors.centerIn: parent
-                text: index + 1
-                color: pill.selected ? Theme.bg : pill.used ? Theme.fg : Theme.fgDim
-                opacity: pill.used || pill.selected ? 1 : 0.45
-                font.family: Theme.font
-                font.pixelSize: 10
-                font.bold: pill.selected
-            }
+            Behavior on opacity { NumberAnimation { duration: Theme.duration } }
 
             HoverHandler {
+                id: hover
                 cursorShape: Qt.PointingHandCursor
             }
 
