@@ -1,0 +1,5 @@
+singleton Niri 1.0 Niri.qml
+singleton SysStats 1.0 SysStats.qml
+singleton Network 1.0 Network.qml
+singleton Bluetooth 1.0 Bluetooth.qml
+singleton Battery 1.0 Battery.qml
