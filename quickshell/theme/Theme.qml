@@ -52,6 +52,7 @@ QtObject {
     readonly property string gPower: "\uF011"
     readonly property string gBell: "\uF0F3"
     readonly property string gChevronLeft: "\uF053"
+    readonly property string gChevronRight: "\uF054"
     readonly property string gBrightness: "\uF185"
     readonly property string gDisk: "\uF0A0"
     readonly property string gRam: "\uF1C0"

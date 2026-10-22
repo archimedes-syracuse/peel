@@ -71,4 +71,10 @@ Row {
             font.pixelSize: Theme.size
         }
     }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleCalendar"])
+    }
 }

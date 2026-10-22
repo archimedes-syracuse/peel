@@ -26,6 +26,7 @@ ShellRoot {
     PowerMenu { id: power }
     ControlCenter { id: controlCenter }
     NotificationCenter { id: notificationCenter }
+    Calendar { id: calendar }
     NotificationDaemon {}
 
     IpcHandler {
@@ -39,6 +40,7 @@ ShellRoot {
             power.close();
             controlCenter.close();
             notificationCenter.close();
+            calendar.close();
             launcher.open();
         }
 
@@ -50,6 +52,7 @@ ShellRoot {
             launcher.close();
             controlCenter.close();
             notificationCenter.close();
+            calendar.close();
             power.open();
         }
 
@@ -61,6 +64,7 @@ ShellRoot {
             launcher.close();
             power.close();
             controlCenter.close();
+            calendar.close();
             notificationCenter.open();
         }
 
@@ -72,7 +76,20 @@ ShellRoot {
             launcher.close();
             power.close();
             notificationCenter.close();
+            calendar.close();
             controlCenter.open();
+        }
+
+        function toggleCalendar() {
+            if (calendar.visible) {
+                calendar.close();
+                return;
+            }
+            launcher.close();
+            power.close();
+            controlCenter.close();
+            notificationCenter.close();
+            calendar.open();
         }
 
         function closeOverlays() {
@@ -80,6 +97,7 @@ ShellRoot {
             power.close();
             controlCenter.close();
             notificationCenter.close();
+            calendar.close();
         }
 
         function clearNotifications() {
