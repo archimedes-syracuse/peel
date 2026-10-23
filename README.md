@@ -13,9 +13,10 @@ quickshell/                  qs -c niri
   theme/Theme.qml            palette, type, glyphs, motion
   services/                  Niri IPC, sysstats, weather, brightness, disk,
                              network, bluetooth, battery, notifications
-  components/                bar widgets
+  components/                bar widgets and desktop windows
   overlays/                  launcher, system drawer, power menu, notifications,
                              calendar, OSD
+  assets/                    bundled desktop-widget artwork
 scripts/install.sh           install niri, switch login manager, remove old stack
 ```
 
@@ -70,6 +71,25 @@ center. Hardware keys, the drawer sliders, and external tools all feed it.
 
 The bar is deliberately minimal. Wi-Fi, Bluetooth, and battery live in the
 system drawer instead of taking permanent space.
+
+## Desktop widgets
+
+The wallpaper layer now carries three small reference-matched windows:
+
+- **Weather**: live wttr.in feels-like/min/max, rain total, clothing/umbrella
+  advice, and sunset.
+- **Now playing**: MPRIS cover/title/artist with previous/play/next. Browser
+  players that only expose a generic "playing media" title keep the bundled
+  illustrated demo state; real tracks take over automatically.
+- **Notes**: the supplied olive/yellow palette window.
+
+They are background-layer surfaces, so they sit on the wallpaper and disappear
+behind tiled windows. Switch to an empty workspace to see them. The shared
+`RetroWindow` frame and `PixelText` component are the starting point for the
+later sprite/GIF widget host.
+
+The typewriter pixel text uses `Nimbus Mono PS` (package `gsfonts`); the
+install script includes it.
 
 Useful IPC while developing:
 
@@ -140,5 +160,5 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
   Niri.
 - v0 locking/idle/wallpaper still uses `swaylock`, `swayidle`, and `swaybg`.
   v1: Quickshell lock screen (`WlSessionLock` + PAM), an animated wallpaper
-  via `awww`, and desktop sprite widgets (`AnimatedSprite` / `SpriteSequence`
-  plus GIF and spritecook exports).
+  via `awww`, and the generic sprite/GIF widget host (`AnimatedImage`,
+  `AnimatedSprite` / `SpriteSequence`, and spritecook exports).

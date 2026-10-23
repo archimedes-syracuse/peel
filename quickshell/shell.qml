@@ -22,6 +22,24 @@ ShellRoot {
         Bar {}
     }
 
+    Variants {
+        model: Quickshell.screens
+
+        WeatherWidget {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        MusicWidget {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        NotesWidget {}
+    }
+
     Launcher { id: launcher }
     PowerMenu { id: power }
     ControlCenter { id: controlCenter }

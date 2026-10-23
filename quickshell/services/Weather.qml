@@ -11,11 +11,23 @@ Singleton {
 
     property bool available: false
     property int tempC: 0
+    property real feelsLikeC: 0
+    property int minTempC: 0
+    property int maxTempC: 0
+    property real rainMM: 0
+    property string sunset: ""
     property int code: 0
     property string description: ""
     property string icon: "\uF0C2"
 
     readonly property string label: available ? description + ", " + tempC + "°C" : ""
+    readonly property string advice: !available ? ""
+        : minTempC < 17 ? "You'll need a jumper."
+        : maxTempC >= 25 ? "Light clothes today."
+        : "A light layer will do."
+    readonly property string rainAdvice: !available ? ""
+        : rainMM >= 0.2 ? "Bring an umbrella."
+        : "No umbrella needed."
 
     function descriptionFor(weatherCode, raw) {
         if (weatherCode === 113)
@@ -36,6 +48,25 @@ Singleton {
 
         const clean = (raw || "").trim();
         return clean !== "" ? clean : "Weather";
+    }
+
+    function number(value, fallback) {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? fallback : parsed;
+    }
+
+    function clock24(value) {
+        const raw = (value || "").trim();
+        const match = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(raw);
+        if (!match)
+            return raw;
+
+        let hour = parseInt(match[1], 10);
+        if (match[3].toUpperCase() === "PM" && hour !== 12)
+            hour += 12;
+        if (match[3].toUpperCase() === "AM" && hour === 12)
+            hour = 0;
+        return (hour < 10 ? "0" : "") + hour + ":" + match[2];
     }
 
     function iconFor(weatherCode) {
@@ -65,8 +96,19 @@ Singleton {
             const rawDescription = current.weatherDesc && current.weatherDesc[0]
                 ? current.weatherDesc[0].value
                 : "";
+            const today = data.weather && data.weather[0] ? data.weather[0] : null;
+            const hourly = today && today.hourly ? today.hourly : [];
+            const astronomy = today && today.astronomy ? today.astronomy[0] : null;
+            let rain = 0;
+            for (let i = 0; i < hourly.length; i++)
+                rain += number(hourly[i].precipMM, 0);
 
             root.tempC = temp;
+            root.feelsLikeC = number(current.FeelsLikeC, temp);
+            root.minTempC = today ? Math.round(number(today.mintempC, temp)) : temp;
+            root.maxTempC = today ? Math.round(number(today.maxtempC, temp)) : temp;
+            root.rainMM = Math.round(rain * 10) / 10;
+            root.sunset = astronomy ? root.clock24(astronomy.sunset) : "";
             root.code = weatherCode;
             root.description = root.descriptionFor(weatherCode, rawDescription);
             root.icon = root.iconFor(weatherCode);

@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
-import Quickshell.Services.Mpris
 import "../theme"
 import "../components"
 import "../services"
@@ -16,16 +15,9 @@ PanelWindow {
     readonly property var audio: sink ? sink.audio : null
     readonly property real volume: audio ? audio.volume : 0
 
-    readonly property var players: Mpris.players ? Mpris.players.values : []
-    readonly property var player: {
-        const list = players || [];
-        for (let i = 0; i < list.length; i++) {
-            if (list[i] && list[i].isPlaying)
-                return list[i];
-        }
-        return list.length > 0 ? list[0] : null;
-    }
-    readonly property bool hasMedia: player !== null && player.trackTitle !== ""
+    readonly property var players: Media.players
+    readonly property var player: Media.player
+    readonly property bool hasMedia: Media.available
 
     visible: false
     color: "transparent"

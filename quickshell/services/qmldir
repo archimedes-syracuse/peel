@@ -8,3 +8,4 @@ singleton Brightness 1.0 Brightness.qml
 singleton Disk 1.0 Disk.qml
 singleton Notifications 1.0 Notifications.qml
 singleton Osd 1.0 Osd.qml
+singleton Media 1.0 Media.qml

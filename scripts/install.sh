@@ -48,6 +48,7 @@ INSTALL_PKGS=(
     bluez-utils
     curl
     ttf-jetbrains-mono-nerd
+    gsfonts
 )
 if [[ $WITH_MANGO -eq 1 ]]; then
     INSTALL_PKGS+=(mangowm)

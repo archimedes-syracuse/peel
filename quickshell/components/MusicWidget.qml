@@ -1,0 +1,182 @@
+import QtQuick
+import Quickshell
+import Quickshell.Wayland
+import "../theme"
+import "../services"
+
+// Compact now-playing window. When MPRIS only exposes a browser's generic
+// "playing media" stub, show the supplied cover/track as a demo instead.
+PanelWindow {
+    id: root
+
+    property var modelData
+
+    readonly property var player: Media.player
+    readonly property bool demo: !Media.hasTrack
+    readonly property string trackTitle: demo ? "Ice u out" : Media.title
+    readonly property string trackArtist: demo ? "Ninajirachi, Kota Banks" : Media.artist
+    readonly property string artSource: !demo && player && player.trackArtUrl
+        ? player.trackArtUrl
+        : "../assets/ice-u-out.png"
+
+    screen: modelData
+    implicitWidth: 176 + card.shadow
+    implicitHeight: 224 + card.shadow
+    color: "transparent"
+    focusable: false
+    exclusiveZone: 0
+    anchors {
+        top: true
+        left: true
+    }
+    margins {
+        top: Theme.barHeight + 18 + 86
+        left: 32 + 300 + 20
+    }
+    WlrLayershell.layer: WlrLayer.Background
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    WlrLayershell.namespace: "niri-shell-widgets"
+
+    RetroWindow {
+        id: card
+        width: 176
+        height: 224
+        stripHeight: 12
+
+        Rectangle {
+            id: artFrame
+            x: 22
+            y: 8
+            width: 132
+            height: 132
+            color: card.ink
+
+            Image {
+                anchors.fill: parent
+                anchors.margins: 3
+                source: root.artSource
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                smooth: !root.demo
+                sourceSize.width: 252
+                sourceSize.height: 252
+            }
+        }
+
+        PixelText {
+            id: trackTitle
+            x: 8
+            y: artFrame.y + artFrame.height + 5
+            width: parent.width - 16
+            text: root.trackTitle
+            font.pixelSize: 10
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+        }
+
+        PixelText {
+            id: trackArtist
+            x: 8
+            y: trackTitle.y + 15
+            width: parent.width - 16
+            text: root.trackArtist
+            font.pixelSize: 9
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+        }
+
+        Row {
+            anchors.top: trackArtist.bottom
+            anchors.topMargin: 8
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 7
+
+            Rectangle {
+                width: 25
+                height: 22
+                color: hoverPrev.hovered && !root.demo ? card.ink : card.paper
+                border.width: 2
+                border.color: card.ink
+
+                Text {
+                    anchors.centerIn: parent
+                    text: Theme.gArrowLeft
+                    color: hoverPrev.hovered && !root.demo ? card.paper : card.ink
+                    font.family: Theme.font
+                    font.pixelSize: 12
+                }
+
+                HoverHandler {
+                    id: hoverPrev
+                    enabled: !root.demo
+                    cursorShape: Qt.PointingHandCursor
+                }
+                TapHandler {
+                    enabled: !root.demo
+                    onTapped: {
+                        if (root.player && root.player.canGoPrevious)
+                            root.player.previous();
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 25
+                height: 22
+                color: hoverPlay.hovered && !root.demo ? card.ink : card.paper
+                border.width: 2
+                border.color: card.ink
+
+                Text {
+                    anchors.centerIn: parent
+                    text: root.player && root.player.isPlaying ? Theme.gPause : Theme.gPlay
+                    color: hoverPlay.hovered && !root.demo ? card.paper : card.ink
+                    font.family: Theme.font
+                    font.pixelSize: 12
+                }
+
+                HoverHandler {
+                    id: hoverPlay
+                    enabled: !root.demo
+                    cursorShape: Qt.PointingHandCursor
+                }
+                TapHandler {
+                    enabled: !root.demo
+                    onTapped: {
+                        if (root.player)
+                            root.player.togglePlaying();
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 25
+                height: 22
+                color: hoverNext.hovered && !root.demo ? card.ink : card.paper
+                border.width: 2
+                border.color: card.ink
+
+                Text {
+                    anchors.centerIn: parent
+                    text: Theme.gArrowRight
+                    color: hoverNext.hovered && !root.demo ? card.paper : card.ink
+                    font.family: Theme.font
+                    font.pixelSize: 12
+                }
+
+                HoverHandler {
+                    id: hoverNext
+                    enabled: !root.demo
+                    cursorShape: Qt.PointingHandCursor
+                }
+                TapHandler {
+                    enabled: !root.demo
+                    onTapped: {
+                        if (root.player && root.player.canGoNext)
+                            root.player.next();
+                    }
+                }
+            }
+        }
+    }
+}
