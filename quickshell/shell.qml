@@ -25,19 +25,7 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
-        WeatherWidget {}
-    }
-
-    Variants {
-        model: Quickshell.screens
-
-        MusicWidget {}
-    }
-
-    Variants {
-        model: Quickshell.screens
-
-        NotesWidget {}
+        WidgetLayer {}
     }
 
     Launcher { id: launcher }
@@ -97,6 +85,10 @@ ShellRoot {
             notificationCenter.close();
             calendar.close();
             controlCenter.open();
+        }
+
+        function toggleNotes() {
+            Widgets.setNotesVisible(!Widgets.notesVisible);
         }
 
         function toggleCalendar() {

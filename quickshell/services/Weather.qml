@@ -15,6 +15,7 @@ Singleton {
     property int minTempC: 0
     property int maxTempC: 0
     property real rainMM: 0
+    property real rainSoFarMM: 0
     property string sunset: ""
     property int code: 0
     property string description: ""
@@ -103,11 +104,20 @@ Singleton {
             for (let i = 0; i < hourly.length; i++)
                 rain += number(hourly[i].precipMM, 0);
 
+            const localHour = new Date().getHours();
+            let rainSoFar = 0;
+            for (let i = 0; i < hourly.length; i++) {
+                const hour = number(hourly[i].time, -1) / 60;
+                if (hour >= 0 && hour < localHour)
+                    rainSoFar += number(hourly[i].precipMM, 0);
+            }
+
             root.tempC = temp;
             root.feelsLikeC = number(current.FeelsLikeC, temp);
             root.minTempC = today ? Math.round(number(today.mintempC, temp)) : temp;
             root.maxTempC = today ? Math.round(number(today.maxtempC, temp)) : temp;
             root.rainMM = Math.round(rain * 10) / 10;
+            root.rainSoFarMM = Math.round(rainSoFar * 10) / 10;
             root.sunset = astronomy ? root.clock24(astronomy.sunset) : "";
             root.code = weatherCode;
             root.description = root.descriptionFor(weatherCode, rawDescription);

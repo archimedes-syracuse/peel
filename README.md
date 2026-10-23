@@ -76,17 +76,19 @@ system drawer instead of taking permanent space.
 
 The wallpaper layer now carries three small reference-matched windows:
 
-- **Weather**: live wttr.in feels-like/min/max, rain total, clothing/umbrella
-  advice, and sunset.
+- **Weather**: live wttr.in feels-like/min/max, rain so far, today's rain
+  total, clothing/umbrella advice, and sunset.
 - **Now playing**: MPRIS cover/title/artist with previous/play/next. Browser
   players that only expose a generic "playing media" title keep the bundled
   illustrated demo state; real tracks take over automatically.
-- **Notes**: the supplied olive/yellow palette window.
+- **Notes**: an editable olive/yellow notepad. Click the body to type; the
+  arrows are undo/redo and X hides it.
 
-They are background-layer surfaces, so they sit on the wallpaper and disappear
-behind tiled windows. Switch to an empty workspace to see them. The shared
-`RetroWindow` frame and `PixelText` component are the starting point for the
-later sprite/GIF widget host.
+The widgets share one background-layer surface, so they sit on the wallpaper
+and disappear behind tiled windows. Switch to an empty workspace to see them.
+Drag any widget by its title bar. Positions and the note text persist in
+Quickshell's state directory. The shared `RetroWindow` frame and `PixelText`
+component are the starting point for the later sprite/GIF widget host.
 
 The typewriter pixel text uses `Nimbus Mono PS` (package `gsfonts`); the
 install script includes it.
@@ -98,6 +100,7 @@ qs -c niri ipc call shell toggleLauncher
 qs -c niri ipc call shell toggleControl
 qs -c niri ipc call shell toggleNotifications
 qs -c niri ipc call shell toggleCalendar
+qs -c niri ipc call shell toggleNotes
 qs -c niri ipc call shell togglePower
 qs -c niri ipc call shell closeOverlays
 ```
@@ -131,6 +134,7 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
 | Super+Shift+C | system drawer |
 | Super+Shift+N | notifications |
 | Super+Shift+D | calendar |
+| Super+Shift+W | show/hide desktop notes |
 | Super+Q | close window |
 | Super+L | swaylock |
 | Super+F / Super+Shift+F | maximize / fullscreen |

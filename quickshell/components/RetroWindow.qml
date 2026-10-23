@@ -18,8 +18,15 @@ Item {
     property bool showSquares: true
     property bool showHatch: false
     property bool showNav: false
+    property bool draggable: false
     property int stripHeight: 12
     property int shadow: 3
+
+    signal dragBy(real dx, real dy)
+    signal dragFinished()
+    signal backRequested()
+    signal forwardRequested()
+    signal closeRequested()
 
     default property alias content: body.data
 
@@ -55,6 +62,41 @@ Item {
         width: frame.width - 2
         height: 1
         color: root.ink
+    }
+
+    // Title-bar drag. Declared below the window controls so their MouseAreas
+    // win the event, but above the title strip itself.
+    MouseArea {
+        id: titleDrag
+        visible: root.draggable
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: root.stripHeight + 2
+        cursorShape: Qt.SizeAllCursor
+        property real lastSceneX
+        property real lastSceneY
+
+        onPressed: (mouse) => {
+            const point = titleDrag.mapToItem(null, mouse.x, mouse.y);
+            lastSceneX = point.x;
+            lastSceneY = point.y;
+        }
+        onPositionChanged: (mouse) => {
+            if (!pressed)
+                return;
+            // The widget moves inside a stationary full-screen surface, so
+            // mapping the local pointer position to the scene gives stable
+            // coordinates even while the card itself moves.
+            const point = titleDrag.mapToItem(null, mouse.x, mouse.y);
+            const dx = point.x - lastSceneX;
+            const dy = point.y - lastSceneY;
+            if (dx !== 0 || dy !== 0)
+                root.dragBy(dx, dy);
+            lastSceneX = point.x;
+            lastSceneY = point.y;
+        }
+        onReleased: root.dragFinished()
     }
 
     // Dithered application mark used by the Notes reference.
@@ -105,25 +147,61 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 9
         anchors.verticalCenter: stripRect.verticalCenter
-        spacing: 10
+        spacing: 8
 
-        Text {
-            text: Theme.gArrowLeft
-            color: root.titleTextColor
-            font.family: Theme.font
-            font.pixelSize: 16
+        Item {
+            width: 16
+            height: root.stripHeight
+            Text {
+                anchors.centerIn: parent
+                text: Theme.gArrowLeft
+                color: navBack.hovered ? root.paper : root.titleTextColor
+                font.family: Theme.font
+                font.pixelSize: 16
+            }
+            MouseArea {
+                id: navBack
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.backRequested()
+            }
         }
-        Text {
-            text: Theme.gArrowRight
-            color: root.titleTextColor
-            font.family: Theme.font
-            font.pixelSize: 16
+        Item {
+            width: 16
+            height: root.stripHeight
+            Text {
+                anchors.centerIn: parent
+                text: Theme.gArrowRight
+                color: navForward.hovered ? root.paper : root.titleTextColor
+                font.family: Theme.font
+                font.pixelSize: 16
+            }
+            MouseArea {
+                id: navForward
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.forwardRequested()
+            }
         }
-        Text {
-            text: Theme.gClose
-            color: root.titleTextColor
-            font.family: Theme.font
-            font.pixelSize: 16
+        Item {
+            width: 14
+            height: root.stripHeight
+            Text {
+                anchors.centerIn: parent
+                text: Theme.gClose
+                color: navClose.hovered ? root.paper : root.titleTextColor
+                font.family: Theme.font
+                font.pixelSize: 16
+            }
+            MouseArea {
+                id: navClose
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.closeRequested()
+            }
         }
     }
 

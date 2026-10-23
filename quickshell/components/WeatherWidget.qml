@@ -1,39 +1,32 @@
 import QtQuick
-import Quickshell
-import Quickshell.Wayland
 import "../theme"
 import "../services"
 
-// Weather window from the supplied desktop mockup. It sits on the wallpaper
-// layer, below tiled windows, and uses live wttr.in data.
-PanelWindow {
+// Weather window from the supplied desktop mockup. WidgetLayer puts it on the
+// wallpaper layer, below tiled windows, with live wttr.in data.
+Item {
     id: root
 
-    property var modelData
+    width: card.width + card.shadow
+    height: card.height + card.shadow
+    x: Widgets.weatherX
+    y: Widgets.weatherY
 
-    screen: modelData
-    implicitWidth: 300 + card.shadow
-    implicitHeight: 118 + card.shadow
-    color: "transparent"
-    focusable: false
-    exclusiveZone: 0
-    anchors {
-        top: true
-        left: true
+    function moveBy(dx, dy) {
+        const screenWidth = parent ? parent.width : 1920;
+        const screenHeight = parent ? parent.height : 1080;
+        const x = Math.max(8, Math.min(screenWidth - width - 8, Widgets.weatherX + dx));
+        const y = Math.max(Theme.barHeight + 4, Math.min(screenHeight - height - 8, Widgets.weatherY + dy));
+        Widgets.setWeatherPosition(x, y);
     }
-    margins {
-        top: Theme.barHeight + 18
-        left: 32
-    }
-    WlrLayershell.layer: WlrLayer.Background
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "niri-shell-widgets"
 
     RetroWindow {
         id: card
         width: 300
         height: 118
         stripHeight: 12
+        draggable: true
+        onDragBy: (dx, dy) => root.moveBy(dx, dy)
 
         Canvas {
             anchors.left: parent.left
@@ -98,7 +91,7 @@ PanelWindow {
             PixelText {
                 width: parent.width
                 visible: Weather.available
-                text: "We've had " + Weather.rainMM.toFixed(1) + "mm rain so far. " + Weather.rainAdvice
+                text: "We've had " + Weather.rainSoFarMM.toFixed(1) + "mm rain so far. " + Weather.rainAdvice
                 font.pixelSize: 9
                 lineHeightMode: Text.FixedHeight
                 lineHeight: 11

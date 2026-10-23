@@ -1,15 +1,11 @@
 import QtQuick
-import Quickshell
-import Quickshell.Wayland
 import "../theme"
 import "../services"
 
 // Compact now-playing window. When MPRIS only exposes a browser's generic
 // "playing media" stub, show the supplied cover/track as a demo instead.
-PanelWindow {
+Item {
     id: root
-
-    property var modelData
 
     readonly property var player: Media.player
     readonly property bool demo: !Media.hasTrack
@@ -19,29 +15,26 @@ PanelWindow {
         ? player.trackArtUrl
         : "../assets/ice-u-out.png"
 
-    screen: modelData
-    implicitWidth: 176 + card.shadow
-    implicitHeight: 224 + card.shadow
-    color: "transparent"
-    focusable: false
-    exclusiveZone: 0
-    anchors {
-        top: true
-        left: true
+    width: card.width + card.shadow
+    height: card.height + card.shadow
+    x: Widgets.musicX
+    y: Widgets.musicY
+
+    function moveBy(dx, dy) {
+        const screenWidth = parent ? parent.width : 1920;
+        const screenHeight = parent ? parent.height : 1080;
+        const x = Math.max(8, Math.min(screenWidth - width - 8, Widgets.musicX + dx));
+        const y = Math.max(Theme.barHeight + 4, Math.min(screenHeight - height - 8, Widgets.musicY + dy));
+        Widgets.setMusicPosition(x, y);
     }
-    margins {
-        top: Theme.barHeight + 18 + 86
-        left: 32 + 300 + 20
-    }
-    WlrLayershell.layer: WlrLayer.Background
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "niri-shell-widgets"
 
     RetroWindow {
         id: card
         width: 176
         height: 224
         stripHeight: 12
+        draggable: true
+        onDragBy: (dx, dy) => root.moveBy(dx, dy)
 
         Rectangle {
             id: artFrame

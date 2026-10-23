@@ -1,32 +1,35 @@
 import QtQuick
-import Quickshell
-import Quickshell.Wayland
 import "../theme"
+import "../services"
 
-// Palette card from the third reference window. Kept as a desktop note rather
-// than folded into the shell theme: it is the supplied reference palette.
-PanelWindow {
+// Editable retro notepad. The title bar is the drag handle; the body is a real
+// TextEdit and saves into Widgets state. The arrow buttons undo/redo, and X
+// hides the note until Mod+Shift+W (or the IPC toggleNotes) brings it back.
+Item {
     id: root
 
-    property var modelData
+    width: card.width + card.shadow
+    height: card.height + card.shadow
+    x: Widgets.notesX
+    y: Widgets.notesY
+    visible: Widgets.notesVisible
 
-    screen: modelData
-    implicitWidth: 282 + card.shadow
-    implicitHeight: 260 + card.shadow
-    color: "transparent"
-    focusable: false
-    exclusiveZone: 0
-    anchors {
-        top: true
-        left: true
+    onVisibleChanged: {
+        if (!visible)
+            noteEditor.focus = false;
     }
-    margins {
-        top: Theme.barHeight + 18 + 118 + 18
-        left: 32
+
+    function clearEditorFocus() {
+        noteEditor.focus = false;
     }
-    WlrLayershell.layer: WlrLayer.Background
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "niri-shell-widgets"
+
+    function moveBy(dx, dy) {
+        const screenWidth = parent ? parent.width : 1920;
+        const screenHeight = parent ? parent.height : 1080;
+        const x = Math.max(8, Math.min(screenWidth - width - 8, Widgets.notesX + dx));
+        const y = Math.max(Theme.barHeight + 4, Math.min(screenHeight - height - 8, Widgets.notesY + dy));
+        Widgets.setNotesPosition(x, y);
+    }
 
     RetroWindow {
         id: card
@@ -43,27 +46,34 @@ PanelWindow {
         showSquares: false
         showHatch: true
         showNav: true
+        draggable: true
 
-        PixelText {
-            x: 10
-            y: 9
-            width: parent.width - 20
-            text: "greys:\n"
-                + "#edeceb\n"
-                + "#dcdad\n"
-                + "#d4cfc7\n"
-                + "#d3d7cf\n"
-                + "#d3d3dd\n"
-                + "\n"
-                + "---motif colours / xfce stellar ---\n"
-                + "#aeb2c3, #9ba0b0, #b24d7a,\n"
-                + "#7b7691\n"
-                + "--------------------------------"
+        onDragBy: (dx, dy) => root.moveBy(dx, dy)
+        onBackRequested: noteEditor.undo()
+        onForwardRequested: noteEditor.redo()
+        onCloseRequested: {
+            noteEditor.focus = false;
+            Widgets.setNotesVisible(false);
+        }
+
+        TextEdit {
+            id: noteEditor
+            anchors.fill: parent
+            anchors.margins: 10
+            text: Widgets.noteText
             color: "#5b5537"
+            selectionColor: "#69633f"
+            selectedTextColor: "#f7eb96"
+            font.family: "Nimbus Mono PS"
             font.pixelSize: 12
-            lineHeightMode: Text.FixedHeight
-            lineHeight: 18
-            wrapMode: Text.Wrap
+            font.bold: true
+            font.hintingPreference: Font.PreferFullHinting
+            renderType: Text.NativeRendering
+            wrapMode: TextEdit.Wrap
+            selectByMouse: true
+            activeFocusOnPress: true
+            Keys.onEscapePressed: noteEditor.focus = false
+            onTextChanged: Widgets.setNoteText(text)
         }
     }
 }
