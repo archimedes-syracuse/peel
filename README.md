@@ -14,7 +14,8 @@ quickshell/                  qs -c niri
   services/                  Niri IPC, sysstats, weather, brightness, disk,
                              network, bluetooth, battery, notifications
   components/                bar widgets
-  overlays/                  launcher, system drawer, power menu, notifications
+  overlays/                  launcher, system drawer, power menu, notifications,
+                             calendar, OSD
 scripts/install.sh           install niri, switch login manager, remove old stack
 ```
 
@@ -57,11 +58,15 @@ Left to right:
 - Arch mark: opens the launcher.
 - Numeric workspaces `1..5`; the active workspace is pink.
 - Center: `date · time · weather`, with current conditions from wttr.in.
+  Click it for the month calendar.
 - `<`: opens the system drawer (network, Bluetooth, battery, volume and
   brightness sliders, lock screen).
 - Volume, brightness, root-disk, RAM, and CPU readouts.
 - Bell: notification history and do-not-disturb.
 - Power: session menu.
+
+Volume and brightness changes show a small non-focusable OSD near the bottom
+center. Hardware keys, the drawer sliders, and external tools all feed it.
 
 The bar is deliberately minimal. Wi-Fi, Bluetooth, and battery live in the
 system drawer instead of taking permanent space.
@@ -72,6 +77,7 @@ Useful IPC while developing:
 qs -c niri ipc call shell toggleLauncher
 qs -c niri ipc call shell toggleControl
 qs -c niri ipc call shell toggleNotifications
+qs -c niri ipc call shell toggleCalendar
 qs -c niri ipc call shell togglePower
 qs -c niri ipc call shell closeOverlays
 ```

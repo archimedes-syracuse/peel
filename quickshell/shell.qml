@@ -27,6 +27,7 @@ ShellRoot {
     ControlCenter { id: controlCenter }
     NotificationCenter { id: notificationCenter }
     Calendar { id: calendar }
+    OsdOverlay {}
     NotificationDaemon {}
 
     IpcHandler {
