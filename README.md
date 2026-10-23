@@ -18,6 +18,8 @@ quickshell/                  qs -c niri
                              calendar, OSD
   assets/                    bundled desktop-widget artwork
 scripts/install.sh           install niri, switch login manager, remove old stack
+scripts/install-razer-resize.sh  optional Basilisk mouse-button resize helper
+scripts/razer-resize.c           helper source
 ```
 
 ## Run
@@ -104,6 +106,41 @@ qs -c niri ipc call shell toggleNotes
 qs -c niri ipc call shell togglePower
 qs -c niri ipc call shell closeOverlays
 ```
+
+## Window chrome and edge resize
+
+Windows are square and borderless: `focus-ring { off; }`, `border { off; }`,
+`geometry-corner-radius 0`, and `clip-to-geometry true`. The top gap is
+removed with `struts { top -8; }`, so tiled windows sit flush under the bar.
+
+Niri has no bindable "start resize" action; its interactive resize is
+hardcoded to `Mod+right-drag` and only starts when the pointer is on a window
+edge. The Basilisk helper holds that chord while a chosen mouse button is
+pressed: hover an edge, hold the button, and drag. The checked-in default is
+the forward thumb button, which leaves normal right-click unchanged.
+
+Install it with:
+
+```
+sudo ./scripts/install-razer-resize.sh                    # forward thumb
+sudo ./scripts/install-razer-resize.sh --button BTN_RIGHT # normal right button
+```
+
+Change `BUTTON=` in `/etc/razer-resize.conf` (`BTN_EXTRA` is the forward
+thumb button, `BTN_SIDE` is the back thumb button) and run
+`sudo systemctl restart razer-resize` to switch. `BTN_RIGHT` maps the normal
+right button; that makes right-drag resize everywhere, but it holds Super
+during ordinary right-clicks, so context menus/games may react differently.
+Remove it with:
+
+```
+sudo ./scripts/install-razer-resize.sh --uninstall
+```
+
+Files/Nautilus is GTK4/libadwaita and ignores Niri's `prefer-no-csd`; a local
+GTK-NoCSD wrapper (`~/.local/bin/nautilus-nocsd`) removes its headerbar and
+CSD edge handles so it matches the tiled windows. Launch Files normally from
+the bar.
 
 ## Install / teardown
 

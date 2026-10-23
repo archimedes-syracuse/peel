@@ -23,8 +23,8 @@ Item {
     function moveBy(dx, dy) {
         const screenWidth = parent ? parent.width : 1920;
         const screenHeight = parent ? parent.height : 1080;
-        const x = Math.max(8, Math.min(screenWidth - width - 8, Widgets.musicX + dx));
-        const y = Math.max(Theme.barHeight + 4, Math.min(screenHeight - height - 8, Widgets.musicY + dy));
+        const x = Math.max(8, Math.min(screenWidth - width - Theme.barWidth - 8, Widgets.musicX + dx));
+        const y = Math.max(Theme.gap, Math.min(screenHeight - height - 8, Widgets.musicY + dy));
         Widgets.setMusicPosition(x, y);
     }
 

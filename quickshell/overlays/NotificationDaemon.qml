@@ -24,8 +24,8 @@ Scope {
                 right: true
             }
             margins {
-                top: Theme.barHeight + Theme.gap
-                right: Theme.gap
+                top: Theme.gap
+                right: Theme.barWidth + Theme.gap
             }
             implicitWidth: 304
             implicitHeight: column.implicitHeight

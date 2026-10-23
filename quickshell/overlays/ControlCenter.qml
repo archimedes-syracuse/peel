@@ -78,8 +78,8 @@ PanelWindow {
         anchors {
             top: parent.top
             right: parent.right
-            topMargin: Theme.barHeight + 8
-            rightMargin: 8
+            topMargin: Theme.gap
+            rightMargin: Theme.barWidth + Theme.gap
         }
         implicitHeight: content.implicitHeight + 20
         radius: 6

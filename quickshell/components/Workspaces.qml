@@ -2,12 +2,12 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Numeric workspace strip. Active is the only accent; occupied
-// workspaces are quieter, empty ones recede almost completely.
-Row {
+// Numeric workspace strip for the vertical rail. Active is the only accent;
+// occupied workspaces are quieter, empty ones recede almost completely.
+Column {
     id: root
 
-    spacing: 10
+    spacing: 1
 
     readonly property var all: Niri.workspaces
 
@@ -18,8 +18,8 @@ Row {
     Repeater {
         model: 5
 
-        Text {
-            id: label
+        Item {
+            id: item
 
             readonly property bool used: {
                 for (let i = 0; i < root.all.length; i++) {
@@ -37,15 +37,33 @@ Row {
                 return false;
             }
 
-            text: String(index + 1)
-            color: selected ? Theme.accent : hover.hovered ? Theme.fg : used ? Theme.fg : Theme.fgDim
-            opacity: selected ? 1 : hover.hovered ? 1 : used ? 0.8 : 0.35
-            font.family: Theme.font
-            font.pixelSize: Theme.size
-            font.bold: selected
+            width: 28
+            height: 23
 
-            Behavior on color { ColorAnimation { duration: Theme.duration } }
-            Behavior on opacity { NumberAnimation { duration: Theme.duration } }
+            Rectangle {
+                anchors.fill: parent
+                radius: Theme.radius
+                color: item.selected
+                    ? Theme.accentSoft
+                    : hover.hovered ? Theme.bgHover : "transparent"
+                border.width: item.selected ? 1 : 0
+                border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.45)
+
+                Behavior on color { ColorAnimation { duration: Theme.duration } }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: String(index + 1)
+                color: item.selected ? Theme.accent : hover.hovered ? Theme.fg : item.used ? Theme.fg : Theme.fgDim
+                opacity: item.selected ? 1 : hover.hovered ? 1 : item.used ? 0.8 : 0.35
+                font.family: Theme.font
+                font.pixelSize: Theme.size
+                font.bold: item.selected
+
+                Behavior on color { ColorAnimation { duration: Theme.duration } }
+                Behavior on opacity { NumberAnimation { duration: Theme.duration } }
+            }
 
             HoverHandler {
                 id: hover

@@ -30,6 +30,9 @@ QtObject {
     readonly property color blue: "#a9c7e8"
 
     // geometry
+    // The bar is a floating rail on the right edge. barHeight is kept for the
+    // few horizontal shell surfaces that still need a compact header height.
+    readonly property int barWidth: 42
     readonly property int barHeight: 30
     readonly property int radius: 4
     readonly property int gap: 8
@@ -53,6 +56,7 @@ QtObject {
     readonly property string gBell: "\uF0F3"
     readonly property string gChevronLeft: "\uF053"
     readonly property string gChevronRight: "\uF054"
+    readonly property string gSettings: "\uF013"
     readonly property string gArrowLeft: "\uF060"
     readonly property string gArrowRight: "\uF061"
     readonly property string gClose: "\uF00D"

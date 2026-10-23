@@ -40,10 +40,10 @@ layout {
 
     default-column-width { proportion 0.5; }
 
+    // No coloured outline around windows. The active window is still obvious
+    // from its content; add a subtle 1px focus-ring here if you want a cue.
     focus-ring {
-        width 2
-        active-color "#c2c1ff"
-        inactive-color "#3a3942"
+        off
     }
 
     border {
@@ -76,7 +76,9 @@ hotkey-overlay {
 
 // ── window rules ─────────────────────────────────────────────────────
 window-rule {
-    geometry-corner-radius 10
+    // Keep windows square. Clip-to-geometry also trims CSD shadows/rounded
+    // corners from apps that draw their own decorations.
+    geometry-corner-radius 0
     clip-to-geometry true
 }
 

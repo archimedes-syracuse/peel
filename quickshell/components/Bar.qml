@@ -2,9 +2,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "../theme"
+import "../components"
+import "../services"
 
-// Compact full-width top bar, one layer-shell surface per monitor.
-// Reference language: numeric workspaces, date · time · weather, metrics.
+// Floating vertical rail on the right edge, inspired by gdots' Waybar. The
+// layer surface reserves the rail width so tiled windows stack to its left.
+// Top: launcher, workspaces, system counters. Bottom: sound/brightness,
+// drawers, clock and power.
 PanelWindow {
     id: root
 
@@ -13,77 +17,121 @@ PanelWindow {
     screen: modelData
     anchors {
         top: true
-        left: true
+        bottom: true
         right: true
     }
-    implicitHeight: Theme.barHeight
-    exclusiveZone: Theme.barHeight
+    implicitWidth: Theme.barWidth
+    exclusiveZone: Theme.barWidth
     color: "transparent"
     WlrLayershell.namespace: "niri-shell-bar"
 
     Rectangle {
-        anchors.fill: parent
-        color: Theme.bgBar
-    }
+        id: rail
 
-    Rectangle {
         anchors {
-            left: parent.left
-            right: parent.right
+            top: parent.top
             bottom: parent.bottom
+            right: parent.right
+            topMargin: 6
+            bottomMargin: 6
+            rightMargin: 3
         }
-        height: 1
-        color: "#12ffffff"
-    }
+        width: Theme.barWidth - 6
+        radius: 8
+        color: Theme.bgBar
+        border.width: 2
+        border.color: Theme.accent
+        clip: true
 
-    Row {
-        anchors.left: parent.left
-        anchors.leftMargin: 14
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 10
+        Column {
+            id: topGroup
 
-        BarButton {
-            glyph: Theme.gArch
-            textColor: Theme.fg
-            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleLauncher"])
+            anchors {
+                top: parent.top
+                topMargin: 4
+                horizontalCenter: parent.horizontalCenter
+            }
+            spacing: 2
+
+            BarButton {
+                vertical: true
+                bordered: true
+                glyph: Theme.gArch
+                textColor: Theme.fg
+                onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleLauncher"])
+            }
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 18
+                height: 1
+                color: Theme.border
+            }
+
+            Workspaces {}
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 18
+                height: 1
+                color: Theme.border
+            }
+
+            CpuIndicator { vertical: true }
+            RamIndicator { vertical: true }
+            DiskIndicator { vertical: true }
         }
 
-        Workspaces {}
-    }
+        Column {
+            id: bottomGroup
 
-    Clock {
-        anchors.centerIn: parent
-    }
+            anchors {
+                bottom: parent.bottom
+                bottomMargin: 4
+                horizontalCenter: parent.horizontalCenter
+            }
+            spacing: 2
 
-    Row {
-        anchors.right: parent.right
-        anchors.rightMargin: 10
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 3
+            Volume { vertical: true }
+            BrightnessIndicator { vertical: true }
 
-        BarButton {
-            glyph: Theme.gChevronLeft
-            textColor: Theme.fgDim
-            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleControl"])
-        }
+            BarButton {
+                vertical: true
+                glyph: Theme.gChevronLeft
+                textColor: Theme.fgDim
+                onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleControl"])
+            }
 
-        Volume {}
-        BrightnessIndicator {}
-        DiskIndicator {}
-        RamIndicator {}
-        CpuIndicator {}
+            BarButton {
+                vertical: true
+                glyph: Theme.gBell
+                textColor: Theme.fgDim
+                onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleNotifications"])
+            }
 
-        BarButton {
-            glyph: Theme.gBell
-            textColor: Theme.fgDim
-            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleNotifications"])
-        }
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 18
+                height: 1
+                color: Theme.border
+            }
 
-        BarButton {
-            glyph: Theme.gPower
-            textColor: Theme.fgDim
-            hoverColor: Theme.red
-            onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "togglePower"])
+            Clock {}
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 18
+                height: 1
+                color: Theme.border
+            }
+
+            BarButton {
+                vertical: true
+                glyph: Theme.gPower
+                textColor: Theme.fgDim
+                hoverColor: Theme.red
+                onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "togglePower"])
+            }
         }
     }
 }

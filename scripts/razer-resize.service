@@ -1,0 +1,15 @@
+[Unit]
+Description=Razer Basilisk mouse-button resize helper (Meta+right-drag)
+Documentation=https://github.com/nimd/niri-rice
+After=systemd-udevd.service
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/razer-resize.conf
+ExecStart=/usr/local/bin/razer-resize
+Restart=always
+RestartSec=1
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target
