@@ -6,7 +6,7 @@ import "../services"
 Row {
     id: root
 
-    readonly property var win: Niri.focusedWindow
+    readonly property var win: Compositor.focusedWindow
 
     spacing: 7
     visible: win !== null

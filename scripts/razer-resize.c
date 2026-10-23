@@ -1,10 +1,9 @@
 // razer-resize: turn one mouse button into Super+right-drag.
 //
-// Niri starts an interactive resize on Mod+right-click but has no bindable
-// "start resize" action. This daemon grabs the Basilisk, clones it as a
-// virtual mouse with KEY_LEFTMETA added, and replaces the chosen button with
-// a Meta+right-button chord. When a thumb button is chosen, normal
-// right-clicks are untouched.
+// Mango and Niri both start an interactive resize on Super+right-click. This
+// daemon grabs the Basilisk, clones it as a virtual mouse with KEY_LEFTMETA
+// added, and replaces the chosen button with a Meta+right-button chord. When a
+// thumb button is chosen, normal right-clicks are untouched.
 //
 // Build: gcc -O2 -Wall -Wextra -o razer-resize razer-resize.c
 //            $(pkg-config --cflags --libs libevdev)

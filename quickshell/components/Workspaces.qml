@@ -2,17 +2,21 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Numeric workspace strip for the vertical rail. Active is the only accent;
-// occupied workspaces are quieter, empty ones recede almost completely.
+// Numeric workspace/tag strip for the vertical rail. Active is the only
+// accent; occupied workspaces are quieter, empty ones recede almost
+// completely. Mango reports every tag (1..5), so client_count distinguishes
+// occupied tags from empty ones.
 Column {
     id: root
 
+    property string monitorName: ""
+
     spacing: 1
 
-    readonly property var all: Niri.workspaces
+    readonly property var all: Compositor.tagsFor(monitorName)
 
     function goTo(idx) {
-        Niri.focusWorkspace(idx);
+        Compositor.focusTag(idx, monitorName);
     }
 
     Repeater {
@@ -21,21 +25,25 @@ Column {
         Item {
             id: item
 
-            readonly property bool used: {
+            readonly property var workspace: {
                 for (let i = 0; i < root.all.length; i++) {
-                    if (root.all[i].idx === index + 1)
-                        return true;
+                    const tag = root.all[i];
+                    const number = tag.idx !== undefined ? tag.idx : tag.index;
+                    if (number === index + 1)
+                        return tag;
                 }
-                return false;
+                return null;
             }
 
-            readonly property bool selected: {
-                for (let i = 0; i < root.all.length; i++) {
-                    if (root.all[i].idx === index + 1 && root.all[i].is_active)
-                        return true;
-                }
-                return false;
+            readonly property bool used: {
+                if (!workspace)
+                    return false;
+                if (typeof workspace.client_count === "number")
+                    return workspace.client_count > 0;
+                return true;
             }
+
+            readonly property bool selected: workspace ? workspace.is_active === true : false
 
             width: 28
             height: 23
@@ -79,9 +87,9 @@ Column {
     WheelHandler {
         onWheel: (event) => {
             if (event.angleDelta.y > 0)
-                Niri.workspaceUp();
+                Compositor.workspaceUp();
             else
-                Niri.workspaceDown();
+                Compositor.workspaceDown();
         }
     }
 }

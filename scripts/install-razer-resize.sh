@@ -64,8 +64,10 @@ install -Dm644 "$REPO_DIR/scripts/razer-resize.service" "$SERVICE"
 
 if [[ ! -f "$CONFIG" || $BUTTON_EXPLICIT -eq 1 ]]; then
     cat > "$CONFIG" <<EOF
-# Mouse button translated into Meta+right-drag for Niri's resize gesture.
-# BTN_EXTRA is the forward thumb button; BTN_SIDE is the back thumb button.
+# Mouse button translated into Meta+right-drag for the compositor's resize
+# gesture. Works with Mango (mousebind=SUPER,btn_right,moveresize,curresize)
+# and with the Niri fallback. BTN_EXTRA is the forward thumb button; BTN_SIDE
+# is the back thumb button.
 BUTTON=$BUTTON_VALUE
 EOF
     chmod 644 "$CONFIG"

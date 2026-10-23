@@ -1,6 +1,5 @@
 [Unit]
 Description=Razer Basilisk mouse-button resize helper (Meta+right-drag)
-Documentation=https://github.com/nimd/niri-rice
 After=systemd-udevd.service
 
 [Service]

@@ -68,7 +68,9 @@ PanelWindow {
                 color: Theme.border
             }
 
-            Workspaces {}
+            Workspaces {
+                monitorName: root.modelData ? root.modelData.name : ""
+            }
 
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter

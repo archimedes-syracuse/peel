@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
-# niri-rice install / teardown
+# niri-rice install / teardown — Mango branch
 #
 #   sudo ./scripts/install.sh              # dry run, prints the removal plan
-#   sudo ./scripts/install.sh --yes        # install niri, switch DM, remove Hyprland/Plasma
-#   sudo ./scripts/install.sh --yes --with-mango   # also install Mango for comparison
+#   sudo ./scripts/install.sh --yes        # install Mango + Niri fallback, switch DM,
+#                                           # remove Hyprland/Plasma
+#
+# Both session files are installed: Mango is the default at the login screen,
+# and Niri remains selectable if Mango fails to start.
 #
 set -euo pipefail
 
 ASSUME_YES=0
-WITH_MANGO=0
 for arg in "$@"; do
     case "$arg" in
         -y|--yes) ASSUME_YES=1 ;;
-        --with-mango) WITH_MANGO=1 ;;
+        --with-mango) : ;; # compatibility no-op; Mango is installed by default now
         *) echo "unknown argument: $arg"; exit 2 ;;
     esac
 done
@@ -31,12 +33,15 @@ USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6)"
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 INSTALL_PKGS=(
+    mangowm
     niri
     quickshell
     xwayland-satellite
     greetd
     greetd-tuigreet
     xdg-desktop-portal-gnome
+    xdg-desktop-portal-wlr
+    xdg-desktop-portal-gtk
     swaybg
     swayidle
     swaylock
@@ -44,15 +49,15 @@ INSTALL_PKGS=(
     qt6-imageformats
     brightnessctl
     playerctl
+    grim
+    slurp
+    wl-clipboard
     networkmanager
     bluez-utils
     curl
     ttf-jetbrains-mono-nerd
     gsfonts
 )
-if [[ $WITH_MANGO -eq 1 ]]; then
-    INSTALL_PKGS+=(mangowm)
-fi
 
 REMOVE_HYPR=(hyprland hypridle hyprlock hyprpaper hyprpm xdg-desktop-portal-hyprland)
 
@@ -99,6 +104,12 @@ if [[ -e "$USER_HOME/.config/niri" && ! -L "$USER_HOME/.config/niri" ]]; then
 fi
 ln -sfn "$REPO_DIR/niri" "$USER_HOME/.config/niri"
 
+if [[ -e "$USER_HOME/.config/mango" && ! -L "$USER_HOME/.config/mango" ]]; then
+    echo "ERROR: $USER_HOME/.config/mango exists and is not a symlink. Move it aside first."
+    exit 1
+fi
+ln -sfn "$REPO_DIR/mango" "$USER_HOME/.config/mango"
+
 if [[ -e "$USER_HOME/.config/quickshell/niri" && ! -L "$USER_HOME/.config/quickshell/niri" ]]; then
     echo "ERROR: $USER_HOME/.config/quickshell/niri exists and is not a symlink. Move it aside first."
     exit 1
@@ -107,12 +118,19 @@ ln -sfn "$REPO_DIR/quickshell" "$USER_HOME/.config/quickshell/niri"
 
 chown -h "$USER_NAME:$USER_NAME" \
     "$USER_HOME/.config/niri" \
+    "$USER_HOME/.config/mango" \
     "$USER_HOME/.config/quickshell/niri"
 
 # ── 3. validate before removing anything ──────────────────────────────
 if ! runuser -u "$USER_NAME" -- env HOME="$USER_HOME" \
         niri validate -c "$USER_HOME/.config/niri/config.kdl"; then
-    echo "niri config failed validation — aborting before removal."
+    echo "niri fallback config failed validation — aborting before removal."
+    exit 1
+fi
+
+if ! runuser -u "$USER_NAME" -- env HOME="$USER_HOME" \
+        mango -c "$USER_HOME/.config/mango/config.conf" -p; then
+    echo "Mango config failed validation — aborting before removal."
     exit 1
 fi
 
@@ -156,5 +174,5 @@ echo "Old Quickshell configs were left untouched in ~/.config/quickshell/."
 echo "Orphans (review before removing):"
 pacman -Qdtq || true
 echo
-echo "Reboot to land in greetd → niri:"
+echo "Reboot to land in greetd → Mango (Niri is still available as a fallback):"
 echo "  sudo reboot"
