@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
+import Quickshell.Services.Mpris
 import "../theme"
 import "../components"
 import "../services"
@@ -14,6 +15,17 @@ PanelWindow {
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var audio: sink ? sink.audio : null
     readonly property real volume: audio ? audio.volume : 0
+
+    readonly property var players: Mpris.players ? Mpris.players.values : []
+    readonly property var player: {
+        const list = players || [];
+        for (let i = 0; i < list.length; i++) {
+            if (list[i] && list[i].isPlaying)
+                return list[i];
+        }
+        return list.length > 0 ? list[0] : null;
+    }
+    readonly property bool hasMedia: player !== null && player.trackTitle !== ""
 
     visible: false
     color: "transparent"
@@ -119,6 +131,128 @@ PanelWindow {
             }
 
             Rectangle {
+                width: parent.width
+                height: 1
+                color: Theme.border
+            }
+
+            Item {
+                visible: root.hasMedia
+                width: parent.width
+                height: 46
+
+                Rectangle {
+                    id: art
+                    width: 38
+                    height: 38
+                    anchors.verticalCenter: parent.verticalCenter
+                    radius: Theme.radius
+                    color: Theme.surface
+                    clip: true
+
+                    Image {
+                        id: artImage
+                        anchors.fill: parent
+                        source: root.player ? root.player.trackArtUrl : ""
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        visible: status === Image.Ready
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        visible: !artImage.visible
+                        text: Theme.gNote
+                        color: Theme.fgDim
+                        font.family: Theme.font
+                        font.pixelSize: Theme.iconSize
+                    }
+                }
+
+                Column {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 50
+                    anchors.right: controls.left
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 2
+
+                    Text {
+                        width: parent.width
+                        text: root.player ? root.player.trackTitle : ""
+                        color: Theme.fg
+                        font.family: Theme.font
+                        font.pixelSize: Theme.size
+                        elide: Text.ElideRight
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: root.player ? (root.player.trackArtist || root.player.identity) : ""
+                        color: Theme.fgDim
+                        font.family: Theme.font
+                        font.pixelSize: Theme.sizeSmall
+                        elide: Text.ElideRight
+                    }
+                }
+
+                Row {
+                    id: controls
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 8
+
+                    Text {
+                        text: Theme.gPrev
+                        color: hoverPrev.hovered ? Theme.accent : Theme.fgDim
+                        opacity: root.player && root.player.canGoPrevious ? 1 : 0.35
+                        font.family: Theme.font
+                        font.pixelSize: Theme.iconSize
+
+                        HoverHandler { id: hoverPrev; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            onTapped: {
+                                if (root.player && root.player.canGoPrevious)
+                                    root.player.previous();
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: root.player && root.player.isPlaying ? Theme.gPause : Theme.gPlay
+                        color: hoverPlay.hovered ? Theme.accent : Theme.fg
+                        font.family: Theme.font
+                        font.pixelSize: Theme.iconSize
+
+                        HoverHandler { id: hoverPlay; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            onTapped: {
+                                if (root.player)
+                                    root.player.togglePlaying();
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: Theme.gNext
+                        color: hoverNext.hovered ? Theme.accent : Theme.fgDim
+                        opacity: root.player && root.player.canGoNext ? 1 : 0.35
+                        font.family: Theme.font
+                        font.pixelSize: Theme.iconSize
+
+                        HoverHandler { id: hoverNext; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            onTapped: {
+                                if (root.player && root.player.canGoNext)
+                                    root.player.next();
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: root.hasMedia
                 width: parent.width
                 height: 1
                 color: Theme.border

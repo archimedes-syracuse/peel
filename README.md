@@ -59,8 +59,8 @@ Left to right:
 - Numeric workspaces `1..5`; the active workspace is pink.
 - Center: `date · time · weather`, with current conditions from wttr.in.
   Click it for the month calendar.
-- `<`: opens the system drawer (network, Bluetooth, battery, volume and
-  brightness sliders, lock screen).
+- `<`: opens the system drawer (now-playing controls, network, Bluetooth,
+  battery, volume and brightness sliders, lock screen).
 - Volume, brightness, root-disk, RAM, and CPU readouts.
 - Bell: notification history and do-not-disturb.
 - Power: session menu.
@@ -108,6 +108,9 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
 | Super+Return | Alacritty |
 | Super+D | launcher |
 | Super+Escape | power menu |
+| Super+Shift+C | system drawer |
+| Super+Shift+N | notifications |
+| Super+Shift+D | calendar |
 | Super+Q | close window |
 | Super+L | swaylock |
 | Super+F / Super+Shift+F | maximize / fullscreen |

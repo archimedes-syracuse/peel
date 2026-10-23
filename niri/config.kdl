@@ -106,6 +106,9 @@ binds {
     Mod+Return hotkey-overlay-title="Terminal: alacritty" { spawn "alacritty"; }
     Mod+D hotkey-overlay-title="Launcher" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleLauncher"; }
     Mod+Escape hotkey-overlay-title="Power menu" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "togglePower"; }
+    Mod+Shift+C hotkey-overlay-title="Control center" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleControl"; }
+    Mod+Shift+N hotkey-overlay-title="Notifications" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleNotifications"; }
+    Mod+Shift+D hotkey-overlay-title="Calendar" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleCalendar"; }
     Mod+Ctrl+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
 
     // window control
