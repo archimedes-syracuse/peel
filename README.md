@@ -139,6 +139,6 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
   `org.freedesktop.Notifications` bus name. Caelestia is not started under
   Niri.
 - v0 locking/idle/wallpaper still uses `swaylock`, `swayidle`, and `swaybg`.
-  v1: Quickshell lock screen (`WlSessionLock` + PAM), media/calendar popups,
-  animated wallpaper via `awww`, and sprite widgets (`AnimatedSprite` /
-  `SpriteSequence`).
+  v1: Quickshell lock screen (`WlSessionLock` + PAM), an animated wallpaper
+  via `awww`, and desktop sprite widgets (`AnimatedSprite` / `SpriteSequence`
+  plus GIF and spritecook exports).

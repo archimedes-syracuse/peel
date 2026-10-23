@@ -44,6 +44,10 @@ INSTALL_PKGS=(
     qt6-imageformats
     brightnessctl
     playerctl
+    networkmanager
+    bluez-utils
+    curl
+    ttf-jetbrains-mono-nerd
 )
 if [[ $WITH_MANGO -eq 1 ]]; then
     INSTALL_PKGS+=(mangowm)
