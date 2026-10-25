@@ -7,6 +7,10 @@ import "../services"
 // Keeping them in one surface lets the title-bar drag handlers use stable
 // scene coordinates while the widgets move, instead of moving the layer
 // surface itself (which causes pointer feedback loops).
+//
+// The surface is masked to the widget rectangles only. Without the mask a
+// full-screen background layer would swallow pointer events over the whole
+// desktop, so clicks and right-clicks would never reach the applications.
 PanelWindow {
     id: root
 
@@ -30,15 +34,16 @@ PanelWindow {
         : WlrKeyboardFocus.None
     WlrLayershell.namespace: "niri-shell-widgets"
 
-    // Clicking bare wallpaper clears the note editor's focus. Cards are
-    // declared after this item and therefore keep their own input handling.
-    MouseArea {
-        z: -1
-        anchors.fill: parent
-        onClicked: notes.clearEditorFocus()
+    // Only the widget cards accept pointer input; the rest of the desktop
+    // stays click-through. The notes region is dropped while the note is
+    // hidden, otherwise its invisible rectangle would still eat clicks.
+    mask: Region {
+        item: weather
+        Region { item: music }
+        Region { item: notes.visible ? notes : null }
     }
 
-    WeatherWidget { z: 0 }
-    MusicWidget { z: 1 }
+    WeatherWidget { id: weather; z: 0 }
+    MusicWidget { id: music; z: 1 }
     NotesWidget { id: notes; z: 2 }
 }
