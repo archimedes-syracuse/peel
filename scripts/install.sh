@@ -2,7 +2,7 @@
 # niri-rice install / teardown — Mango branch
 #
 #   sudo ./scripts/install.sh              # dry run, prints the removal plan
-#   sudo ./scripts/install.sh --yes        # install Mango + Niri fallback, switch DM,
+#   sudo ./scripts/install.sh --yes        # install Mango + Niri fallback, switch login,
 #                                           # remove Hyprland/Plasma
 #
 # Three session files are installed: Mango is the default at the login screen,
@@ -38,8 +38,6 @@ INSTALL_PKGS=(
     labwc
     quickshell
     xwayland-satellite
-    greetd
-    greetd-tuigreet
     xdg-desktop-portal-gnome
     xdg-desktop-portal-wlr
     xdg-desktop-portal-gtk
@@ -58,6 +56,9 @@ INSTALL_PKGS=(
     curl
     ttf-jetbrains-mono-nerd
     gsfonts
+    rust
+    pam
+    git
 )
 
 REMOVE_HYPR=(hyprland hypridle hyprlock hyprpaper hyprpm xdg-desktop-portal-hyprland)
@@ -68,7 +69,7 @@ echo " repo:        $REPO_DIR"
 echo " install:     ${INSTALL_PKGS[*]}"
 echo " remove:      ${REMOVE_HYPR[*]}"
 echo " remove:      plasma-meta (recursive) + cachyos-kde-settings (package only)"
-echo " login:       greetd + tuigreet  (replaces plasmalogin)"
+echo " login:       rlogin  (replaces greetd/tuigreet and plasmalogin)"
 echo "──────────────────────────────────────────────────────────────"
 
 if [[ $ASSUME_YES -ne 1 ]]; then
@@ -102,6 +103,17 @@ install -m 0644 -o "$USER_NAME" -g "$USER_NAME" \
 install -m 0644 -o "$USER_NAME" -g "$USER_NAME" \
     "$REPO_DIR/quickshell/assets/wallpaper-circuit.png" \
     "$USER_HOME/Pictures/wallpaper-circuit.png"
+
+install -d -o "$USER_NAME" -g "$USER_NAME" "$USER_HOME/.local/bin"
+install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
+    "$REPO_DIR/scripts/screenshot-region.sh" \
+    "$USER_HOME/.local/bin/screenshot-region"
+install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
+    "$REPO_DIR/scripts/screenshot-full.sh" \
+    "$USER_HOME/.local/bin/screenshot-full"
+install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
+    "$REPO_DIR/scripts/screenshot-file.sh" \
+    "$USER_HOME/.local/bin/screenshot-file"
 
 if [[ ! -f "$USER_HOME/Pictures/wallpaper-terminal.png" ]]; then
     echo "WARN: $USER_HOME/Pictures/wallpaper-terminal.png is missing; swaybg will have nothing to show."
@@ -150,27 +162,13 @@ if ! runuser -u "$USER_NAME" -- env HOME="$USER_HOME" \
     exit 1
 fi
 
-# ── 4. greetd ─────────────────────────────────────────────────────────
-id greeter >/dev/null 2>&1 || \
-    useradd --system --home-dir /var/lib/greetd --shell /usr/bin/nologin greeter
-
-install -d -m 0755 /etc/greetd
-cat > /etc/greetd/config.toml <<'EOF'
-[terminal]
-vt = 1
-
-[default_session]
-command = "tuigreet --time --remember --remember-user-session --sessions /usr/share/wayland-sessions"
-user = "greeter"
-EOF
-
-# Disable the old DM first so it releases the display-manager.service alias.
-# Do not stop it now; this session is still using Hyprland. The package
-# removal below deletes plasmalogin, and greetd takes over on reboot.
+# ── 4. login manager ──────────────────────────────────────────────────
+# rlogin replaces greetd/tuigreet. It runs directly on tty1, so there is no
+# greeter/compositor handoff when a session exits. The installer builds it
+# from https://github.com/Beforov1337/rlogin and enables it for the next boot.
 systemctl disable plasmalogin.service 2>/dev/null || true
 rm -f /etc/systemd/system/display-manager.service
-systemctl enable greetd.service
-systemctl is-enabled greetd.service
+"$REPO_DIR/scripts/install-rlogin.sh"
 
 # ── 5. remove Hyprland ────────────────────────────────────────────────
 pacman -Rns --noconfirm "${REMOVE_HYPR[@]}"
@@ -185,10 +183,10 @@ pacman -R --noconfirm cachyos-kde-settings 2>/dev/null || true
 systemctl daemon-reload
 
 echo
-echo "Done. Packages installed, Hyprland/Plasma removed, greetd enabled."
+echo "Done. Packages installed, Hyprland/Plasma removed, rlogin enabled."
 echo "Old Quickshell configs were left untouched in ~/.config/quickshell/."
 echo "Orphans (review before removing):"
 pacman -Qdtq || true
 echo
-echo "Reboot to land in greetd → Mango (Labwc and Niri are still available as fallbacks):"
+echo "Reboot to land in rlogin → Mango (Labwc and Niri are still available as fallbacks):"
 echo "  sudo reboot"

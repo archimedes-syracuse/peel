@@ -92,8 +92,9 @@ text readouts. There are no icons or drawer popups; status is text only.
 
 `Super+D` opens a plain dmenu-style panel: a white `Launch:` prompt and cursor,
 one column of white application text, and a `>` marker on the selected row,
-all on a black background. Type to filter, use Up/Down or scroll to move the
-selection, Enter to run, and Escape or a click outside to dismiss.
+all on a black background. The list shows ten rows and scrolls through every
+match; type to filter, use Up/Down or scroll to move the selection, Enter to
+run, and Escape or a click outside to dismiss.
 
 ### Window close control
 
@@ -183,11 +184,20 @@ sudo ./scripts/install.sh --yes        # install Mango + Niri fallback,
                                        # remove Hyprland/Plasma
 ```
 
-It installs `mangowm`, Niri (fallback), greetd/tuigreet, Quickshell,
+It installs `mangowm`, Niri (fallback), rlogin, Quickshell,
 xwayland-satellite, Labwc (fallback), portals, swaybg, swayidle, swaylock,
 polkit-gnome, grim/slurp/wl-clipboard, and qt6-imageformats. All three session
-files are listed by tuigreet; choose Mango for the new desktop, or Labwc/Niri
+files are listed by rlogin; choose Mango for the new desktop, or Labwc/Niri
 if Mango fails to start.
+
+### Login manager
+
+`rlogin` replaces greetd/tuigreet and runs directly on tty1, so returning from
+a Mango session does not hand off to a second greeter or clear the VT white.
+The installer builds it from
+[`Beforov1337/rlogin`](https://github.com/Beforov1337/rlogin) and enables
+`rlogin.service`. Use `sudo ./scripts/install-rlogin.sh` to install or update
+just the login manager without rerunning the full rice installer.
 
 The script backs up nothing itself — do that first:
 
