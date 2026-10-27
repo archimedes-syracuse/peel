@@ -4,9 +4,10 @@ import QtQuick
 import "../theme"
 
 // A plain dmenu-style application launcher: one black panel, a white prompt
-// and cursor at the left, and the matching applications listed beside it. No
-// title bar, no footer, no window chrome. Type to filter, arrows to move,
-// Enter to launch, Escape to dismiss.
+// and cursor at the top, and the matching applications listed below. The list
+// shows ten rows and scrolls through every match. No title bar, no footer, no
+// window chrome. Type to filter, arrows to move, Enter to launch, Escape to
+// dismiss.
 PanelWindow {
     id: root
 
@@ -28,7 +29,8 @@ PanelWindow {
     property int sel: 0
     property int entriesRevision: 0
     property bool entriesReady: false
-    readonly property int maxResults: 10
+    readonly property int visibleRows: 10
+    readonly property int rowHeight: 20
     readonly property var results: {
         // Read the revision so a late-loading desktop-entry model refreshes
         // the filtered list instead of leaving it stuck on "No matches".
@@ -81,7 +83,7 @@ PanelWindow {
             out.push(entry);
         }
         out.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        return out.slice(0, maxResults);
+        return out;
     }
 
     onResultsChanged: {
@@ -223,22 +225,40 @@ PanelWindow {
                 }
             }
 
-            Column {
-                id: resultList
+            Item {
+                id: resultsBox
 
                 width: content.width
-                spacing: 0
+                height: Math.min(Math.max(root.results.length, 1), root.visibleRows) * root.rowHeight
 
-                Repeater {
+                ListView {
+                    id: resultList
+
+                    anchors.fill: parent
+                    visible: root.results.length > 0
+                    clip: true
+                    interactive: false
+                    boundsBehavior: Flickable.StopAtBounds
                     model: root.results
+                    currentIndex: root.sel
 
-                    Item {
+                    onCurrentIndexChanged: {
+                        if (currentIndex >= 0 && count > 0)
+                            positionViewAtIndex(currentIndex, ListView.Contain);
+                    }
+
+                    onCountChanged: {
+                        if (root.sel >= 0 && root.sel < count)
+                            positionViewAtIndex(root.sel, ListView.Contain);
+                    }
+
+                    delegate: Item {
                         id: row
 
                         readonly property bool picked: index === root.sel
 
                         width: resultList.width
-                        height: 20
+                        height: root.rowHeight
 
                         Text {
                             anchors {
@@ -279,12 +299,16 @@ PanelWindow {
                             onTapped: root.launch(index)
                         }
                     }
+
+                    WheelHandler {
+                        onWheel: (event) => root.wheelMove(event)
+                    }
                 }
 
                 Text {
                     visible: root.results.length === 0
-                    width: resultList.width
-                    height: 20
+                    width: resultsBox.width
+                    height: root.rowHeight
                     text: "No matches"
                     color: root.launchText
                     font.family: Theme.font

@@ -101,7 +101,7 @@ PanelWindow {
                 model: [
                     { glyph: Theme.gLock,     label: "lock",     cmd: ["swaylock", "-f"] },
                     { glyph: Theme.gSuspend,  label: "suspend",  cmd: ["systemctl", "suspend"] },
-                    { glyph: Theme.gLogout,   label: "logout",   cmd: ["sh", "-c", "niri msg action quit --skip-confirmation 2>/dev/null || loginctl terminate-user \"$USER\""] },
+                    { glyph: Theme.gLogout,   label: "logout",   cmd: ["sh", "-c", "mmsg dispatch quit 2>/dev/null || niri msg action quit --skip-confirmation 2>/dev/null || loginctl terminate-user \"$USER\""] },
                     { glyph: Theme.gReboot,   label: "reboot",   cmd: ["systemctl", "reboot"] },
                     { glyph: Theme.gShutdown, label: "shutdown", cmd: ["systemctl", "poweroff"] }
                 ]

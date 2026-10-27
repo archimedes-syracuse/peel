@@ -119,7 +119,7 @@ PanelWindow {
             }
         }
 
-        // [ FLAC  Artist - Title  mm:ss/mm:ss  art ]
+        // [ FLAC/WEB  Artist - Title  mm:ss/mm:ss  art ]
         Rectangle {
             visible: Media.available
             width: visible ? musicRow.implicitWidth + 16 : 0
@@ -135,7 +135,8 @@ PanelWindow {
                 spacing: 4
 
                 Text {
-                    text: "FLAC"
+                    text: Media.format
+                    visible: text !== ""
                     color: Theme.deskTextDim
                     font.family: Theme.font
                     font.pixelSize: 14
