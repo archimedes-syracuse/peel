@@ -52,7 +52,7 @@ PanelWindow {
         Image {
             anchors.fill: parent
             y: spriteItem.idleOffset
-            source: "../assets/companion.png"
+            source: "../assets/companion-naturalist.png"
             fillMode: Image.PreserveAspectFit
             smooth: false
         }

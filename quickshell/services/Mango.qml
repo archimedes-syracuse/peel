@@ -5,15 +5,23 @@ import Quickshell
 import Quickshell.Io
 
 // Mango state for the shell. Mango exposes a small JSON IPC through mmsg;
-// polling is deliberate here, matching the Niri backend's 800 ms cadence and
-// keeping the bar logic identical on both compositors.
+// polling is deliberate here, matching the Niri backend's cadence and keeping
+// the bar logic identical on both compositors. The clients snapshot carries
+// geometry as well, which the floating close control uses.
 Singleton {
     id: root
 
     property var allTags: []
+    property var allClients: []
     property var focusedWindow: null
+    property var focusedClient: null
     property bool available: false
     property bool canPoll: false
+
+    // Keep floating windows below the top bar. Tiled windows receive the
+    // layer-shell exclusive zone automatically; floating windows do not.
+    readonly property int barInset: Widgets.barVisible ? 32 : 0
+    property int lastClampClientId: -1
 
     function tagsFor(monitorName) {
         for (let i = 0; i < allTags.length; i++) {
@@ -98,7 +106,7 @@ Singleton {
 
     Process {
         id: windowProc
-        command: ["mmsg", "get", "focusing-client"]
+        command: ["mmsg", "get", "all-clients"]
         running: false
         stderr: StdioCollector {}
         stdout: StdioCollector {
@@ -108,15 +116,45 @@ Singleton {
                     return;
                 try {
                     const data = JSON.parse(raw);
-                    if (data.id === null || data.id === undefined) {
-                        root.focusedWindow = null;
-                        return;
+                    const clients = Array.isArray(data.clients) ? data.clients : [];
+                    root.allClients = clients;
+
+                    let focused = null;
+                    for (let i = 0; i < clients.length; i++) {
+                        const client = clients[i];
+                        if (client.is_focused && client.is_visible && !client.is_minimized) {
+                            focused = client;
+                            break;
+                        }
                     }
-                    root.focusedWindow = {
-                        app_id: data.appid || "",
-                        title: data.title || ""
-                    };
+
+                    root.focusedClient = focused;
+                    root.focusedWindow = focused
+                        ? {
+                            app_id: focused.appid || "",
+                            title: focused.title || "",
+                            id: focused.id,
+                            x: focused.x,
+                            y: focused.y,
+                            width: focused.width,
+                            height: focused.height
+                        }
+                        : null;
+
+                    if (!focused || focused.y >= root.barInset || focused.is_fullscreen) {
+                        if (root.lastClampClientId !== -1)
+                            root.lastClampClientId = -1;
+                    } else if (focused
+                            && focused.is_floating
+                            && !focused.is_fullscreen
+                            && !focused.is_maximized
+                            && root.lastClampClientId !== focused.id) {
+                        root.lastClampClientId = focused.id;
+                        root.dispatch("movewin", "+0,+" + (root.barInset - focused.y) + ",client," + focused.id);
+                    }
                 } catch (e) {
+                    root.allClients = [];
+                    root.focusedClient = null;
                     root.focusedWindow = null;
                 }
             }
@@ -124,7 +162,7 @@ Singleton {
     }
 
     Timer {
-        interval: 800
+        interval: 500
         running: root.canPoll
         repeat: true
         triggeredOnStart: true

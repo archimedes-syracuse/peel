@@ -32,9 +32,9 @@ Row {
 
             readonly property bool selected: modelData.activated === true
 
-            width: Math.min(210, Math.max(92, ((modelData.title || modelData.appId || "").length * 6.8) + 42))
+            width: Math.min(210, Math.max(104, ((modelData.title || modelData.appId || "").length * 6.8) + 54))
             height: 24
-            radius: 2
+            radius: Theme.radius
             color: selected
                 ? Theme.accentSoft
                 : hover.hovered ? Theme.bgHover : "transparent"
@@ -47,7 +47,7 @@ Row {
             Row {
                 anchors.fill: parent
                 anchors.leftMargin: 7
-                anchors.rightMargin: 8
+                anchors.rightMargin: 22
                 spacing: 5
 
                 Text {
@@ -90,6 +90,41 @@ Row {
                         modelData.minimized = false;
                         modelData.activate();
                     }
+                }
+            }
+
+            // A visible close affordance, matching the reference panel's ×.
+            // It appears on hover or on the active task so the bar stays calm.
+            Item {
+                id: closeItem
+
+                width: 16
+                height: 16
+                anchors.right: parent.right
+                anchors.rightMargin: 4
+                anchors.verticalCenter: parent.verticalCenter
+                visible: hover.hovered || task.selected
+                opacity: closeHover.hovered ? 1 : 0.65
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "\u00D7"
+                    color: closeHover.hovered ? Theme.red : Theme.deskTextDim
+                    font.family: Theme.font
+                    font.pixelSize: 14
+                    font.bold: true
+                }
+
+                HoverHandler {
+                    id: closeHover
+                    cursorShape: Qt.PointingHandCursor
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: modelData.close()
                 }
             }
         }

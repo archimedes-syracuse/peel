@@ -64,9 +64,6 @@
     <keybind key="W-Escape">
       <action name="Execute" command="qs -c niri ipc call shell togglePower" />
     </keybind>
-    <keybind key="W-S-C">
-      <action name="Execute" command="qs -c niri ipc call shell toggleControl" />
-    </keybind>
     <keybind key="W-S-N">
       <action name="Execute" command="qs -c niri ipc call shell toggleNotifications" />
     </keybind>

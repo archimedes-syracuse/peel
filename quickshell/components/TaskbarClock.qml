@@ -6,7 +6,7 @@ import "../theme"
 Item {
     id: root
 
-    implicitWidth: 78
+    implicitWidth: 96
     implicitHeight: 24
 
     SystemClock {
@@ -31,7 +31,7 @@ Item {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: Qt.formatDateTime(clock.date, "ddd dd")
+            text: Qt.formatDateTime(clock.date, "yyyy-MM-dd")
             color: Theme.deskTextDim
             font.family: Theme.fontRetro
             font.pixelSize: 8

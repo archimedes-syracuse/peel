@@ -42,9 +42,6 @@
       <action name="Execute" command="~/.local/bin/screenshot-full" />
     </item>
     <separator />
-    <item label="Settings">
-      <action name="Execute" command="qs -c niri ipc call shell toggleControl" />
-    </item>
     <item label="Lock">
       <action name="Execute" command="swaylock -f" />
     </item>

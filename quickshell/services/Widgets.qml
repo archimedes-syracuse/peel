@@ -29,11 +29,11 @@ Singleton {
     property real musicY: 134
     property real notesX: 32
     property real notesY: 184
-    property bool notesVisible: true
+    property bool notesVisible: false
     property bool barVisible: true
-    property bool widgetsVisible: true
-    property bool desktopIconsVisible: true
-    property bool companionVisible: true
+    property bool widgetsVisible: false
+    property bool desktopIconsVisible: false
+    property bool companionVisible: false
     property real companionX: 760
     property real companionY: 160
     property string noteText: defaultNote

@@ -64,7 +64,7 @@ prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 // ── session startup ──────────────────────────────────────────────────
-spawn-at-startup "swaybg" "-i" "/home/nimd/Pictures/wallpaper.png" "-m" "fill"
+spawn-at-startup "swaybg" "-i" "/home/nimd/Pictures/wallpaper-terminal.png" "-m" "fill"
 spawn-at-startup "qs" "-n" "-c" "niri"
 // niri 26.04 spawns xwayland-satellite itself when it is in PATH; don't start a second one.
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
@@ -108,7 +108,6 @@ binds {
     Mod+Return hotkey-overlay-title="Terminal: alacritty" { spawn "alacritty"; }
     Mod+D hotkey-overlay-title="Launcher" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleLauncher"; }
     Mod+Escape hotkey-overlay-title="Power menu" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "togglePower"; }
-    Mod+Shift+C hotkey-overlay-title="Control center" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleControl"; }
     Mod+Shift+N hotkey-overlay-title="Notifications" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleNotifications"; }
     Mod+Shift+D hotkey-overlay-title="Calendar" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleCalendar"; }
     Mod+Shift+W hotkey-overlay-title="Notes widget" { spawn "qs" "-c" "niri" "ipc" "call" "shell" "toggleNotes"; }

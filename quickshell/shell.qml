@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "theme"
 import "services"
@@ -19,9 +20,16 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
-        BottomBar {
+        TopBar {
             visible: Widgets.barVisible
+                && !(Mango.focusedClient && Mango.focusedClient.is_fullscreen)
         }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        WindowCloseOverlay {}
     }
 
     Variants {
@@ -50,7 +58,6 @@ ShellRoot {
 
     Launcher { id: launcher }
     PowerMenu { id: power }
-    ControlCenter { id: controlCenter }
     NotificationCenter { id: notificationCenter }
     Calendar { id: calendar }
     OsdOverlay {}
@@ -59,13 +66,21 @@ ShellRoot {
     IpcHandler {
         target: "shell"
 
+        function closeFocused() {
+            if (ToplevelManager.activeToplevel) {
+                ToplevelManager.activeToplevel.close();
+                return;
+            }
+            if (Mango.available)
+                Mango.dispatch("killclient");
+        }
+
         function toggleLauncher() {
             if (launcher.visible) {
                 launcher.close();
                 return;
             }
             power.close();
-            controlCenter.close();
             notificationCenter.close();
             calendar.close();
             launcher.open();
@@ -77,7 +92,6 @@ ShellRoot {
                 return;
             }
             launcher.close();
-            controlCenter.close();
             notificationCenter.close();
             calendar.close();
             power.open();
@@ -90,21 +104,8 @@ ShellRoot {
             }
             launcher.close();
             power.close();
-            controlCenter.close();
             calendar.close();
             notificationCenter.open();
-        }
-
-        function toggleControl() {
-            if (controlCenter.visible) {
-                controlCenter.close();
-                return;
-            }
-            launcher.close();
-            power.close();
-            notificationCenter.close();
-            calendar.close();
-            controlCenter.open();
         }
 
         function toggleNotes() {
@@ -153,7 +154,6 @@ ShellRoot {
             }
             launcher.close();
             power.close();
-            controlCenter.close();
             notificationCenter.close();
             calendar.open();
         }
@@ -161,7 +161,6 @@ ShellRoot {
         function closeOverlays() {
             launcher.close();
             power.close();
-            controlCenter.close();
             notificationCenter.close();
             calendar.close();
         }

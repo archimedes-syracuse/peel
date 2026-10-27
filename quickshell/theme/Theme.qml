@@ -2,66 +2,64 @@ pragma Singleton
 
 import QtQuick
 
-// Palette matched to the compact reference bar: near-black translucent
-// surfaces, pink active state, and pale-gold system readouts. Swap these
-// values (or generate them with matugen later) and the shell follows.
-//
-// Visual language: 4px geometry, JetBrains Mono, accent-as-state.
+// Terminal monochrome: near-black surfaces, grey hairlines, and plain text.
+// No color accents, no decorative imagery. The shell should read like a tiling
+// window manager with a text UI, not a themed desktop.
 QtObject {
     // surfaces
-    readonly property color bg: "#0c0b10"
-    readonly property color bgBar: "#ee0c0b10"
-    readonly property color bgPanel: "#f217161c"
-    readonly property color bgHover: "#1fffffff"
-    readonly property color surface: "#0fffffff"
-    readonly property color accentSoft: "#40f2a8c4"
-    readonly property color border: "#26ffffff"
+    readonly property color bg: "#0b0b0b"
+    readonly property color bgBar: "#ee111111"
+    readonly property color bgPanel: "#f2161616"
+    readonly property color bgHover: "#24ffffff"
+    readonly property color surface: "#14ffffff"
+    readonly property color accentSoft: "#2effffff"
+    readonly property color border: "#40ffffff"
 
     // text
-    readonly property color fg: "#ded9e2"
-    readonly property color fgDim: "#918c98"
+    readonly property color fg: "#d6d6d6"
+    readonly property color fgDim: "#878787"
 
-    // accents
-    readonly property color accent: "#f2a8c4"
-    readonly property color accent2: "#c2c1ff"
-    readonly property color red: "#ffb4ab"
-    readonly property color green: "#b5ccba"
-    readonly property color yellow: "#e5c79a"
-    readonly property color blue: "#a9c7e8"
+    // accents are deliberately desaturated; callers keep their old semantic
+    // names so the rest of the shell does not need a parallel palette.
+    readonly property color accent: "#d8d8d8"
+    readonly property color accent2: "#9a9a9a"
+    readonly property color red: "#b8b8b8"
+    readonly property color green: "#b8b8b8"
+    readonly property color yellow: "#c8c8c8"
+    readonly property color blue: "#a8a8a8"
 
-    // Desktop-scene palette: cool steel, chunky low-contrast surfaces, and the
-    // existing pink reserved for active states.
-    readonly property color deskText: "#dce7ef"
-    readonly property color deskTextDim: "#a6b9c8"
-    readonly property color deskInk: "#18232d"
-    readonly property color deskPanel: "#e61a2430"
-    readonly property color deskPanelSolid: "#1a2430"
-    readonly property color deskBorder: "#6f8798"
-    readonly property color deskHighlight: "#c7d7e2"
-    readonly property color deskShadow: "#99080f16"
-    readonly property color deskBlue: "#9cc4e4"
+    // Desktop-scene palette
+    readonly property color deskText: "#d6d6d6"
+    readonly property color deskTextDim: "#878787"
+    readonly property color deskInk: "#141414"
+    readonly property color deskPanel: "#e6141414"
+    readonly property color deskPanelSolid: "#161616"
+    readonly property color deskBorder: "#4a4a4a"
+    readonly property color deskHighlight: "#f0f0f0"
+    readonly property color deskShadow: "#99000000"
+    readonly property color deskBlue: "#9a9a9a"
 
     // geometry
-    // The old rail is kept for reference; the active shell uses the bottom
-    // taskbar dimensions below.
+    // The old rail is kept for reference; the active shell uses the top bar
+    // dimensions below.
     readonly property int barWidth: 42
     readonly property int barHeight: 30
-    readonly property int taskbarHeight: 40
-    readonly property int radius: 4
+    readonly property int taskbarHeight: 32
+    readonly property int radius: 0
     readonly property int gap: 8
 
     // type
     readonly property string font: "JetBrainsMono Nerd Font"
     readonly property string fontRetro: "Nimbus Mono PS"
-    readonly property int sizeSmall: 10
-    readonly property int size: 12
-    readonly property int sizeBig: 13
+    readonly property int sizeSmall: 9
+    readonly property int size: 11
+    readonly property int sizeBig: 12
     readonly property int sizeTitle: 16
     readonly property int iconSize: 15
 
     // motion
-    readonly property int duration: 150
-    readonly property int durationSlow: 300
+    readonly property int duration: 140
+    readonly property int durationSlow: 260
 
     // Nerd Font glyphs (same codepoints as the existing bar)
     readonly property string gApps: "\uF009"

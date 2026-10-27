@@ -71,8 +71,8 @@ PanelWindow {
         width: 300
         implicitHeight: column.implicitHeight + 22
         anchors.centerIn: parent
-        radius: 6
-        borderWidth: 2
+        radius: Theme.radius
+        borderWidth: 1
 
         MouseArea { anchors.fill: parent }
 

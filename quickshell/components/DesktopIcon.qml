@@ -16,9 +16,9 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: 0
-        color: hover.hovered ? "#26ffffff" : "transparent"
+        color: hover.hovered ? "#22e8dcc4" : "transparent"
         border.width: hover.hovered ? 1 : 0
-        border.color: "#44ffffff"
+        border.color: "#55e8dcc4"
     }
 
     Column {

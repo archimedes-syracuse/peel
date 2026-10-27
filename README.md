@@ -1,27 +1,29 @@
 # mango-rice
 
-A from-scratch **Mango + Quickshell** desktop, migrated from the original
-Niri rice. Mango is the primary compositor; Niri remains installed as a
-fallback session at the login screen. The vertical right rail, launcher,
-system drawer, power menu, notifications, and desktop widgets are custom QML
-in `quickshell/`. No Waybar, no AGS, no KDE.
+A from-scratch **Mango + Quickshell** desktop with a terminal monochrome
+palette: near-black surfaces, grey hairline boxes, and plain text. Mango is
+the primary compositor; Labwc and Niri remain installed as fallback sessions
+at the login screen. The top bar, dmenu-style launcher, power menu, notifications,
+desktop icons, companion, and desktop widgets are custom QML in `quickshell/`.
+No Waybar, no AGS, no KDE.
 
-The migration lives on the `mango` branch. Niri is kept in `niri/config.kdl`
-so the fallback session still works.
+The active branch is `mango-naturalist`, but the shell palette is now plain
+grey/black. Labwc is kept in `labwc/` and Niri in `niri/config.kdl` so both
+fallback sessions still work.
 
 ## Layout
 
 ```
 mango/config.conf            Mango compositor config (primary)
+labwc/                       Labwc fallback config
 niri/config.kdl              Niri compositor config (fallback)
 quickshell/                  qs -c niri
   shell.qml                  entry point
   theme/Theme.qml            palette, type, glyphs, motion
   services/                  Mango + Niri IPC, sysstats, weather, brightness,
                              disk, network, bluetooth, battery, notifications
-  components/                vertical rail widgets and desktop windows
-  overlays/                  launcher, system drawer, power menu, notifications,
-                             calendar, OSD
+  components/                top bar, desktop icons, companion, widgets
+  overlays/                  launcher, power menu, notifications, calendar, OSD
   assets/                    bundled desktop-widget artwork
 scripts/install.sh           install Mango + Niri fallback, switch login manager
 scripts/install-razer-resize.sh  optional Basilisk mouse-button resize helper
@@ -37,14 +39,16 @@ qs -c niri
 The Quickshell profile keeps its historical `niri` name so the Niri fallback
 and existing IPC commands continue to work. The compositor underneath is
 detected automatically: Mango's `mmsg` IPC is used when available, otherwise
-the shell falls back to Niri's `niri msg` IPC.
+the shell falls back to Labwc's foreign-toplevel data or Niri's `niri msg`
+IPC.
 
 The configs are symlinked:
 
 ```
-~/.config/mango             -> ~/niri-rice/mango
-~/.config/niri              -> ~/niri-rice/niri
-~/.config/quickshell/niri   -> ~/niri-rice/quickshell
+~/.config/mango             -> ~/niri-rice-mango/mango
+~/.config/labwc             -> ~/niri-rice-mango/labwc
+~/.config/niri              -> ~/niri-rice-mango/niri
+~/.config/quickshell/niri   -> ~/niri-rice-mango/quickshell
 ```
 
 Validate and reload Mango:
@@ -71,29 +75,33 @@ systemctl --user restart niri-quickshell 2>/dev/null || qs -n -c niri -d
 
 ## Bar
 
-The bar is a floating vertical rail on the right edge, inspired by gdots'
-Waybar layout. It reserves 42 px through a layer-shell exclusive zone, so
-Mango tiles windows to its left instead of underneath it.
+The active layout is a single 32 px top strip of square, hairline-bordered
+text readouts. There are no icons or drawer popups; status is text only.
 
-Top group:
+- Left: time and the current track.
+- Center: workspace tags `1..5`.
+- Right: `PKG`, `BT`, `WIFI`, `BAT`, `VOL`, and `BRT` readouts.
+- Click the time for the calendar, click the track to play/pause, and scroll
+  over `VOL` to change the volume.
+- Floating windows are kept below the strip when focused, and the strip gets
+  out of the way while a fullscreen window is active.
+- The old vertical right rail remains available in `components/Bar.qml` for
+  comparison, but the top strip is the active shell.
 
-- Arch mark: opens the launcher.
-- Tags `1..5` (Mango's dwm-style tags). The active tag is pink; occupied tags
-  are brighter than empty ones.
-- CPU, RAM, and root-disk readouts.
+### Launcher
 
-Bottom group:
+`Super+D` opens a plain dmenu-style panel: a white `Launch:` prompt and cursor,
+one column of white application text, and a `>` marker on the selected row,
+all on a black background. Type to filter, use Up/Down or scroll to move the
+selection, Enter to run, and Escape or a click outside to dismiss.
 
-- Volume and brightness.
-- `<`: opens the system drawer (now-playing controls, Wi-Fi, Bluetooth,
-  battery, volume/brightness sliders, lock screen).
-- Bell: notification history and do-not-disturb.
-- Clock.
-- Power: session menu.
+### Window close control
 
-The rail is deliberately minimal. Wi-Fi, Bluetooth, and battery live in the
-system drawer instead of taking permanent space. The old horizontal bar
-documentation no longer applies; the shell is now one vertical rail.
+The focused Mango window gets a small floating `×` just above its top-right
+corner, styled as an ink tag. The layer surface is masked to the button, so
+all other input passes through to the application. The taskbar task buttons
+have a second close affordance. `Super+Q` and
+`qs -c niri ipc call shell closeFocused` use the same path.
 
 ## Desktop widgets
 
@@ -120,7 +128,6 @@ Useful IPC while developing:
 
 ```
 qs -c niri ipc call shell toggleLauncher
-qs -c niri ipc call shell toggleControl
 qs -c niri ipc call shell toggleNotifications
 qs -c niri ipc call shell toggleCalendar
 qs -c niri ipc call shell toggleNotes
@@ -132,9 +139,9 @@ qs -c niri ipc call shell closeOverlays
 
 Windows are square and borderless:
 
-- `border_px=0`
+- `border_px=1` (transparent, preserving Mango's resize strip)
 - `border_radius=0`
-- `no_radius_when_single=1`
+- `no_radius_when_single=0`
 - no focus outline or coloured border
 - a soft shadow is kept only for floating windows
 
@@ -177,10 +184,10 @@ sudo ./scripts/install.sh --yes        # install Mango + Niri fallback,
 ```
 
 It installs `mangowm`, Niri (fallback), greetd/tuigreet, Quickshell,
-xwayland-satellite, portals, swaybg, swayidle, swaylock, polkit-gnome,
-grim/slurp/wl-clipboard, and qt6-imageformats. Both session files are listed
-by tuigreet; choose Mango for the new desktop, or Niri if Mango fails to
-start.
+xwayland-satellite, Labwc (fallback), portals, swaybg, swayidle, swaylock,
+polkit-gnome, grim/slurp/wl-clipboard, and qt6-imageformats. All three session
+files are listed by tuigreet; choose Mango for the new desktop, or Labwc/Niri
+if Mango fails to start.
 
 The script backs up nothing itself — do that first:
 
@@ -196,7 +203,6 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
 | Super+Return | Alacritty |
 | Super+D | launcher |
 | Super+Escape | power menu |
-| Super+Shift+C | system drawer |
 | Super+Shift+N | notifications |
 | Super+Shift+D | calendar |
 | Super+Shift+W | show/hide desktop notes |
@@ -217,7 +223,9 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
 | Super+Tab | previous tagset |
 | Super+Page_Up/Page_Down | previous/next tag |
 | Super+Shift+E | quit Mango |
-| Print / Super+Shift+S | save screenshot / region to clipboard |
+| Print | region screenshot to clipboard |
+| Super+Print | full screen to clipboard |
+| Shift+Print | full screen to `~/Pictures/Screenshots` |
 
 Mango consumes `Super+1..5` as tag switches. Niri's column-width presets and
 tabbed-column bindings have no direct Mango equivalent; the dwindle layout
@@ -225,8 +233,8 @@ plus mouse resizing replaces them.
 
 ## Notes / next
 
-- The palette is matched to the supplied compact bar reference: near-black
-  surfaces, pink active state, and pale-gold system readouts. Swap
+- The palette is terminal monochrome: near-black surfaces, grey hairlines,
+  and no accent colors. The wallpaper is a plain graphite gradient. Swap
   `quickshell/theme/Theme.qml` or generate it later with matugen.
 - Notifications are owned by Quickshell. The toast overlay and history panel
   share one `NotificationServer` singleton so they do not fight for the

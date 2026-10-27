@@ -48,8 +48,8 @@ Scope {
 
                         width: column.width
                         implicitHeight: body.implicitHeight + 20
-                        radius: 6
-                        borderWidth: 2
+                        radius: Theme.radius
+                        borderWidth: 1
                         borderStart: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.accent
                         borderEnd: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.accent2
 

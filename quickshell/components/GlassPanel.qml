@@ -10,7 +10,7 @@ Item {
     default property alias content: surface.data
 
     property int radius: Theme.radius
-    property int borderWidth: 2
+    property int borderWidth: 1
     property color fill: Theme.bgPanel
     property color borderStart: Theme.accent
     property color borderEnd: Theme.accent2

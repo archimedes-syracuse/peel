@@ -28,29 +28,24 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: 4
         color: Theme.deskPanel
-        border.width: 1
-        border.color: Theme.deskBorder
-        radius: 3
+        radius: 0
 
         Rectangle {
             anchors {
                 left: parent.left
                 right: parent.right
                 top: parent.top
-                leftMargin: 1
-                rightMargin: 1
             }
             height: 1
-            color: Theme.deskHighlight
-            opacity: 0.35
+            color: Theme.deskBorder
+            opacity: 0.7
         }
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 6
-            anchors.rightMargin: 7
+            anchors.leftMargin: 8
+            anchors.rightMargin: 8
             spacing: 4
 
             TaskbarButton {
@@ -129,12 +124,6 @@ PanelWindow {
 
             TaskbarClock {
                 Layout.alignment: Qt.AlignVCenter
-            }
-
-            BarButton {
-                glyph: Theme.gSettings
-                textColor: Theme.deskTextDim
-                onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleControl"])
             }
 
             BarButton {

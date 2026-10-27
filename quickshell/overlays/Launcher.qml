@@ -2,9 +2,11 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../theme"
-import "../components"
 
-// Centered app launcher. Keyboard focus is taken only while open.
+// A plain dmenu-style application launcher: one black panel, a white prompt
+// and cursor at the left, and the matching applications listed beside it. No
+// title bar, no footer, no window chrome. Type to filter, arrows to move,
+// Enter to launch, Escape to dismiss.
 PanelWindow {
     id: root
 
@@ -19,18 +21,25 @@ PanelWindow {
     exclusiveZone: 0
     focusable: true
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     WlrLayershell.namespace: "niri-shell-launcher"
 
     property string query: ""
-    readonly property var results: filterApps(query)
     property int sel: 0
+    readonly property int maxResults: 10
+    readonly property var results: filterApps(query)
+
+    // Keep the launcher plain for now: black panel, white text, and the
+    // arrow is the only selection marker.
+    readonly property color launchText: "#ffffff"
+    readonly property color launchBg: "#000000"
 
     function open() {
         input.text = "";
         query = "";
         sel = 0;
         visible = true;
+        input.forceActiveFocus();
         focusTimer.running = true;
     }
 
@@ -39,30 +48,39 @@ PanelWindow {
         input.text = "";
     }
 
-    function toggle() {
-        if (visible)
-            close();
-        else
-            open();
+    function lock() {
+        Quickshell.execDetached(["swaylock", "-f"]);
+        close();
     }
 
     function filterApps(q) {
         const all = DesktopEntries.applications.values;
         const needle = (q || "").trim().toLowerCase();
         const out = [];
+        const seen = {};
         for (let i = 0; i < all.length; i++) {
             const entry = all[i];
-            if (!entry)
+            if (!entry || entry.noDisplay)
                 continue;
-            const hay = (entry.name + " " + (entry.genericName || "") + " " + (entry.keywords || []).join(" ")).toLowerCase();
-            if (needle === "" || hay.indexOf(needle) !== -1)
-                out.push(entry);
+            const name = entry.name || "";
+            if (name === "" || seen[name])
+                continue;
+            const hay = (name + " " + (entry.genericName || "") + " " + (entry.comment || "")).toLowerCase();
+            if (needle !== "" && hay.indexOf(needle) === -1)
+                continue;
+            seen[name] = true;
+            out.push(entry);
         }
         out.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        return out.slice(0, 6);
+        return out.slice(0, maxResults);
     }
 
-    onResultsChanged: sel = 0
+    onResultsChanged: {
+        if (results.length === 0)
+            sel = 0;
+        else
+            sel = Math.max(0, Math.min(results.length - 1, sel));
+    }
 
     function launch(i) {
         if (i < 0 || i >= results.length)
@@ -71,173 +89,176 @@ PanelWindow {
         close();
     }
 
-    onVisibleChanged: {
-        if (visible) {
-            card.scale = 0.98;
-            card.opacity = 0;
-            intro.restart();
-        }
+    function move(delta) {
+        if (results.length === 0)
+            return;
+        sel = (sel + delta + results.length) % results.length;
     }
 
     Timer {
         id: focusTimer
-        interval: 50
+        interval: 30
         onTriggered: input.forceActiveFocus()
     }
 
-    Rectangle {
+    // Clicking outside the panel dismisses it without a scrim.
+    MouseArea {
         anchors.fill: parent
-        color: "#66070a10"
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.close()
-        }
+        onClicked: root.close()
     }
 
-    GlassPanel {
+    Rectangle {
         id: card
 
-        width: Math.min(600, root.width - 120)
+        width: 820
+        height: content.implicitHeight + 24
+        implicitHeight: height
         anchors.centerIn: parent
-        implicitHeight: column.implicitHeight + 24
-        radius: 6
-        borderWidth: 2
+        color: root.launchBg
+        radius: 0
 
         MouseArea { anchors.fill: parent }
 
-        ParallelAnimation {
-            id: intro
-            NumberAnimation { target: card; property: "scale"; to: 1; duration: 160; easing.type: Easing.OutCubic }
-            NumberAnimation { target: card; property: "opacity"; to: 1; duration: 120 }
+        // Wheel/touchpad scrolling moves the selected row, including when the
+        // launcher first opens with the full list showing.
+        WheelHandler {
+            onWheel: (event) => {
+                const delta = event.angleDelta.y !== 0
+                    ? event.angleDelta.y
+                    : event.pixelDelta.y;
+                if (delta !== 0)
+                    root.move(delta > 0 ? -1 : 1);
+                event.accepted = true;
+            }
         }
 
-        Column {
-            id: column
-            anchors.fill: parent
-            anchors.margins: 10
-            spacing: 5
+        Row {
+            id: content
 
-            Rectangle {
-                width: parent.width
-                height: 42
-                radius: Theme.radius
-                color: Theme.surface
+            x: 12
+            y: 12
+            width: parent.width - 24
+            spacing: 8
+
+            Row {
+                id: promptRow
+
+                spacing: 2
 
                 Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 13
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "›"
-                    color: Theme.accent
+                    id: promptText
+
+                    height: 20
+                    text: "Launch:"
+                    color: root.launchText
                     font.family: Theme.font
-                    font.pixelSize: Theme.sizeBig
+                    font.pixelSize: 14
+                    verticalAlignment: Text.AlignVCenter
                 }
 
                 TextInput {
                     id: input
-                    anchors.left: parent.left
-                    anchors.leftMargin: 30
-                    anchors.right: parent.right
-                    anchors.rightMargin: 12
-                    anchors.verticalCenter: parent.verticalCenter
+
+                    width: Math.min(220, Math.max(2, contentWidth + 2))
+                    height: 20
                     font.family: Theme.font
-                    font.pixelSize: Theme.sizeBig
-                    color: Theme.fg
-                    selectionColor: Theme.accent
-                    selectedTextColor: Theme.bg
+                    font.pixelSize: 14
+                    color: root.launchText
+                    selectionColor: root.launchText
+                    selectedTextColor: root.launchBg
+                    focus: true
                     clip: true
+                    verticalAlignment: Text.AlignVCenter
+
+                    cursorDelegate: Rectangle {
+                        width: 2
+                        height: 14
+                        color: root.launchText
+                        visible: input.activeFocus
+                    }
 
                     onTextChanged: root.query = text
                     Keys.onEscapePressed: root.close()
                     Keys.onReturnPressed: root.launch(root.sel)
-                    Keys.onDownPressed: root.sel = Math.min(root.results.length - 1, root.sel + 1)
-                    Keys.onUpPressed: root.sel = Math.max(0, root.sel - 1)
-                }
-
-                Text {
-                    anchors.left: input.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: input.text === ""
-                    text: "Search…"
-                    color: Theme.fgDim
-                    font.family: Theme.font
-                    font.pixelSize: Theme.sizeBig
-                }
-            }
-
-            Text {
-                visible: root.results.length === 0
-                text: "no matches"
-                color: Theme.fgDim
-                font.family: Theme.font
-                font.pixelSize: Theme.size
-                leftPadding: 10
-                topPadding: 5
-            }
-
-            Repeater {
-                model: root.results
-
-                Rectangle {
-                    width: column.width
-                    height: 32
-                    radius: Theme.radius
-                    color: index === root.sel ? Theme.accentSoft : "transparent"
-
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 2
-                        height: parent.height - 8
-                        radius: 1
-                        color: Theme.accent
-                        visible: index === root.sel
-                    }
-
-                    Behavior on color { ColorAnimation { duration: Theme.duration } }
-
-                    Row {
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            verticalCenter: parent.verticalCenter
-                            leftMargin: 10
-                            rightMargin: 10
+                    Keys.onEnterPressed: root.launch(root.sel)
+                    Keys.onDownPressed: root.move(1)
+                    Keys.onUpPressed: root.move(-1)
+                    Keys.onPressed: (event) => {
+                        if (event.key === Qt.Key_L && (event.modifiers & Qt.ControlModifier)) {
+                            root.lock();
+                            event.accepted = true;
                         }
-                        spacing: 8
+                    }
+                }
+            }
 
-                        Image {
-                            id: appIcon
-                            width: 18
-                            height: 18
-                            anchors.verticalCenter: parent.verticalCenter
-                            source: modelData.icon ? Quickshell.iconPath(modelData.icon, true) : ""
-                            sourceSize.width: 18
-                            sourceSize.height: 18
-                            smooth: true
-                            fillMode: Image.PreserveAspectFit
-                            visible: source !== ""
+            Column {
+                id: resultList
+
+                width: content.width - promptRow.width - content.spacing
+                spacing: 0
+
+                Repeater {
+                    model: root.results
+
+                    Item {
+                        id: row
+
+                        readonly property bool picked: index === root.sel
+
+                        width: resultList.width
+                        height: 20
+
+                        Text {
+                            anchors {
+                                left: parent.left
+                                verticalCenter: parent.verticalCenter
+                            }
+                            text: row.picked ? ">" : " "
+                            color: root.launchText
+                            font.family: Theme.font
+                            font.pixelSize: 14
                         }
 
                         Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - (appIcon.visible ? appIcon.width + parent.spacing : 0)
+                            anchors {
+                                left: parent.left
+                                leftMargin: 16
+                                right: parent.right
+                                verticalCenter: parent.verticalCenter
+                            }
                             text: modelData.name
-                            color: Theme.fg
+                            color: root.launchText
                             font.family: Theme.font
-                            font.pixelSize: Theme.size
+                            font.pixelSize: 14
                             elide: Text.ElideRight
                         }
-                    }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onEntered: root.sel = index
-                        onClicked: root.launch(index)
+                        HoverHandler {
+                            id: hover
+                            cursorShape: Qt.PointingHandCursor
+
+                            onHoveredChanged: {
+                                if (hovered)
+                                    root.sel = index;
+                            }
+                        }
+
+                        TapHandler {
+                            onTapped: root.launch(index)
+                        }
                     }
+                }
+
+                Text {
+                    visible: root.results.length === 0
+                    width: resultList.width
+                    height: 20
+                    text: "No matches"
+                    color: root.launchText
+                    font.family: Theme.font
+                    font.pixelSize: 14
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
         }

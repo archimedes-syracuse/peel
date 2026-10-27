@@ -5,8 +5,8 @@
 #   sudo ./scripts/install.sh --yes        # install Mango + Niri fallback, switch DM,
 #                                           # remove Hyprland/Plasma
 #
-# Both session files are installed: Mango is the default at the login screen,
-# and Niri remains selectable if Mango fails to start.
+# Three session files are installed: Mango is the default at the login screen,
+# and Labwc and Niri remain selectable if Mango fails to start.
 #
 set -euo pipefail
 
@@ -35,6 +35,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INSTALL_PKGS=(
     mangowm
     niri
+    labwc
     quickshell
     xwayland-satellite
     greetd
@@ -93,9 +94,17 @@ pacman -S --needed --noconfirm "${INSTALL_PKGS[@]}"
 # ── 2. symlinks ───────────────────────────────────────────────────────
 mkdir -p "$USER_HOME/.config/quickshell"
 install -d -o "$USER_NAME" -g "$USER_NAME" "$USER_HOME/Pictures/Screenshots"
+install -d -o "$USER_NAME" -g "$USER_NAME" "$USER_HOME/Pictures"
 
-if [[ ! -f "$USER_HOME/Pictures/wallpaper.png" ]]; then
-    echo "WARN: $USER_HOME/Pictures/wallpaper.png is missing; swaybg will have nothing to show."
+install -m 0644 -o "$USER_NAME" -g "$USER_NAME" \
+    "$REPO_DIR/quickshell/assets/wallpaper-terminal.png" \
+    "$USER_HOME/Pictures/wallpaper-terminal.png"
+install -m 0644 -o "$USER_NAME" -g "$USER_NAME" \
+    "$REPO_DIR/quickshell/assets/wallpaper-circuit.png" \
+    "$USER_HOME/Pictures/wallpaper-circuit.png"
+
+if [[ ! -f "$USER_HOME/Pictures/wallpaper-terminal.png" ]]; then
+    echo "WARN: $USER_HOME/Pictures/wallpaper-terminal.png is missing; swaybg will have nothing to show."
 fi
 
 if [[ -e "$USER_HOME/.config/niri" && ! -L "$USER_HOME/.config/niri" ]]; then
@@ -110,6 +119,12 @@ if [[ -e "$USER_HOME/.config/mango" && ! -L "$USER_HOME/.config/mango" ]]; then
 fi
 ln -sfn "$REPO_DIR/mango" "$USER_HOME/.config/mango"
 
+if [[ -e "$USER_HOME/.config/labwc" && ! -L "$USER_HOME/.config/labwc" ]]; then
+    echo "ERROR: $USER_HOME/.config/labwc exists and is not a symlink. Move it aside first."
+    exit 1
+fi
+ln -sfn "$REPO_DIR/labwc" "$USER_HOME/.config/labwc"
+
 if [[ -e "$USER_HOME/.config/quickshell/niri" && ! -L "$USER_HOME/.config/quickshell/niri" ]]; then
     echo "ERROR: $USER_HOME/.config/quickshell/niri exists and is not a symlink. Move it aside first."
     exit 1
@@ -119,6 +134,7 @@ ln -sfn "$REPO_DIR/quickshell" "$USER_HOME/.config/quickshell/niri"
 chown -h "$USER_NAME:$USER_NAME" \
     "$USER_HOME/.config/niri" \
     "$USER_HOME/.config/mango" \
+    "$USER_HOME/.config/labwc" \
     "$USER_HOME/.config/quickshell/niri"
 
 # ── 3. validate before removing anything ──────────────────────────────
@@ -174,5 +190,5 @@ echo "Old Quickshell configs were left untouched in ~/.config/quickshell/."
 echo "Orphans (review before removing):"
 pacman -Qdtq || true
 echo
-echo "Reboot to land in greetd → Mango (Niri is still available as a fallback):"
+echo "Reboot to land in greetd → Mango (Labwc and Niri are still available as fallbacks):"
 echo "  sudo reboot"

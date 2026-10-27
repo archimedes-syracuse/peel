@@ -42,8 +42,8 @@ PanelWindow {
         id: card
 
         anchors.fill: parent
-        radius: 6
-        borderWidth: 2
+        radius: Theme.radius
+        borderWidth: 1
         borderStart: root.accentColor
         borderEnd: root.endColor
         transformOrigin: Item.Bottom

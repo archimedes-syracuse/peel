@@ -2,14 +2,15 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Horizontal five-workspace strip for the bottom taskbar. This intentionally
-// keeps the same data path as the old vertical rail.
+// Bare workspace numbers for the top bar. No boxes, no icons, no badges:
+// the active tag is white, occupied tags are grey, and empty tags recede into
+// the bar. The same tag data drives Mango, labwc and Niri.
 Row {
     id: root
 
     property string monitorName: ""
 
-    spacing: 2
+    spacing: 10
 
     readonly property var all: Compositor.tagsFor(monitorName)
 
@@ -43,28 +44,18 @@ Row {
 
             readonly property bool selected: workspace ? workspace.is_active === true : false
 
-            width: 25
+            width: 13
             height: 24
-
-            Rectangle {
-                anchors.fill: parent
-                radius: 2
-                color: item.selected
-                    ? Theme.accentSoft
-                    : hover.hovered ? Theme.bgHover : "transparent"
-                border.width: item.selected ? 1 : 0
-                border.color: Theme.accent
-
-                Behavior on color { ColorAnimation { duration: Theme.duration } }
-            }
 
             Text {
                 anchors.centerIn: parent
                 text: String(index + 1)
-                color: item.selected ? Theme.accent : hover.hovered ? Theme.deskText : item.used ? Theme.deskTextDim : Theme.deskTextDim
-                opacity: item.selected || hover.hovered ? 1 : item.used ? 0.8 : 0.45
-                font.family: Theme.fontRetro
-                font.pixelSize: 9
+                color: item.selected
+                    ? Theme.accent
+                    : hover.hovered ? Theme.deskText : item.used ? Theme.deskTextDim : Theme.deskTextDim
+                opacity: item.selected || hover.hovered ? 1 : item.used ? 0.8 : 0.35
+                font.family: Theme.font
+                font.pixelSize: 14
                 font.bold: item.selected
 
                 Behavior on color { ColorAnimation { duration: Theme.duration } }

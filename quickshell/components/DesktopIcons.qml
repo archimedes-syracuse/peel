@@ -42,28 +42,28 @@ PanelWindow {
 
         DesktopIcon {
             id: homeIcon
-            iconSource: "../assets/icon-home.png"
+            iconSource: "../assets/icon-home-naturalist.png"
             label: "Home"
             onActivated: Quickshell.execDetached(["nautilus", root.home])
         }
 
         DesktopIcon {
             id: trashIcon
-            iconSource: "../assets/icon-trash.png"
+            iconSource: "../assets/icon-trash-naturalist.png"
             label: "Trash"
             onActivated: Quickshell.execDetached(["nautilus", "trash://"])
         }
 
         DesktopIcon {
             id: computerIcon
-            iconSource: "../assets/icon-computer.png"
+            iconSource: "../assets/icon-computer-naturalist.png"
             label: "Computer"
             onActivated: Quickshell.execDetached(["nautilus", "/"])
         }
 
         DesktopIcon {
             id: docsIcon
-            iconSource: "../assets/icon-books.png"
+            iconSource: "../assets/icon-books-naturalist.png"
             label: "Documents"
             onActivated: Quickshell.execDetached(["nautilus", root.home + "/Documents"])
         }

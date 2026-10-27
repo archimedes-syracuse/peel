@@ -16,7 +16,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 2
+        radius: Theme.radius
         color: root.active
             ? Theme.accentSoft
             : hover.hovered

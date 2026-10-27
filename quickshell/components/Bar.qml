@@ -99,13 +99,6 @@ PanelWindow {
 
             BarButton {
                 vertical: true
-                glyph: Theme.gChevronLeft
-                textColor: Theme.fgDim
-                onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleControl"])
-            }
-
-            BarButton {
-                vertical: true
                 glyph: Theme.gBell
                 textColor: Theme.fgDim
                 onClicked: Quickshell.execDetached(["qs", "-c", "niri", "ipc", "call", "shell", "toggleNotifications"])
