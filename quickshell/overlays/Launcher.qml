@@ -26,8 +26,15 @@ PanelWindow {
 
     property string query: ""
     property int sel: 0
+    property int entriesRevision: 0
+    property bool entriesReady: false
     readonly property int maxResults: 10
-    readonly property var results: filterApps(query)
+    readonly property var results: {
+        // Read the revision so a late-loading desktop-entry model refreshes
+        // the filtered list instead of leaving it stuck on "No matches".
+        entriesRevision;
+        return filterApps(query);
+    }
 
     // Keep the launcher plain for now: black panel, white text, and the
     // arrow is the only selection marker.
@@ -38,6 +45,8 @@ PanelWindow {
         input.text = "";
         query = "";
         sel = 0;
+        entriesReady = false;
+        entriesRevision++;
         visible = true;
         input.forceActiveFocus();
         focusTimer.running = true;
@@ -95,16 +104,44 @@ PanelWindow {
         sel = (sel + delta + results.length) % results.length;
     }
 
+    function wheelMove(event) {
+        const delta = event.angleDelta.y !== 0
+            ? event.angleDelta.y
+            : event.pixelDelta.y;
+        if (delta !== 0)
+            root.move(delta > 0 ? -1 : 1);
+        event.accepted = true;
+    }
+
     Timer {
         id: focusTimer
         interval: 30
         onTriggered: input.forceActiveFocus()
     }
 
-    // Clicking outside the panel dismisses it without a scrim.
+    // Desktop entries can load after the shell starts or reloads. Refresh once
+    // they are available so typed queries do not get stuck on "No matches".
+    Timer {
+        interval: 300
+        repeat: true
+        running: root.visible && !root.entriesReady
+        onTriggered: {
+            if (DesktopEntries.applications.values.length > 0) {
+                root.entriesReady = true;
+                root.entriesRevision++;
+            }
+        }
+    }
+
+    // Clicking outside the panel dismisses it without a scrim. The wheel
+    // handler here also keeps scrolling alive after the result card shrinks.
     MouseArea {
         anchors.fill: parent
         onClicked: root.close()
+
+        WheelHandler {
+            onWheel: (event) => root.wheelMove(event)
+        }
     }
 
     Rectangle {
@@ -122,27 +159,21 @@ PanelWindow {
         // Wheel/touchpad scrolling moves the selected row, including when the
         // launcher first opens with the full list showing.
         WheelHandler {
-            onWheel: (event) => {
-                const delta = event.angleDelta.y !== 0
-                    ? event.angleDelta.y
-                    : event.pixelDelta.y;
-                if (delta !== 0)
-                    root.move(delta > 0 ? -1 : 1);
-                event.accepted = true;
-            }
+            onWheel: (event) => root.wheelMove(event)
         }
 
-        Row {
+        Column {
             id: content
 
             x: 12
             y: 12
             width: parent.width - 24
-            spacing: 8
+            spacing: 4
 
             Row {
                 id: promptRow
 
+                width: content.width
                 spacing: 2
 
                 Text {
@@ -195,7 +226,7 @@ PanelWindow {
             Column {
                 id: resultList
 
-                width: content.width - promptRow.width - content.spacing
+                width: content.width
                 spacing: 0
 
                 Repeater {
