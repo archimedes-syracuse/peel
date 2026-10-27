@@ -19,13 +19,33 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
-        Bar {}
+        BottomBar {
+            visible: Widgets.barVisible
+        }
     }
 
     Variants {
         model: Quickshell.screens
 
-        WidgetLayer {}
+        DesktopIcons {
+            visible: Widgets.desktopIconsVisible
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        Companion {
+            visible: Widgets.companionVisible
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        WidgetLayer {
+            visible: Widgets.widgetsVisible
+        }
     }
 
     Launcher { id: launcher }
@@ -89,6 +109,41 @@ ShellRoot {
 
         function toggleNotes() {
             Widgets.setNotesVisible(!Widgets.notesVisible);
+        }
+
+        function toggleBar() {
+            Widgets.setBarVisible(!Widgets.barVisible);
+        }
+
+        function toggleWidgets() {
+            Widgets.setWidgetsVisible(!Widgets.widgetsVisible);
+        }
+
+        function toggleDesktop() {
+            Widgets.toggleDesktop();
+        }
+
+        function toggleCompanion() {
+            Widgets.setCompanionVisible(!Widgets.companionVisible);
+        }
+
+        function toggleIcons() {
+            Widgets.setDesktopIconsVisible(!Widgets.desktopIconsVisible);
+        }
+
+        function hideChrome() {
+            Widgets.hideChrome();
+        }
+
+        function showChrome() {
+            Widgets.showChrome();
+        }
+
+        function toggleChrome() {
+            if (Widgets.barVisible || Widgets.desktopIconsVisible || Widgets.companionVisible)
+                Widgets.hideChrome();
+            else
+                Widgets.showChrome();
         }
 
         function toggleCalendar() {

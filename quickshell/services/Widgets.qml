@@ -30,6 +30,12 @@ Singleton {
     property real notesX: 32
     property real notesY: 184
     property bool notesVisible: true
+    property bool barVisible: true
+    property bool widgetsVisible: true
+    property bool desktopIconsVisible: true
+    property bool companionVisible: true
+    property real companionX: 760
+    property real companionY: 160
     property string noteText: defaultNote
 
     function load() {
@@ -45,6 +51,12 @@ Singleton {
             if (typeof data.notesX === "number") root.notesX = data.notesX;
             if (typeof data.notesY === "number") root.notesY = data.notesY;
             if (typeof data.notesVisible === "boolean") root.notesVisible = data.notesVisible;
+            if (typeof data.barVisible === "boolean") root.barVisible = data.barVisible;
+            if (typeof data.widgetsVisible === "boolean") root.widgetsVisible = data.widgetsVisible;
+            if (typeof data.desktopIconsVisible === "boolean") root.desktopIconsVisible = data.desktopIconsVisible;
+            if (typeof data.companionVisible === "boolean") root.companionVisible = data.companionVisible;
+            if (typeof data.companionX === "number") root.companionX = data.companionX;
+            if (typeof data.companionY === "number") root.companionY = data.companionY;
             if (typeof data.noteText === "string") root.noteText = data.noteText;
         } catch (e) {
             // Missing/corrupt state is fine: defaults are the initial layout.
@@ -64,6 +76,12 @@ Singleton {
             notesX: notesX,
             notesY: notesY,
             notesVisible: notesVisible,
+            barVisible: barVisible,
+            widgetsVisible: widgetsVisible,
+            desktopIconsVisible: desktopIconsVisible,
+            companionVisible: companionVisible,
+            companionX: companionX,
+            companionY: companionY,
             noteText: noteText
         }, null, 2));
     }
@@ -98,6 +116,59 @@ Singleton {
             return;
         notesVisible = value;
         scheduleSave();
+    }
+
+    function setBarVisible(value) {
+        if (barVisible === value)
+            return;
+        barVisible = value;
+        scheduleSave();
+    }
+
+    function setWidgetsVisible(value) {
+        if (widgetsVisible === value)
+            return;
+        widgetsVisible = value;
+        scheduleSave();
+    }
+
+    function setDesktopIconsVisible(value) {
+        if (desktopIconsVisible === value)
+            return;
+        desktopIconsVisible = value;
+        scheduleSave();
+    }
+
+    function setCompanionVisible(value) {
+        if (companionVisible === value)
+            return;
+        companionVisible = value;
+        scheduleSave();
+    }
+
+    function setCompanionPosition(x, y) {
+        companionX = x;
+        companionY = y;
+        scheduleSave();
+    }
+
+    function toggleDesktop() {
+        const next = !(desktopIconsVisible || companionVisible);
+        setDesktopIconsVisible(next);
+        setCompanionVisible(next);
+    }
+
+    function hideChrome() {
+        setBarVisible(false);
+        setWidgetsVisible(false);
+        setDesktopIconsVisible(false);
+        setCompanionVisible(false);
+    }
+
+    function showChrome() {
+        setBarVisible(true);
+        setDesktopIconsVisible(true);
+        setCompanionVisible(true);
     }
 
     FileView {

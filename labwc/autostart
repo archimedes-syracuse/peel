@@ -1,0 +1,10 @@
+#!/bin/sh
+# labwc starts this file asynchronously with sh; keep long-running daemons in
+# the background so the rest of the session starts too.
+
+swaybg -i "$HOME/Pictures/wallpaper-circuit.png" -m fill >/dev/null 2>&1 &
+qs -n -c niri >/dev/null 2>&1 &
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
+swayidle -w \
+    timeout 300 'swaylock -f' \
+    before-sleep 'swaylock -f' >/dev/null 2>&1 &

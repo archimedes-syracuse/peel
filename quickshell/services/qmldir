@@ -1,5 +1,6 @@
 singleton Niri 1.0 Niri.qml
 singleton Mango 1.0 Mango.qml
+singleton Labwc 1.0 Labwc.qml
 singleton Compositor 1.0 Compositor.qml
 singleton SysStats 1.0 SysStats.qml
 singleton Network 1.0 Network.qml

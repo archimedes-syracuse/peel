@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<!--
+  labwc configuration for the niri-rice.
+  Validate with xmllint; reload with: kill -HUP "$LABWC_PID"
+-->
+<labwc_config>
+
+  <core>
+    <decoration>server</decoration>
+    <gap>0</gap>
+    <adaptiveSync>no</adaptiveSync>
+    <allowTearing>no</allowTearing>
+    <autoEnableOutputs>yes</autoEnableOutputs>
+    <primarySelection>yes</primarySelection>
+  </core>
+
+  <placement>
+    <policy>cascade</policy>
+    <cascadeOffset x="32" y="32" />
+  </placement>
+
+  <theme>
+    <cornerRadius>0</cornerRadius>
+    <keepBorder>yes</keepBorder>
+    <maximizedDecoration>titlebar</maximizedDecoration>
+    <dropShadows>no</dropShadows>
+    <dropShadowsOnTiled>no</dropShadowsOnTiled>
+    <fallbackAppIcon>labwc</fallbackAppIcon>
+    <font name="JetBrainsMono Nerd Font" size="10" />
+    <titlebar>
+      <layout>icon:iconify,max,close</layout>
+      <showTitle>yes</showTitle>
+    </titlebar>
+  </theme>
+
+  <desktops>
+    <popupTime>600</popupTime>
+    <names>
+      <name>1</name>
+      <name>2</name>
+      <name>3</name>
+      <name>4</name>
+      <name>5</name>
+    </names>
+  </desktops>
+
+  <keyboard>
+    <default />
+    <numlock>off</numlock>
+
+    <!-- programs and Quickshell overlays -->
+    <keybind key="W-Return">
+      <action name="Execute" command="alacritty" />
+    </keybind>
+    <keybind key="W-B">
+      <action name="Execute" command="librewolf" />
+    </keybind>
+    <keybind key="W-S-O">
+      <action name="Execute" command="alacritty -e opencode" />
+    </keybind>
+    <keybind key="W-D">
+      <action name="Execute" command="qs -c niri ipc call shell toggleLauncher" />
+    </keybind>
+    <keybind key="W-Escape">
+      <action name="Execute" command="qs -c niri ipc call shell togglePower" />
+    </keybind>
+    <keybind key="W-S-C">
+      <action name="Execute" command="qs -c niri ipc call shell toggleControl" />
+    </keybind>
+    <keybind key="W-S-N">
+      <action name="Execute" command="qs -c niri ipc call shell toggleNotifications" />
+    </keybind>
+    <keybind key="W-S-D">
+      <action name="Execute" command="qs -c niri ipc call shell toggleCalendar" />
+    </keybind>
+    <keybind key="W-S-W">
+      <action name="Execute" command="qs -c niri ipc call shell toggleNotes" />
+    </keybind>
+    <keybind key="W-S-H">
+      <action name="Execute" command="qs -c niri ipc call shell toggleChrome" />
+    </keybind>
+    <keybind key="W-S-B">
+      <action name="Execute" command="qs -c niri ipc call shell toggleBar" />
+    </keybind>
+    <keybind key="W-S-G">
+      <action name="Execute" command="qs -c niri ipc call shell toggleWidgets" />
+    </keybind>
+    <keybind key="W-S-C">
+      <action name="Execute" command="qs -c niri ipc call shell toggleCompanion" />
+    </keybind>
+    <keybind key="W-S-I">
+      <action name="Execute" command="qs -c niri ipc call shell toggleIcons" />
+    </keybind>
+    <keybind key="W-S-A">
+      <action name="Execute" command="qs -c niri ipc call shell toggleDesktop" />
+    </keybind>
+
+    <!-- window control -->
+    <keybind key="W-Q">
+      <action name="Close" />
+    </keybind>
+    <keybind key="W-L">
+      <action name="Execute" command="swaylock -f" />
+    </keybind>
+    <keybind key="W-F">
+      <action name="ToggleMaximize" />
+    </keybind>
+    <keybind key="W-S-F">
+      <action name="ToggleFullscreen" />
+    </keybind>
+    <keybind key="W-M">
+      <action name="Iconify" />
+    </keybind>
+    <keybind key="W-S-R">
+      <action name="Reconfigure" />
+    </keybind>
+    <keybind key="W-S-E">
+      <action name="Exit" />
+    </keybind>
+    <keybind key="W-Space">
+      <action name="ShowMenu" menu="client-list-combined-menu" />
+    </keybind>
+
+    <!-- workspaces: 1..5, plus send focused window -->
+    <keybind key="W-1">
+      <action name="GoToDesktop" to="1" />
+    </keybind>
+    <keybind key="W-2">
+      <action name="GoToDesktop" to="2" />
+    </keybind>
+    <keybind key="W-3">
+      <action name="GoToDesktop" to="3" />
+    </keybind>
+    <keybind key="W-4">
+      <action name="GoToDesktop" to="4" />
+    </keybind>
+    <keybind key="W-5">
+      <action name="GoToDesktop" to="5" />
+    </keybind>
+    <keybind key="W-S-1">
+      <action name="SendToDesktop" to="1" follow="yes" />
+    </keybind>
+    <keybind key="W-S-2">
+      <action name="SendToDesktop" to="2" follow="yes" />
+    </keybind>
+    <keybind key="W-S-3">
+      <action name="SendToDesktop" to="3" follow="yes" />
+    </keybind>
+    <keybind key="W-S-4">
+      <action name="SendToDesktop" to="4" follow="yes" />
+    </keybind>
+    <keybind key="W-S-5">
+      <action name="SendToDesktop" to="5" follow="yes" />
+    </keybind>
+    <keybind key="W-S-Left">
+      <action name="SendToDesktop" to="left" follow="yes" />
+    </keybind>
+    <keybind key="W-S-Right">
+      <action name="SendToDesktop" to="right" follow="yes" />
+    </keybind>
+
+    <!-- media keys -->
+    <keybind key="XF86AudioPlay">
+      <action name="Execute" command="playerctl play-pause" />
+    </keybind>
+    <keybind key="XF86AudioNext">
+      <action name="Execute" command="playerctl next" />
+    </keybind>
+    <keybind key="XF86AudioPrev">
+      <action name="Execute" command="playerctl previous" />
+    </keybind>
+
+    <!-- screenshots: region -> clipboard, full -> clipboard, Shift -> file -->
+    <keybind key="Print">
+      <action name="Execute" command="~/.local/bin/screenshot-region" />
+    </keybind>
+    <keybind key="W-Print">
+      <action name="Execute" command="~/.local/bin/screenshot-full" />
+    </keybind>
+    <keybind key="S-Print">
+      <action name="Execute" command="~/.local/bin/screenshot-file" />
+    </keybind>
+  </keyboard>
+
+  <mouse>
+    <default />
+  </mouse>
+
+  <libinput>
+    <device category="touchpad">
+      <naturalScroll>yes</naturalScroll>
+      <tap>yes</tap>
+      <tapAndDrag>yes</tapAndDrag>
+      <dragLock>yes</dragLock>
+      <disableWhileTyping>yes</disableWhileTyping>
+    </device>
+    <device category="non-touch">
+      <naturalScroll>no</naturalScroll>
+    </device>
+  </libinput>
+
+  <resize>
+    <popupShow>Never</popupShow>
+    <drawContents>yes</drawContents>
+    <minimumArea>10</minimumArea>
+  </resize>
+
+  <windowRules>
+    <!-- Labwc's own square titlebar/edges instead of app-drawn rounded CSD. -->
+    <windowRule identifier="*" serverDecoration="yes" />
+  </windowRules>
+
+  <windowSwitcher preview="yes" outlines="yes" unshade="yes">
+    <osd show="yes" style="classic" output="all" thumbnailLabelFormat="%T" />
+    <fields>
+      <field content="icon" width="5%" />
+      <field content="desktop_entry_name" width="30%" />
+      <field content="title" width="65%" />
+    </fields>
+  </windowSwitcher>
+
+  <menu>
+    <ignoreButtonReleasePeriod>250</ignoreButtonReleasePeriod>
+    <showIcons>yes</showIcons>
+  </menu>
+
+</labwc_config>

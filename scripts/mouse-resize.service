@@ -1,0 +1,14 @@
+[Unit]
+Description=Mouse-button resize helper (Super+right-drag)
+After=systemd-udevd.service
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/mouse-resize.conf
+ExecStart=/usr/local/bin/mouse-resize
+Restart=always
+RestartSec=1
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target

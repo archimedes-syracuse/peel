@@ -29,16 +29,30 @@ QtObject {
     readonly property color yellow: "#e5c79a"
     readonly property color blue: "#a9c7e8"
 
+    // Desktop-scene palette: cool steel, chunky low-contrast surfaces, and the
+    // existing pink reserved for active states.
+    readonly property color deskText: "#dce7ef"
+    readonly property color deskTextDim: "#a6b9c8"
+    readonly property color deskInk: "#18232d"
+    readonly property color deskPanel: "#e61a2430"
+    readonly property color deskPanelSolid: "#1a2430"
+    readonly property color deskBorder: "#6f8798"
+    readonly property color deskHighlight: "#c7d7e2"
+    readonly property color deskShadow: "#99080f16"
+    readonly property color deskBlue: "#9cc4e4"
+
     // geometry
-    // The bar is a floating rail on the right edge. barHeight is kept for the
-    // few horizontal shell surfaces that still need a compact header height.
+    // The old rail is kept for reference; the active shell uses the bottom
+    // taskbar dimensions below.
     readonly property int barWidth: 42
     readonly property int barHeight: 30
+    readonly property int taskbarHeight: 40
     readonly property int radius: 4
     readonly property int gap: 8
 
     // type
     readonly property string font: "JetBrainsMono Nerd Font"
+    readonly property string fontRetro: "Nimbus Mono PS"
     readonly property int sizeSmall: 10
     readonly property int size: 12
     readonly property int sizeBig: 13

@@ -1,0 +1,5 @@
+# labwc session environment. The shell profile keeps the historical name
+# "niri" so existing Quickshell IPC commands and Niri fallback keep working.
+PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
+XCURSOR_SIZE=24
+XKB_DEFAULT_LAYOUT=us

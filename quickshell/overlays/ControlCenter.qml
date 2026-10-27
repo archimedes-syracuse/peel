@@ -79,7 +79,7 @@ PanelWindow {
             top: parent.top
             right: parent.right
             topMargin: Theme.gap
-            rightMargin: Theme.barWidth + Theme.gap
+            rightMargin: Theme.gap
         }
         implicitHeight: content.implicitHeight + 20
         radius: 6

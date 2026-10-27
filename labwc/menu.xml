@@ -1,0 +1,59 @@
+<openbox_menu>
+
+  <menu id="client-menu">
+    <item label="Minimize">
+      <action name="Iconify" />
+    </item>
+    <item label="Maximize">
+      <action name="ToggleMaximize" />
+    </item>
+    <item label="Fullscreen">
+      <action name="ToggleFullscreen" />
+    </item>
+    <item label="Always on Top">
+      <action name="ToggleAlwaysOnTop" />
+    </item>
+    <menu id="client-send-to-menu" label="Send to..." />
+    <separator />
+    <item label="Close">
+      <action name="Close" />
+    </item>
+  </menu>
+
+  <menu id="root-menu">
+    <item label="Terminal">
+      <action name="Execute" command="alacritty" />
+    </item>
+    <item label="Browser">
+      <action name="Execute" command="librewolf" />
+    </item>
+    <item label="OpenCode">
+      <action name="Execute" command="alacritty -e opencode" />
+    </item>
+    <item label="Launcher">
+      <action name="Execute" command="qs -c niri ipc call shell toggleLauncher" />
+    </item>
+    <menu id="client-list-combined-menu" label="Windows" />
+    <separator />
+    <item label="Screenshot region">
+      <action name="Execute" command="~/.local/bin/screenshot-region" />
+    </item>
+    <item label="Screenshot full screen">
+      <action name="Execute" command="~/.local/bin/screenshot-full" />
+    </item>
+    <separator />
+    <item label="Settings">
+      <action name="Execute" command="qs -c niri ipc call shell toggleControl" />
+    </item>
+    <item label="Lock">
+      <action name="Execute" command="swaylock -f" />
+    </item>
+    <item label="Reconfigure">
+      <action name="Reconfigure" />
+    </item>
+    <item label="Exit">
+      <action name="Exit" />
+    </item>
+  </menu>
+
+</openbox_menu>

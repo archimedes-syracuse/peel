@@ -1,0 +1,72 @@
+# Theme overrides for labwc's built-in theme. Square corners, a dark inactive
+# frame, and the shell's pink accent on the focused titlebar. The window border
+# is transparent: labwc still reserves an 8px resize strip around the frame.
+
+border.width: 1
+window.titlebar.padding.width: 0
+window.titlebar.padding.height: 2
+
+window.active.border.color: #00000000
+window.inactive.border.color: #00000000
+
+window.active.title.bg.color: #f2a8c4
+window.inactive.title.bg.color: #17161c
+window.*.title.bg: Solid
+
+window.active.label.text.color: #0c0b10
+window.inactive.label.text.color: #918c98
+window.label.text.justify: center
+
+window.button.width: 22
+window.button.height: 20
+window.button.spacing: 0
+window.button.hover.bg.color: #00000020
+window.button.hover.bg.corner-radius: 0
+window.active.button.unpressed.image.color: #0c0b10
+window.inactive.button.unpressed.image.color: #918c98
+
+window.active.shadow.size: 0
+window.inactive.shadow.size: 0
+window.active.indicator.toggled-keybind.color: #f2a8c4
+
+# menus
+menu.width.min: 180
+menu.width.max: 280
+menu.border.width: 1
+menu.border.color: #f2a8c4
+menu.items.bg.color: #17161c
+menu.items.text.color: #ded9e2
+menu.items.active.bg.color: #f2a8c4
+menu.items.active.text.color: #0c0b10
+menu.items.padding.x: 10
+menu.items.padding.y: 5
+menu.separator.width: 1
+menu.separator.padding.width: 8
+menu.separator.padding.height: 4
+menu.separator.color: #26ffffff
+menu.title.bg.color: #f2a8c4
+menu.title.text.color: #0c0b10
+
+# window switcher and workspace OSD
+osd.bg.color: #17161c
+osd.border.color: #f2a8c4
+osd.border.width: 1
+osd.label.text.color: #ded9e2
+osd.window-switcher.style-classic.item.active.bg.color: #40f2a8c4
+osd.window-switcher.style-classic.item.active.border.color: #f2a8c4
+osd.window-switcher.style-classic.item.active.border.width: 1
+osd.window-switcher.style-thumbnail.item.active.bg.color: #40f2a8c4
+osd.window-switcher.style-thumbnail.item.active.border.color: #f2a8c4
+osd.window-switcher.style-thumbnail.item.active.border.width: 1
+osd.window-switcher.preview.border.color: #f2a8c4,#0c0b10,#f2a8c4
+osd.workspace-switcher.boxes.width: 20
+osd.workspace-switcher.boxes.height: 20
+osd.workspace-switcher.boxes.border.width: 2
+
+# snap preview
+snapping.overlay.region.bg.color: #40f2a8c4
+snapping.overlay.edge.bg.color: #40f2a8c4
+snapping.overlay.region.border.width: 1
+snapping.overlay.edge.border.width: 1
+snapping.overlay.region.border.color: #f2a8c4
+snapping.overlay.edge.border.color: #f2a8c4

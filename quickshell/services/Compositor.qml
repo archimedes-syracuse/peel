@@ -3,17 +3,21 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// One small façade so the shell works on both compositors. The Mango branch is
-// primary, but the Niri session remains selectable at the login screen. Mango
-// and Niri each report availability from their own IPC probes; no compositor
-// environment variable is required in QML.
+// One façade so the shell works on Labwc, Mango, and Niri. Labwc is the
+// primary session now; Mango and Niri remain selectable at the login screen.
+// Each backend reports availability from its own environment/IPC probe, so no
+// compositor-specific branch is needed in the bar components.
 Singleton {
     id: root
 
+    readonly property bool isLabwc: Labwc.available
     readonly property bool isMango: Mango.available
-    readonly property bool available: Mango.available || Niri.available
+    readonly property bool available: Labwc.available || Mango.available || Niri.available
 
     function tagsFor(monitorName) {
+        if (Labwc.available)
+            return Labwc.tagsFor(monitorName);
+
         if (Mango.available)
             return Mango.tagsFor(monitorName);
 
@@ -24,6 +28,10 @@ Singleton {
     }
 
     function focusTag(idx, monitorName) {
+        if (Labwc.available) {
+            Labwc.focusIndex(idx);
+            return;
+        }
         if (Mango.available) {
             Mango.viewTagOn(monitorName, idx);
             return;
@@ -32,6 +40,10 @@ Singleton {
     }
 
     function workspaceUp() {
+        if (Labwc.available) {
+            Labwc.workspaceUp();
+            return;
+        }
         if (Mango.available) {
             Mango.workspaceUp();
             return;
@@ -40,6 +52,10 @@ Singleton {
     }
 
     function workspaceDown() {
+        if (Labwc.available) {
+            Labwc.workspaceDown();
+            return;
+        }
         if (Mango.available) {
             Mango.workspaceDown();
             return;
@@ -47,7 +63,9 @@ Singleton {
         Niri.workspaceDown();
     }
 
-    readonly property var focusedWindow: Mango.available
-        ? Mango.focusedWindow
-        : Niri.focusedWindow
+    readonly property var focusedWindow: Labwc.available
+        ? Labwc.focusedWindow
+        : Mango.available
+            ? Mango.focusedWindow
+            : Niri.focusedWindow
 }
