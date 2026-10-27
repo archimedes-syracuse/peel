@@ -211,6 +211,10 @@ PanelWindow {
         }
         spacing: 2
 
+        AppIcons {
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
         BarReadout {
             label: "PKG"
             value: Updates.count < 0 ? "--" : String(Updates.count)

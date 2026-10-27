@@ -80,7 +80,8 @@ text readouts. There are no icons or drawer popups; status is text only.
 
 - Left: time and the current track.
 - Center: workspace tags `1..5`.
-- Right: `PKG`, `BT`, `WIFI`, `BAT`, `VOL`, and `BRT` readouts.
+- Right: open-app icons, then `PKG`, `BT`, `WIFI`, `BAT`, `VOL`, and `BRT`
+  readouts.
 - Click the time for the calendar, click the track to play/pause, and scroll
   over `VOL` to change the volume.
 - Floating windows are kept below the strip when focused, and the strip gets
@@ -88,8 +89,28 @@ text readouts. There are no icons or drawer popups; status is text only.
 - The old vertical right rail remains available in `components/Bar.qml` for
   comparison, but the top strip is the active shell.
 
-### Launcher
+### Open application icons
 
+The box left of `PKG` shows one monochrome icon per application with a window
+on the **active tag**; two terminals show a single icon. Clicking an icon
+focuses that window through `mmsg dispatch focusid client,<id>`. The box hides
+completely on an empty tag rather than leaving an empty frame.
+
+Icons are tinted to `Theme.deskText` with `MultiEffect` so they stay grey
+rather than introducing colour into the strip. Resolution is deliberately more
+forgiving than `Quickshell.iconPath(name, true)`, which only consults the active
+icon theme plus `hicolor`: the active theme here is `WhiteSur-dark`, which
+inherits `breeze` but does not ship every breeze icon, so `utilities-terminal`
+(the icon for Konsole) would otherwise render blank. `services/Icons.qml`
+resolves appid → the application's own `Icon=` → a prebuilt index of the
+`WhiteSur-dark`, `WhiteSur`, `breeze`, `Adwaita`, and `hicolor` themes → a Nerd
+Font glyph as the last resort.
+
+`PKG` is the count of pending package updates, not a package manager: it runs
+`checkupdates` every six hours and shows how many lines it printed. It is a
+readout only and has no click action.
+
+### Launcher
 `Super+D` opens a plain dmenu-style panel: a white `Launch:` prompt and cursor,
 one column of white application text, and a `>` marker on the selected row,
 all on a black background. The list shows ten rows and scrolls through every

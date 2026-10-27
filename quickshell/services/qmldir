@@ -14,3 +14,4 @@ singleton Osd 1.0 Osd.qml
 singleton Media 1.0 Media.qml
 singleton Widgets 1.0 Widgets.qml
 singleton Updates 1.0 Updates.qml
+singleton Icons 1.0 Icons.qml
