@@ -27,9 +27,20 @@ Singleton {
 
     readonly property var metadata: player && player.metadata ? player.metadata : ({})
 
-    // MPRIS has no standard codec field. Prefer an explicit codec/format from
-    // the player, then a file extension, and only then fall back to a truthful
-    // source label. A Firefox video is "WEB", not a made-up FLAC tag.
+    // MPRIS never exposes a codec. A browser userscript fills the gap for
+    // YouTube Music by setting navigator.mediaSession.metadata.album to the
+    // real codec; Firefox forwards that to xesam:album. Read it only for
+    // browser players so a real album name cannot be mistaken for a codec.
+    readonly property string browserCodec: {
+        if (!isBrowserPlayer())
+            return "";
+        return normalizeFormat(firstValue((player.metadata || {})["xesam:album"]));
+    }
+
+    // Codec resolution order: explicit metadata from the player, a file
+    // extension (local files, HLS/DASH), the browser music bridge, and only
+    // then a truthful fallback. A Firefox video is "WEB" unless a real codec
+    // is available for a music stream.
     readonly property string format: {
         if (!player)
             return "";
@@ -54,6 +65,10 @@ Singleton {
         if (extension !== "")
             return extension;
 
+        // A real codec from the browser bridge beats the generic "WEB" label.
+        if (browserCodec !== "")
+            return browserCodec;
+
         if (isBrowserPlayer())
             return "WEB";
         return "AUDIO";
@@ -75,30 +90,31 @@ Singleton {
         // Strip MIME parameters such as "; codecs=opus" and the media type.
         text = text.split(";")[0].trim();
         text = text.replace(/^audio\//, "").replace(/^video\//, "");
+        // "codecs=av01.0.05M.08,opus" -> keep a single recognisable token.
+        text = text.split(",")[0].trim();
         const compact = text.replace(/[^a-z0-9]+/g, "");
 
-        if (compact.indexOf("flac") !== -1)
-            return "FLAC";
-        if (compact.indexOf("opus") !== -1)
-            return "OPUS";
-        if (compact.indexOf("vorbis") !== -1)
-            return "VORBIS";
-        if (compact.indexOf("alac") !== -1)
-            return "ALAC";
-        if (compact.indexOf("mp4a") !== -1 || compact.indexOf("aac") !== -1)
-            return "AAC";
-        if (compact.indexOf("mpeg") !== -1 || compact.indexOf("mp3") !== -1)
-            return "MP3";
-        if (compact.indexOf("pcm") !== -1 || compact.indexOf("wav") !== -1)
-            return "PCM";
-        if (compact.indexOf("eac3") !== -1 || compact.indexOf("ac3") !== -1)
-            return "AC3";
-        if (compact.indexOf("dts") !== -1)
-            return "DTS";
-        if (compact.indexOf("webm") !== -1)
-            return "WEBM";
-        if (compact.indexOf("mp4") !== -1)
-            return "MP4";
+        // Order matters: match the more specific names before the generic ones
+        // (e.g. mpeg4 before mpeg, hevc before nothing-else).
+        const table = [
+            ["flac", "FLAC"], ["opus", "OPUS"], ["vorbis", "VORBIS"],
+            ["alac", "ALAC"], ["mp4a", "AAC"], ["aac", "AAC"],
+            ["eac3", "AC3"], ["ac3", "AC3"], ["ac4", "AC4"],
+            ["dts", "DTS"], ["truehd", "TRUEHD"], ["mlp", "MLP"],
+            ["wma", "WMA"], ["amr", "AMR"], ["ape", "APE"], ["dsd", "DSD"],
+            ["av01", "AV1"], ["av1", "AV1"], ["vp9", "VP9"], ["vp09", "VP9"],
+            ["vp8", "VP8"], ["hevc", "HEVC"], ["h265", "HEVC"],
+            ["avc1", "H264"], ["avc", "H264"], ["h264", "H264"],
+            ["mpeg4", "MP4"], ["mp4", "MP4"], ["m4v", "MP4"],
+            ["mpeg2", "MPEG2"], ["theora", "THEORA"],
+            ["webm", "WEBM"], ["matroska", "MKV"], ["mkv", "MKV"],
+            ["mpeg", "MP3"], ["mp3", "MP3"],
+            ["pcm", "PCM"], ["wav", "WAV"], ["aiff", "AIFF"],
+        ];
+        for (let i = 0; i < table.length; i++) {
+            if (compact.indexOf(table[i][0]) !== -1)
+                return table[i][1];
+        }
         return "";
     }
 

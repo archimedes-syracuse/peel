@@ -110,6 +110,25 @@ Font glyph as the last resort.
 `checkupdates` every six hours and shows how many lines it printed. It is a
 readout only and has no click action.
 
+### Now-playing codec
+
+The track readout starts with a codec badge. MPRIS has no codec field, so
+`services/Media.qml` resolves it in this order:
+
+1. An explicit codec/format key in the player's MPRIS metadata.
+2. The file extension in `xesam:url` (local files, HLS/DASH) — so VLC or mpv
+   playing `song.flac` shows `FLAC`.
+3. The browser bridge, below.
+4. Otherwise `WEB` for a browser, `AUDIO` for anything else.
+
+Firefox never publishes a codec, so web **videos** correctly show `WEB`. For
+web **music**, install `scripts/nowplaying-codec.user.js` in a userscript
+manager (Violentmonkey/Tampermonkey). It reads YouTube's own player stats and
+puts the real audio codec (`OPUS`, `AAC`, …) into
+`navigator.mediaSession.metadata.album`, which Firefox mirrors to MPRIS. The
+bar reads that slot only for browser players, so a normal album name is never
+mistaken for a codec.
+
 ### Launcher
 `Super+D` opens a plain dmenu-style panel: a white `Launch:` prompt and cursor,
 one column of white application text, and a `>` marker on the selected row,
