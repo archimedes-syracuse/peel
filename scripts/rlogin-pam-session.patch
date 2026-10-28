@@ -1,0 +1,90 @@
+diff --git a/src/auth.rs b/src/auth.rs
+index 257a03d..2239cc2 100644
+--- a/src/auth.rs
++++ b/src/auth.rs
+@@ -7,7 +7,18 @@ use std::process::Command;
+ use crate::session::{SessionEntry, SessionType};
+ use crate::user::UserEntry;
+ 
+-pub fn authenticate(service_name: &str, username: &str, password: &str) -> Result<(), String> {
++// Keep the PAM session open until the session process is exec'd. Dropping the
++// client here closes the session immediately, which makes logind mark the
++// user's session as closing and turns a later suspend into a logout.
++pub fn authenticate(
++    service_name: &str,
++    username: &str,
++    password: &str,
++) -> Result<Client<'static, pam::PasswordConv>, String> {
++    // The pam crate ties the client to the service name's lifetime. This
++    // process is replaced by exec right after login, so leaking the small
++    // service name is harmless and lets the client outlive the UI state.
++    let service_name: &'static str = Box::leak(service_name.to_string().into_boxed_str());
+     let mut client = Client::with_password(service_name)
+         .map_err(|e| format!("Failed to initialize PAM: {:?}", e))?;
+ 
+@@ -19,7 +30,7 @@ pub fn authenticate(service_name: &str, username: &str, password: &str) -> Resul
+     client.open_session()
+         .map_err(|e| format!("Failed to open PAM session: {:?}", e))?;
+ 
+-    Ok(())
++    Ok(client)
+ }
+ 
+ pub fn spawn_session(user: &UserEntry, session: &SessionEntry, tty_num: Option<u32>) -> Result<(), std::io::Error> {
+diff --git a/src/main.rs b/src/main.rs
+index e7d43fc..c4c9c57 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -36,7 +36,11 @@ fn main() {
+     let state = ui::AppState::new(users, sessions, cfg);
+ 
+     match ui::run_ui(state) {
+-        Ok(Some((user_entry, session_entry))) => {
++        Ok(Some((user_entry, session_entry, pam_client))) => {
++            // Hold the PAM client alive until spawn_session replaces this
++            // process with the user's session. Dropping it earlier closes the
++            // PAM session and leaves logind with State=closing.
++            let _pam_client = pam_client;
+             // Authentication succeeded, launch session
+             if let Err(e) = auth::spawn_session(&user_entry, &session_entry, tty_num) {
+                 eprintln!("Failed to launch session: {}", e);
+diff --git a/src/ui.rs b/src/ui.rs
+index c63e804..2ad86f4 100644
+--- a/src/ui.rs
++++ b/src/ui.rs
+@@ -98,7 +98,7 @@ impl AppState {
+ 
+ pub fn run_ui(
+     mut state: AppState,
+-) -> Result<Option<(UserEntry, SessionEntry)>, Box<dyn std::error::Error>> {
++) -> Result<Option<(UserEntry, SessionEntry, pam::Client<'static, pam::PasswordConv>)>, Box<dyn std::error::Error>> {
+     enable_raw_mode()?;
+     let mut stdout = io::stdout();
+ 
+@@ -135,7 +135,7 @@ pub fn run_ui(
+ fn run_loop(
+     terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+     state: &mut AppState,
+-) -> Result<Option<(UserEntry, SessionEntry)>, Box<dyn std::error::Error>> {
++) -> Result<Option<(UserEntry, SessionEntry, pam::Client<'static, pam::PasswordConv>)>, Box<dyn std::error::Error>> {
+     loop {
+         terminal.draw(|f| draw_ui(f, state))?;
+ 
+@@ -310,7 +310,7 @@ fn run_loop(
+                         username,
+                         &state.password_input,
+                     ) {
+-                        Ok(()) => {
++                        Ok(pam_client) => {
+                             let user_entry = state
+                                 .users
+                                 .iter()
+@@ -341,7 +341,7 @@ fn run_loop(
+                                 }
+                             };
+ 
+-                            return Ok(Some((user_entry, session_entry)));
++                            return Ok(Some((user_entry, session_entry, pam_client)));
+                         }
+                         Err(_) => {
+                             state.error_message = Some("login incorrect".to_string());

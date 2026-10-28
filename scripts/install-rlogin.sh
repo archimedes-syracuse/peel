@@ -29,6 +29,19 @@ if (( ${#missing[@]} > 0 )); then
 fi
 
 git clone --depth=1 "$RLOGIN_SRC" "$BUILD_ROOT/rlogin"
+
+# Keep rlogin's PAM session open until the session process is exec'd. Without
+# this, rlogin closes the PAM session right after login, logind marks the
+# session as closing, and a later suspend can log the user out instead of
+# showing a lock screen.
+PAM_PATCH="$REPO_DIR/scripts/rlogin-pam-session.patch"
+if [[ ! -f "$PAM_PATCH" ]]; then
+    echo "Missing patch: $PAM_PATCH" >&2
+    exit 1
+fi
+git -C "$BUILD_ROOT/rlogin" apply --check "$PAM_PATCH"
+git -C "$BUILD_ROOT/rlogin" apply "$PAM_PATCH"
+
 cargo build --release --locked \
     --manifest-path "$BUILD_ROOT/rlogin/Cargo.toml" \
     --target-dir "$BUILD_ROOT/target"
