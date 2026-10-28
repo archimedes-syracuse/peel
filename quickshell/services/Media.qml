@@ -27,20 +27,9 @@ Singleton {
 
     readonly property var metadata: player && player.metadata ? player.metadata : ({})
 
-    // MPRIS never exposes a codec. A browser userscript fills the gap for
-    // YouTube Music by setting navigator.mediaSession.metadata.album to the
-    // real codec; Firefox forwards that to xesam:album. Read it only for
-    // browser players so a real album name cannot be mistaken for a codec.
-    readonly property string browserCodec: {
-        if (!isBrowserPlayer())
-            return "";
-        return normalizeFormat(firstValue((player.metadata || {})["xesam:album"]));
-    }
-
-    // Codec resolution order: explicit metadata from the player, a file
-    // extension (local files, HLS/DASH), the browser music bridge, and only
-    // then a truthful fallback. A Firefox video is "WEB" unless a real codec
-    // is available for a music stream.
+    // Codec resolution order: explicit metadata from the player, then a file
+    // extension (local files, HLS/DASH), and only then a truthful fallback.
+    // A browser player that exposes no codec shows "WEB".
     readonly property string format: {
         if (!player)
             return "";
@@ -64,10 +53,6 @@ Singleton {
         const extension = formatFromUrl(url);
         if (extension !== "")
             return extension;
-
-        // A real codec from the browser bridge beats the generic "WEB" label.
-        if (browserCodec !== "")
-            return browserCodec;
 
         if (isBrowserPlayer())
             return "WEB";

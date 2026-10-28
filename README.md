@@ -118,27 +118,11 @@ The track readout starts with a codec badge. MPRIS has no codec field, so
 1. An explicit codec/format key in the player's MPRIS metadata.
 2. The file extension in `xesam:url` (local files, HLS/DASH) — so VLC or mpv
    playing `song.flac` shows `FLAC`.
-3. The browser bridge, below.
-4. Otherwise `WEB` for a browser, `AUDIO` for anything else.
+3. Otherwise `WEB` for a browser, `AUDIO` for anything else.
 
-Firefox never publishes a codec, so a browser player would otherwise show
-`WEB`. Install `scripts/nowplaying-codec.user.js` in a userscript manager
-(Violentmonkey/Tampermonkey) and it fills that gap. It runs on every site and
-resolves the codec from, in order:
-
-1. The mime type declared to `MediaSource.addSourceBuffer` — every MSE player
-   (YouTube, SoundCloud, Deezer, …) must state `audio/webm; codecs="opus"`,
-   `audio/mp4; codecs="mp4a.40.2"`, etc.
-2. The `Content-Type` of media network responses (fetch/XHR) — catches players
-   that stream progressively or over HLS without MSE.
-3. YouTube's own `getStatsForNerds()`.
-4. The extension of a plain `<audio>`/`<video>` file URL (MP3, FLAC, …).
-
-It publishes the result (`OPUS`, `AAC`, `MP3`, …) into
-`navigator.mediaSession.metadata.album`, which Firefox mirrors to MPRIS. The bar
-reads that slot only for browser players, so a normal album name is never
-mistaken for a codec. A site that streams without declaring a codec still falls
-back to `WEB`.
+Firefox never publishes a codec, so a browser player shows `WEB`. Native
+players (VLC, mpv, foobar2000, Lyrion) report a real codec through one of the
+paths above.
 
 ### Launcher
 `Super+D` opens a plain dmenu-style panel: a white `Launch:` prompt and cursor,
