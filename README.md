@@ -192,11 +192,12 @@ Windows are square and borderless:
 - no focus outline or coloured border
 - a soft shadow is kept only for floating windows
 
-`enable_border_resize=0`: Mango's native edge grab strip put a resize cursor on
-the outer edge, where dragging a window's own scrollbar would start a resize
-instead. Resizing is done with `Super+right-drag`, bound to Mango's
-`moveresize,curresize` action below. Floating windows move with
-`Super+left-drag`.
+`enable_border_resize=1` with a thin `border_resize_size=4`: hover a window
+border, then press and hold the left button to resize. The strip is measured
+inward from the window edge, so on an app whose scrollbar sits flush to that
+edge (Konsole) the outer few pixels resize instead of scroll — hence the small
+value. `Super+right-drag` resizes from anywhere, and the keyboard binds below
+also resize.
 
 The Basilisk helper is optional and still works on Mango. It holds the
 `Super+right` chord while a chosen physical mouse button is pressed:

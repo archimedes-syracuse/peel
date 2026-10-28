@@ -4,6 +4,9 @@
 // @version      1.0.0
 // @description  Publish the real audio codec of the playing track to MPRIS so the desktop bar shows OPUS/AAC instead of a generic WEB label.
 // @match        https://music.youtube.com/*
+// @match        https://www.youtube.com/*
+// @match        https://youtube.com/*
+// @match        https://m.youtube.com/*
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
