@@ -186,16 +186,17 @@ qs -c niri ipc call shell closeOverlays
 
 Windows are square and borderless:
 
-- `border_px=1` (transparent, preserving Mango's resize strip)
+- `border_px=1` (transparent)
 - `border_radius=0`
 - `no_radius_when_single=0`
 - no focus outline or coloured border
 - a soft shadow is kept only for floating windows
 
-Mango's `enable_border_resize=1` adds a 10 px grab strip for plain left-button
-edge resizing. For the original right-button behaviour, the config binds
-`Super+right-drag` to Mango's `moveresize,curresize` action. Floating windows
-expose every edge; tiled windows expose the edges shared with a neighbour.
+`enable_border_resize=0`: Mango's native edge grab strip put a resize cursor on
+the outer edge, where dragging a window's own scrollbar would start a resize
+instead. Resizing is done with `Super+right-drag`, bound to Mango's
+`moveresize,curresize` action below. Floating windows move with
+`Super+left-drag`.
 
 The Basilisk helper is optional and still works on Mango. It holds the
 `Super+right` chord while a chosen physical mouse button is pressed:
