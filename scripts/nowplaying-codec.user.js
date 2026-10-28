@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         nowplaying codec bridge (YouTube Music)
+// @name         nowplaying codec bridge (YouTube)
 // @namespace    niri-rice-mango
-// @version      1.0.0
+// @version      1.1.0
 // @description  Publish the real audio codec of the playing track to MPRIS so the desktop bar shows OPUS/AAC instead of a generic WEB label.
 // @match        https://music.youtube.com/*
 // @match        https://www.youtube.com/*
@@ -50,8 +50,27 @@
         }
         if (!stats)
             return "";
-        const raw = String(stats.codecs || stats.audioCodecs || stats.audioCodec || "");
-        return tokenize(raw.includes("/") ? raw.split("/").pop() : raw);
+
+        // The key that holds the negotiated codecs has changed between player
+        // versions, so gather every candidate and take the audio side (after
+        // the slash, e.g. "av01.0.05M.08 (398) / opus (251)" -> "opus (251)").
+        const parts = [];
+        ["codecs", "codec", "audioCodecs", "audioCodec", "videoCodecs"].forEach((key) => {
+            if (stats[key])
+                parts.push(String(stats[key]));
+        });
+        const raw = parts.join(" / ");
+        const audio = raw.includes("/") ? raw.split("/").pop() : raw;
+        const codec = tokenize(audio);
+        if (codec)
+            return codec;
+
+        // Last resort: scan the whole stats object for a known token.
+        try {
+            return tokenize(JSON.stringify(stats));
+        } catch (e) {
+            return "";
+        }
     }
 
     const proto = Object.getPrototypeOf(navigator.mediaSession);
