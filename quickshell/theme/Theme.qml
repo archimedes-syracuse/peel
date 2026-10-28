@@ -42,8 +42,8 @@ QtObject {
     // Top-bar glass: the bar strip itself is fully transparent (the wallpaper
     // shows through) and each module is a square, translucent dark pill with a
     // faint light hairline so the text stays legible over any wallpaper.
-    readonly property color barGlass: "#8c0d0d0d"
-    readonly property color barGlassBorder: "#33ffffff"
+    readonly property color barGlass: "#4d0d0d0d"
+    readonly property color barGlassBorder: "#40ffffff"
 
     // geometry
     // The old rail is kept for reference; the active shell uses the top bar
