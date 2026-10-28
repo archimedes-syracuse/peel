@@ -50,6 +50,7 @@ Scope {
                         implicitHeight: body.implicitHeight + 20
                         radius: Theme.radius
                         borderWidth: 1
+                        fill: Theme.barGlass
                         borderStart: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.accent
                         borderEnd: modelData.urgency === NotificationUrgency.Critical ? Theme.red : Theme.accent2
 

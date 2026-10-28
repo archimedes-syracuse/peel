@@ -44,6 +44,7 @@ PanelWindow {
         anchors.fill: parent
         radius: Theme.radius
         borderWidth: 1
+        fill: Theme.barGlass
         borderStart: root.accentColor
         borderEnd: root.endColor
         transformOrigin: Item.Bottom
