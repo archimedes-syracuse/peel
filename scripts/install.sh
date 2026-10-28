@@ -103,6 +103,9 @@ install -m 0644 -o "$USER_NAME" -g "$USER_NAME" \
 install -m 0644 -o "$USER_NAME" -g "$USER_NAME" \
     "$REPO_DIR/quickshell/assets/wallpaper-circuit.png" \
     "$USER_HOME/Pictures/wallpaper-circuit.png"
+install -m 0644 -o "$USER_NAME" -g "$USER_NAME" \
+    "$REPO_DIR/quickshell/assets/wallpaper-scene-on-the-ice.jpg" \
+    "$USER_HOME/Pictures/wallpaper-scene-on-the-ice.jpg"
 
 install -d -o "$USER_NAME" -g "$USER_NAME" "$USER_HOME/.local/bin"
 install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
@@ -115,8 +118,8 @@ install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
     "$REPO_DIR/scripts/screenshot-file.sh" \
     "$USER_HOME/.local/bin/screenshot-file"
 
-if [[ ! -f "$USER_HOME/Pictures/wallpaper-terminal.png" ]]; then
-    echo "WARN: $USER_HOME/Pictures/wallpaper-terminal.png is missing; swaybg will have nothing to show."
+if [[ ! -f "$USER_HOME/Pictures/wallpaper-scene-on-the-ice.jpg" ]]; then
+    echo "WARN: $USER_HOME/Pictures/wallpaper-scene-on-the-ice.jpg is missing; swaybg will have nothing to show."
 fi
 
 if [[ -e "$USER_HOME/.config/niri" && ! -L "$USER_HOME/.config/niri" ]]; then

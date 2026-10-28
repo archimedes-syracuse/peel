@@ -293,8 +293,11 @@ plus mouse resizing replaces them.
 ## Notes / next
 
 - The palette is terminal monochrome: near-black surfaces, grey hairlines,
-  and no accent colors. The wallpaper is a plain graphite gradient. Swap
-  `quickshell/theme/Theme.qml` or generate it later with matugen.
+  and no accent colors. The bar strip is transparent with translucent glass
+  pills, and the wallpaper is Hendrick Avercamp's *A Scene on the Ice*
+  (`~/Pictures/wallpaper-scene-on-the-ice.jpg`, set by `swaybg` in
+  `mango/config.conf`). Swap `quickshell/theme/Theme.qml` or generate a
+  palette later with matugen.
 - Notifications are owned by Quickshell. The toast overlay and history panel
   share one `NotificationServer` singleton so they do not fight for the
   `org.freedesktop.Notifications` bus name. Caelestia is not started.
