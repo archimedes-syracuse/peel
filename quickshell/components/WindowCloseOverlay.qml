@@ -1,28 +1,96 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
 import "../services"
 
-// A single square × floating just above the focused Mango window's top-right
-// corner. Mango exposes window geometry through `mmsg get all-clients`; the
-// rest of the shell works without compositor-specific window controls.
+// A titlebar-style × sitting flush inside the focused Mango window's top-right
+// corner. Mango exposes per-window state through `mmsg`: id, appid, x/y/width/
+// height, monitor, tags, and the is_focused / is_visible / is_fullscreen /
+// is_floating flags. A specific window is closed with
+// `mmsg dispatch killclient client,<id>`. The surface is masked to the button,
+// so every other pointer event passes through to the application.
 //
-// The surface is masked to the button itself, so every other click goes
-// straight through to the application underneath.
+// Mango has no `mmsg` query for overview mode, so the button cannot be hidden
+// during the overview; every other case below is covered.
 PanelWindow {
     id: root
 
     property var modelData
 
-    readonly property var client: Mango.available ? Mango.focusedClient : null
-    readonly property int barInset: 32
+    // ── tunables ─────────────────────────────────────────────────────
+    readonly property int buttonWidth: 46
+    readonly property int buttonHeight: 34
+    readonly property int borderWidth: 1      // Mango border_px
+    readonly property int cornerRadius: 0     // Mango border_radius
+    readonly property int fadeDuration: 120   // ms
+
+    readonly property color restGlyphColor: Theme.deskTextDim
+    readonly property color hoverGlyphColor: Theme.deskHighlight
+    readonly property color hoverFillColor: Theme.bgHover
+
+    // Apps that already draw their own control in this corner; the button is
+    // suppressed there so it never overlaps a native titlebar close. Mango has
+    // no server-side decorations, so anything with client-side decorations
+    // (editors, browsers, mail) belongs here. Matched as a lowercased substring
+    // of the app_id; edit this one list to taste.
+    readonly property var ignoreAppIds: [
+        "vscodium", "codium", "code-oss", "code",
+        "firefox", "librewolf", "chrom", "chrome", "brave", "vivaldi",
+        "opera", "edge", "thunderbird", "celluloid", "vlc"
+    ]
+
+    // ── live geometry ────────────────────────────────────────────────
+    // `mmsg watch all-clients` streams the same JSON as `get all-clients`
+    // whenever a window changes, so the button stays glued during a move or
+    // resize. Mango's 500 ms poll is the fallback until the stream produces
+    // its first line.
+    property var liveClients: []
+
+    readonly property var client: {
+        const list = liveClients.length > 0 ? liveClients : (Mango.allClients || []);
+        for (let i = 0; i < list.length; i++) {
+            const c = list[i];
+            if (c && c.is_focused && c.is_visible && !c.is_minimized)
+                return c;
+        }
+        return Mango.available ? Mango.focusedClient : null;
+    }
+
+    readonly property bool onThisOutput: client !== null
+        && (client.monitor === "" || client.monitor === modelData.name)
     readonly property bool hasClient: client !== null
         && client.is_focused
+        && client.is_visible
+        && !client.is_minimized
         && !client.is_fullscreen
-        && client.width > 80
-        && client.height > 80
-        && (client.monitor === "" || client.monitor === modelData.name)
+        && onThisOutput
+        && !isIgnored(client.appid)
+        && client.width > buttonWidth + borderWidth * 2
+        && client.height > buttonHeight + borderWidth * 2
+    readonly property real buttonX: hasClient
+        ? client.x + client.width - borderWidth - buttonWidth
+        : 0
+    readonly property real buttonY: hasClient
+        ? Math.max(Mango.barInset, client.y + borderWidth)
+        : 0
+
+    function isIgnored(appid) {
+        const id = String(appid || "").toLowerCase();
+        for (let i = 0; i < ignoreAppIds.length; i++) {
+            if (id === ignoreAppIds[i] || id.indexOf(ignoreAppIds[i]) !== -1)
+                return true;
+        }
+        return false;
+    }
+
+    // Close the window the button belongs to, not whichever is focused.
+    function closeById(id) {
+        if (id === undefined || id === null)
+            return;
+        Quickshell.execDetached(["mmsg", "dispatch", "killclient", "client," + id]);
+    }
 
     screen: modelData
     anchors {
@@ -36,51 +104,55 @@ PanelWindow {
     focusable: false
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    WlrLayershell.namespace: "niri-shell-window-close"
+    WlrLayershell.namespace: "mango-shell-window-close"
 
     mask: Region {
         item: closeButton
     }
 
-    function closeFocused() {
-        if (ToplevelManager.activeToplevel)
-            ToplevelManager.activeToplevel.close();
-        else
-            Mango.dispatch("killclient");
+    Process {
+        id: watchProc
+
+        command: ["mmsg", "watch", "all-clients"]
+        running: Mango.available
+        stdout: SplitParser {
+            onRead: data => {
+                const raw = String(data).trim();
+                if (raw === "")
+                    return;
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.clients))
+                        root.liveClients = parsed.clients;
+                } catch (e) {
+                    // A partial or non-JSON line; wait for the next one.
+                }
+            }
+        }
+        onExited: root.liveClients = []
     }
 
     Rectangle {
         id: closeButton
 
-        width: root.hasClient ? 22 : 0
-        height: root.hasClient ? 22 : 0
-        x: root.hasClient
-            ? Math.max(4, Math.min(root.width - 26, root.client.x + root.client.width - 27))
-            : 0
-        // Sit just above the window so the button does not cover app-drawn
-        // close buttons or page content. Never put it under the top bar; when
-        // the window is near the top, fall back to the inside edge.
-        y: root.hasClient
-            ? (root.client.y >= root.barInset + 26
-                ? root.client.y - 26
-                : Math.max(root.barInset + 5, root.client.y + 5))
-            : 0
-        color: closeHover.hovered ? Theme.red : Theme.deskPanel
-        border.width: 1
-        border.color: closeHover.hovered ? Theme.red : Theme.deskBorder
-        radius: 0
-        opacity: closeHover.hovered ? 1 : 0.92
+        width: root.hasClient ? root.buttonWidth : 0
+        height: root.hasClient ? root.buttonHeight : 0
+        x: root.buttonX
+        y: root.buttonY
+        color: closeHover.hovered ? root.hoverFillColor : "transparent"
+        radius: root.cornerRadius
+        border.width: 0
 
-        Behavior on color { ColorAnimation { duration: Theme.duration } }
-        Behavior on opacity { NumberAnimation { duration: Theme.duration } }
+        Behavior on color { ColorAnimation { duration: root.fadeDuration } }
 
         Text {
             anchors.centerIn: parent
             text: "\u00D7"
-            color: closeHover.hovered ? Theme.deskText : Theme.deskHighlight
+            color: closeHover.hovered ? root.hoverGlyphColor : root.restGlyphColor
             font.family: Theme.font
-            font.pixelSize: 15
-            font.bold: true
+            font.pixelSize: 16
+
+            Behavior on color { ColorAnimation { duration: root.fadeDuration } }
         }
 
         HoverHandler {
@@ -92,7 +164,7 @@ PanelWindow {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.closeFocused()
+            onClicked: root.closeById(root.client ? root.client.id : -1)
         }
     }
 }

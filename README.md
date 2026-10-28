@@ -138,11 +138,17 @@ run, and Escape or a click outside to dismiss.
 
 ### Window close control
 
-The focused Mango window gets a small floating `×` just above its top-right
-corner, styled as an ink tag. The layer surface is masked to the button, so
-all other input passes through to the application. The taskbar task buttons
-have a second close affordance. `Super+Q` and
-`qs -c niri ipc call shell closeFocused` use the same path.
+The focused Mango window gets a titlebar-style `×` sitting flush inside its
+top-right corner: no border, dark-on-dark, and a grey glyph that brightens with
+a subtle fill on hover. Geometry comes from the live `mmsg watch all-clients`
+stream, so it stays attached through moves and resizes; it hides for fullscreen
+windows, windows on other tags or outputs, and app ids listed in
+`ignoreAppIds` in `components/WindowCloseOverlay.qml` (apps that draw their own
+control there, such as VSCodium or Firefox). Clicking it closes that window by
+id via `mmsg dispatch killclient client,<id>`. The layer surface is masked to
+the button, so all other input passes through to the application. `Super+Q`
+still closes the focused window, and the taskbar task buttons have a second
+close affordance.
 
 ## Desktop widgets
 
