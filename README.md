@@ -128,10 +128,11 @@ resolves the codec from, in order:
 
 1. The mime type declared to `MediaSource.addSourceBuffer` — every MSE player
    (YouTube, SoundCloud, Deezer, …) must state `audio/webm; codecs="opus"`,
-   `audio/mp4; codecs="mp4a.40.2"`, etc., so the real codec is visible
-   regardless of site.
-2. YouTube's own `getStatsForNerds()`.
-3. The extension of a plain `<audio>`/`<video>` file URL (MP3, FLAC, …).
+   `audio/mp4; codecs="mp4a.40.2"`, etc.
+2. The `Content-Type` of media network responses (fetch/XHR) — catches players
+   that stream progressively or over HLS without MSE.
+3. YouTube's own `getStatsForNerds()`.
+4. The extension of a plain `<audio>`/`<video>` file URL (MP3, FLAC, …).
 
 It publishes the result (`OPUS`, `AAC`, `MP3`, …) into
 `navigator.mediaSession.metadata.album`, which Firefox mirrors to MPRIS. The bar

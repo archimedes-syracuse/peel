@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         nowplaying codec bridge
 // @namespace    niri-rice-mango
-// @version      2.0.0
+// @version      2.1.0
 // @description  Publish the real audio codec of whatever is playing to MPRIS so the desktop bar shows OPUS/AAC/MP3 instead of a generic WEB label.
 // @match        *://*/*
 // @run-at       document-start
@@ -16,11 +16,12 @@
 //
 // Where the codec comes from, in order:
 //   1. MediaSource buffers. Every MSE player must declare its mime type, e.g.
-//      `audio/webm; codecs="opus"` or `audio/mp4; codecs="mp4a.40.2"`, so a
-//      hook on addSourceBuffer sees the real codec on any site (YouTube,
-//      SoundCloud, Deezer, ...).
-//   2. YouTube's own getStatsForNerds().
-//   3. A plain <audio>/<video> element with a progressive file (extension).
+//      `audio/webm; codecs="opus"` or `audio/mp4; codecs="mp4a.40.2"`.
+//   2. Media network responses (fetch/XHR). A player that streams progressively
+//      or over HLS still declares a Content-Type such as `audio/mpeg`. This is
+//      what catches sites that do not use MSE (e.g. SoundCloud progressive).
+//   3. YouTube's own getStatsForNerds().
+//   4. A plain <audio>/<video> element with a file extension.
 (function () {
     "use strict";
 
@@ -62,34 +63,43 @@
         return "";
     }
 
-    // ── 1. MediaSource buffers ──────────────────────────────────────────
-    var buffers = [];
-
+    // A mime like `audio/mp4; codecs="mp4a.40.2"` or a bare container.
     function codecFromMime(mime) {
         var s = String(mime || "").toLowerCase();
         if (!s)
             return "";
-        var match = /codecs?\s*=\s*"?([^"]+)"?/.exec(s);
-        var candidates = [];
-        if (match)
-            candidates = match[1].split(",");
-        if (candidates.length === 0) {
-            var container = s.split(";")[0].trim();
-            if (container)
-                candidates = [container];
+        var match = /codecs?\s*=\s*"?([^";]+)"?/.exec(s);
+        if (match) {
+            var candidates = match[1].split(",");
+            var first = "";
+            for (var i = 0; i < candidates.length; i++) {
+                var tok = tokenize(candidates[i]);
+                if (!tok)
+                    continue;
+                if (AUDIO_TOKENS[tok])
+                    return tok;             // an audio codec wins
+                if (!first)
+                    first = tok;
+            }
+            if (first)
+                return first;
         }
-        var firstToken = "";
-        for (var i = 0; i < candidates.length; i++) {
-            var token = tokenize(candidates[i]);
-            if (!token)
-                continue;
-            if (AUDIO_TOKENS[token])
-                return token;            // prefer an audio codec
-            if (!firstToken)
-                firstToken = token;
-        }
-        return firstToken;
+
+        // No explicit codecs= param: infer from the container.
+        var container = s.split(";")[0].trim();
+        if (/audio\/(mp4|mpeg4|m4a|mp4a)/.test(container)) return "AAC";
+        if (/audio\/(mpeg|mp3|mpeg3)/.test(container)) return "MP3";
+        if (/audio\/aac/.test(container)) return "AAC";
+        if (/audio\/(x-)?flac/.test(container)) return "FLAC";
+        if (/audio\/ogg/.test(container)) return "VORBIS";
+        if (/audio\/webm/.test(container)) return "VORBIS";
+        if (/audio\/wav/.test(container)) return "WAV";
+        if (/audio\/aiff/.test(container)) return "AIFF";
+        return tokenize(container);
     }
+
+    // ── 1. MediaSource buffers ──────────────────────────────────────────
+    var buffers = [];
 
     try {
         var ms = window.MediaSource && window.MediaSource.prototype;
@@ -113,7 +123,7 @@
             if (/^audio\//i.test(mime)) {
                 var audio = codecFromMime(mime);
                 if (audio)
-                    return audio;        // an audio-declared buffer wins
+                    return audio;           // an audio-declared buffer wins
             } else if (!fallback) {
                 fallback = codecFromMime(mime);
             }
@@ -121,7 +131,78 @@
         return fallback;
     }
 
-    // ── 2. YouTube's own stats ──────────────────────────────────────────
+    // ── 2. Media network responses ──────────────────────────────────────
+    var mediaTypes = [];
+
+    function recordMediaType(url, contentType) {
+        var type = String(contentType || "").toLowerCase();
+        if (!type)
+            return;
+        var isMedia = /^audio\//.test(type) || /^video\//.test(type)
+            || (type.indexOf("application/octet-stream") === 0 && /\.(mp3|m4a|aac|ogg|opus|flac|wav)(\?|$)/i.test(url || ""));
+        if (isMedia) {
+            mediaTypes.push(type);
+            if (mediaTypes.length > 40)
+                mediaTypes.shift();
+        }
+    }
+
+    try {
+        if (typeof window.fetch === "function") {
+            var origFetch = window.fetch;
+            window.fetch = function (input, init) {
+                var url = (input && input.url) || String(input || "");
+                var p = origFetch.apply(this, arguments);
+                try {
+                    p.then(function (res) {
+                        try {
+                            recordMediaType(url, res.headers.get("content-type"));
+                        } catch (e) {}
+                    });
+                } catch (e) {}
+                return p;
+            };
+        }
+    } catch (e) {}
+
+    try {
+        var origOpen = XMLHttpRequest.prototype.open;
+        var origSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.open = function (method, url) {
+            try {
+                this.__codecUrl = url;
+            } catch (e) {}
+            return origOpen.apply(this, arguments);
+        };
+        XMLHttpRequest.prototype.send = function () {
+            var xhr = this;
+            try {
+                xhr.addEventListener("load", function () {
+                    try {
+                        recordMediaType(xhr.__codecUrl, xhr.getResponseHeader("content-type"));
+                    } catch (e) {}
+                });
+            } catch (e) {}
+            return origSend.apply(this, arguments);
+        };
+    } catch (e) {}
+
+    function codecFromNetwork() {
+        var fallback = "";
+        for (var i = mediaTypes.length - 1; i >= 0; i--) {
+            var type = mediaTypes[i];
+            if (/^audio\//.test(type)) {
+                var audio = codecFromMime(type);
+                if (audio)
+                    return audio;
+            } else if (!fallback) {
+                fallback = codecFromMime(type);
+            }
+        }
+        return fallback;
+    }
+
+    // ── 3. YouTube's own stats ──────────────────────────────────────────
     function codecFromYouTube() {
         var player = document.getElementById("movie_player");
         if (!player || typeof player.getStatsForNerds !== "function")
@@ -151,7 +232,7 @@
         }
     }
 
-    // ── 3. A plain media element with a file URL ─────────────────────────
+    // ── 4. A plain media element with a file URL ─────────────────────────
     function codecFromElement() {
         var el = document.querySelector("audio, video");
         var src = el && (el.currentSrc || el.src) || "";
@@ -165,7 +246,8 @@
     }
 
     function audioCodec() {
-        return codecFromBuffers() || codecFromYouTube() || codecFromElement();
+        return codecFromBuffers() || codecFromNetwork()
+            || codecFromYouTube() || codecFromElement();
     }
 
     // ── Publish to MediaSession metadata (album slot) ────────────────────
