@@ -130,11 +130,12 @@ players (VLC, mpv, foobar2000, Lyrion) report a real codec through one of the
 paths above.
 
 ### Launcher
-`Super+D` opens a plain dmenu-style panel: a white `Launch:` prompt and cursor,
-one column of white application text, and a `>` marker on the selected row,
-all on a black background. The list shows ten rows and scrolls through every
-match; type to filter, use Up/Down or scroll to move the selection, Enter to
-run, and Escape or a click outside to dismiss.
+`Super+D` opens a plain dmenu-style panel: a `Launch:` prompt and cursor, one
+column of application text, and a `>` marker on the selected row, on the same
+translucent glass surface as the bar (`Theme.barGlass`) with a faint hairline.
+The list shows ten rows and scrolls through every match; type to filter, use
+Up/Down or scroll to move the selection, Enter to run, and Escape or a click
+outside to dismiss.
 
 ### Window close control
 

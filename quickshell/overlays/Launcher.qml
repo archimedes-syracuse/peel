@@ -38,11 +38,14 @@ PanelWindow {
         return filterApps(query);
     }
 
-    // Match the other monochrome panels: off-white text on the solid desk
-    // panel with a hairline border, not pure white on pure black.
+    // Match the bar's glass: off-white text on the translucent dark pill with
+    // a faint light hairline, not a solid black panel.
     readonly property color launchText: Theme.deskText
-    readonly property color launchBg: Theme.deskPanelSolid
-    readonly property color launchBorder: Theme.deskBorder
+    readonly property color launchBg: Theme.barGlass
+    readonly property color launchBorder: Theme.barGlassBorder
+    // Selection highlight inverts text; use a solid dark ink so the selected
+    // glyphs stay readable even though the panel itself is translucent.
+    readonly property color launchInk: Theme.bg
 
     function open() {
         input.text = "";
@@ -201,7 +204,7 @@ PanelWindow {
                     font.pixelSize: 14
                     color: root.launchText
                     selectionColor: root.launchText
-                    selectedTextColor: root.launchBg
+                    selectedTextColor: root.launchInk
                     focus: true
                     clip: true
                     verticalAlignment: Text.AlignVCenter
