@@ -74,6 +74,9 @@ PanelWindow {
         implicitHeight: column.implicitHeight + 20
         radius: Theme.radius
         borderWidth: 1
+        fill: Theme.barGlass
+        borderStart: Theme.barGlassBorder
+        borderEnd: Theme.barGlassBorder
 
         MouseArea { anchors.fill: parent }
 
