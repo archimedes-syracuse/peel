@@ -121,13 +121,23 @@ The track readout starts with a codec badge. MPRIS has no codec field, so
 3. The browser bridge, below.
 4. Otherwise `WEB` for a browser, `AUDIO` for anything else.
 
-Firefox never publishes a codec, so web **videos** correctly show `WEB`. For
-web **music**, install `scripts/nowplaying-codec.user.js` in a userscript
-manager (Violentmonkey/Tampermonkey). It reads YouTube's own player stats and
-puts the real audio codec (`OPUS`, `AAC`, …) into
-`navigator.mediaSession.metadata.album`, which Firefox mirrors to MPRIS. The
-bar reads that slot only for browser players, so a normal album name is never
-mistaken for a codec.
+Firefox never publishes a codec, so a browser player would otherwise show
+`WEB`. Install `scripts/nowplaying-codec.user.js` in a userscript manager
+(Violentmonkey/Tampermonkey) and it fills that gap. It runs on every site and
+resolves the codec from, in order:
+
+1. The mime type declared to `MediaSource.addSourceBuffer` — every MSE player
+   (YouTube, SoundCloud, Deezer, …) must state `audio/webm; codecs="opus"`,
+   `audio/mp4; codecs="mp4a.40.2"`, etc., so the real codec is visible
+   regardless of site.
+2. YouTube's own `getStatsForNerds()`.
+3. The extension of a plain `<audio>`/`<video>` file URL (MP3, FLAC, …).
+
+It publishes the result (`OPUS`, `AAC`, `MP3`, …) into
+`navigator.mediaSession.metadata.album`, which Firefox mirrors to MPRIS. The bar
+reads that slot only for browser players, so a normal album name is never
+mistaken for a codec. A site that streams without declaring a codec still falls
+back to `WEB`.
 
 ### Launcher
 `Super+D` opens a plain dmenu-style panel: a white `Launch:` prompt and cursor,
