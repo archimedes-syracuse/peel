@@ -38,10 +38,11 @@ PanelWindow {
         return filterApps(query);
     }
 
-    // Keep the launcher plain for now: black panel, white text, and the
-    // arrow is the only selection marker.
-    readonly property color launchText: "#ffffff"
-    readonly property color launchBg: "#000000"
+    // Match the other monochrome panels: off-white text on the solid desk
+    // panel with a hairline border, not pure white on pure black.
+    readonly property color launchText: Theme.deskText
+    readonly property color launchBg: Theme.deskPanelSolid
+    readonly property color launchBorder: Theme.deskBorder
 
     function open() {
         input.text = "";
@@ -155,6 +156,8 @@ PanelWindow {
         anchors.centerIn: parent
         color: root.launchBg
         radius: 0
+        border.width: 1
+        border.color: root.launchBorder
 
         MouseArea { anchors.fill: parent }
 
@@ -183,7 +186,7 @@ PanelWindow {
 
                     height: 20
                     text: "Launch:"
-                    color: root.launchText
+                    color: Theme.deskTextDim
                     font.family: Theme.font
                     font.pixelSize: 14
                     verticalAlignment: Text.AlignVCenter

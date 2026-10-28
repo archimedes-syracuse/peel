@@ -41,9 +41,9 @@ QtObject {
 
     // geometry
     // The old rail is kept for reference; the active shell uses the top bar
-    // dimensions below.
+    // dimensions below. barHeight matches the real top-strip surface.
     readonly property int barWidth: 42
-    readonly property int barHeight: 30
+    readonly property int barHeight: 32
     readonly property int taskbarHeight: 32
     readonly property int radius: 0
     readonly property int gap: 8

@@ -15,7 +15,7 @@ Item {
     function moveBy(dx, dy) {
         const screenWidth = parent ? parent.width : 1920;
         const screenHeight = parent ? parent.height : 1080;
-        const x = Math.max(8, Math.min(screenWidth - width - Theme.barWidth - 8, Widgets.weatherX + dx));
+        const x = Math.max(Theme.gap, Math.min(screenWidth - width - Theme.gap, Widgets.weatherX + dx));
         const y = Math.max(Theme.gap, Math.min(screenHeight - height - 8, Widgets.weatherY + dy));
         Widgets.setWeatherPosition(x, y);
     }

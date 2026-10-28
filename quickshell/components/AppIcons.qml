@@ -21,6 +21,9 @@ Item {
     readonly property int cellWidth: 24
     readonly property var windowClients: Mango.allClients
 
+    // Only show windows that live on this monitor's active tag.
+    property string monitorName: ""
+
     // One entry per application on the active tag, in client order.
     readonly property var apps: {
         const out = [];
@@ -44,12 +47,18 @@ Item {
         return out;
     }
 
-    // Active tag indices across every monitor, from `mmsg get all-tags`.
+    // Active tag indices for this monitor only, so an app on another output's
+    // active tag never shows up in this bar.
     readonly property var activeTags: {
         const indices = [];
         const groups = Mango.allTags || [];
         for (let i = 0; i < groups.length; i++) {
-            const tags = groups[i] && groups[i].tags ? groups[i].tags : [];
+            const group = groups[i];
+            if (!group)
+                continue;
+            if (root.monitorName !== "" && group.monitor !== root.monitorName)
+                continue;
+            const tags = group.tags || [];
             for (let j = 0; j < tags.length; j++) {
                 if (tags[j] && tags[j].is_active)
                     indices.push(tags[j].index);

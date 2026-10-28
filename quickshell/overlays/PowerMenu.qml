@@ -57,7 +57,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: "#66070a10"
+        color: "#66000000"
 
         MouseArea {
             anchors.fill: parent

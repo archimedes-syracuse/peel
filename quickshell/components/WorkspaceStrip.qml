@@ -52,7 +52,7 @@ Row {
                 text: String(index + 1)
                 color: item.selected
                     ? Theme.accent
-                    : hover.hovered ? Theme.deskText : item.used ? Theme.deskTextDim : Theme.deskTextDim
+                    : hover.hovered ? Theme.deskText : Theme.deskTextDim
                 opacity: item.selected || hover.hovered ? 1 : item.used ? 0.8 : 0.35
                 font.family: Theme.font
                 font.pixelSize: 14

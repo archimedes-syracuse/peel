@@ -20,8 +20,8 @@ PanelWindow {
         left: true
         right: true
     }
-    implicitHeight: 32
-    exclusiveZone: 32
+    implicitHeight: Theme.barHeight
+    exclusiveZone: Theme.barHeight
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "niri-shell-topbar"
@@ -121,7 +121,7 @@ PanelWindow {
 
         // [ FLAC/WEB  Artist - Title  mm:ss/mm:ss  art ]
         Rectangle {
-            visible: Media.available
+            visible: Media.hasTrack
             width: visible ? musicRow.implicitWidth + 16 : 0
             height: 28
             color: Theme.deskPanelSolid
@@ -212,6 +212,7 @@ PanelWindow {
         spacing: 2
 
         AppIcons {
+            monitorName: root.modelData ? root.modelData.name : ""
             anchors.verticalCenter: parent.verticalCenter
         }
 
