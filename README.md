@@ -78,6 +78,11 @@ systemctl --user restart niri-quickshell 2>/dev/null || qs -n -c niri -d
 The active layout is a single 32 px top strip of square, hairline-bordered
 text readouts. There are no icons or drawer popups; status is text only.
 
+The strip itself is transparent — the wallpaper shows through the gaps — and
+each module is a square translucent dark "glass" pill (`Theme.barGlass`, ~55%
+tint, with a faint light hairline) so the text stays readable over any
+wallpaper.
+
 - Left: time and the current track.
 - Center: workspace tags `1..5`.
 - Right: open-app icons, then `PKG`, `BT`, `WIFI`, `BAT`, `VOL`, and `BRT`

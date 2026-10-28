@@ -69,11 +69,6 @@ PanelWindow {
         precision: SystemClock.Seconds
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: Theme.bg
-    }
-
     Row {
         id: left
 
@@ -88,9 +83,9 @@ PanelWindow {
         Rectangle {
             width: timeRow.implicitWidth + 16
             height: 28
-            color: Theme.deskPanelSolid
+            color: Theme.barGlass
             border.width: 1
-            border.color: Theme.deskBorder
+            border.color: Theme.barGlassBorder
 
             Row {
                 id: timeRow
@@ -124,9 +119,9 @@ PanelWindow {
             visible: Media.hasTrack
             width: visible ? musicRow.implicitWidth + 16 : 0
             height: 28
-            color: Theme.deskPanelSolid
+            color: Theme.barGlass
             border.width: 1
-            border.color: Theme.deskBorder
+            border.color: Theme.barGlassBorder
 
             Row {
                 id: musicRow
@@ -189,9 +184,9 @@ PanelWindow {
         width: center.implicitWidth + 18
         height: 28
         anchors.centerIn: parent
-        color: Theme.deskPanelSolid
+        color: Theme.barGlass
         border.width: 1
-        border.color: Theme.deskBorder
+        border.color: Theme.barGlassBorder
 
         WorkspaceStrip {
             id: center

@@ -39,6 +39,12 @@ QtObject {
     readonly property color deskShadow: "#99000000"
     readonly property color deskBlue: "#9a9a9a"
 
+    // Top-bar glass: the bar strip itself is fully transparent (the wallpaper
+    // shows through) and each module is a square, translucent dark pill with a
+    // faint light hairline so the text stays legible over any wallpaper.
+    readonly property color barGlass: "#8c0d0d0d"
+    readonly property color barGlassBorder: "#33ffffff"
+
     // geometry
     // The old rail is kept for reference; the active shell uses the top bar
     // dimensions below. barHeight matches the real top-strip surface.

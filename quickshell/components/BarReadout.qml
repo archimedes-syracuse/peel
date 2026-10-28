@@ -16,9 +16,9 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Theme.deskPanelSolid
+        color: Theme.barGlass
         border.width: 1
-        border.color: Theme.deskBorder
+        border.color: Theme.barGlassBorder
     }
 
     Row {
