@@ -44,28 +44,28 @@ PanelWindow {
             id: homeIcon
             iconSource: "../assets/icon-home-naturalist.png"
             label: "Home"
-            onActivated: Quickshell.execDetached(["nautilus", root.home])
+            onActivated: Quickshell.execDetached(["alacritty", "-e", "yazi", root.home])
         }
 
         DesktopIcon {
             id: trashIcon
             iconSource: "../assets/icon-trash-naturalist.png"
             label: "Trash"
-            onActivated: Quickshell.execDetached(["nautilus", "trash://"])
+            onActivated: Quickshell.execDetached(["alacritty", "-e", "yazi", root.home + "/.local/share/Trash/files"])
         }
 
         DesktopIcon {
             id: computerIcon
             iconSource: "../assets/icon-computer-naturalist.png"
             label: "Computer"
-            onActivated: Quickshell.execDetached(["nautilus", "/"])
+            onActivated: Quickshell.execDetached(["alacritty", "-e", "yazi", "/"])
         }
 
         DesktopIcon {
             id: docsIcon
             iconSource: "../assets/icon-books-naturalist.png"
             label: "Documents"
-            onActivated: Quickshell.execDetached(["nautilus", root.home + "/Documents"])
+            onActivated: Quickshell.execDetached(["alacritty", "-e", "yazi", root.home + "/Documents"])
         }
     }
 }

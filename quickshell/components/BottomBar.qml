@@ -83,7 +83,7 @@ PanelWindow {
             TaskbarButton {
                 glyph: Theme.gDisk
                 tint: Theme.deskTextDim
-                onClicked: Quickshell.execDetached(["nautilus"])
+                onClicked: Quickshell.execDetached(["alacritty", "-e", "yazi"])
             }
 
             Rectangle {

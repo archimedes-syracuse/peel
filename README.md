@@ -219,10 +219,11 @@ right-clicks, so context menus and games may react differently. Remove it with:
 sudo ./scripts/install-razer-resize.sh --uninstall
 ```
 
-Files/Nautilus is GTK4/libadwaita and ignores `prefer-no-csd`; a local
-GTK-NoCSD wrapper (`~/.local/bin/nautilus-nocsd`) removes its headerbar and
-CSD edge handles so it matches the tiled windows. Launch Files normally from
-the bar.
+Files are handled by [yazi](https://github.com/sxyazi/yazi), a terminal file
+manager. The bar's disk button, the desktop Home/Trash/Computer/Documents
+icons, and the `inode/directory` default handler all open yazi inside
+`alacritty` (`alacritty -e yazi [path]`). Nautilus/GNOME Files is deliberately
+not installed; the old GTK-NoCSD wrapper was removed with it.
 
 ## Install / teardown
 
