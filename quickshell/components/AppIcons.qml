@@ -92,7 +92,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Theme.barGlass
+        color: Theme.barPill
         border.width: 1
         border.color: Theme.barGlassBorder
     }

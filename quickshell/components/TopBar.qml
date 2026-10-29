@@ -83,7 +83,7 @@ PanelWindow {
         Rectangle {
             width: timeRow.implicitWidth + 16
             height: 28
-            color: Theme.barGlass
+            color: Theme.barPill
             border.width: 1
             border.color: Theme.barGlassBorder
 
@@ -123,7 +123,7 @@ PanelWindow {
             visible: Media.hasTrack
             width: visible ? musicRow.implicitWidth + 16 : 0
             height: 28
-            color: Theme.barGlass
+            color: Theme.barPill
             border.width: 1
             border.color: Theme.barGlassBorder
 
@@ -194,7 +194,7 @@ PanelWindow {
         width: center.implicitWidth + 18
         height: 28
         anchors.centerIn: parent
-        color: Theme.barGlass
+        color: Theme.barPill
         border.width: 1
         border.color: Theme.barGlassBorder
 

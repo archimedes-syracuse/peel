@@ -79,9 +79,10 @@ The active layout is a single 32 px top strip of square, hairline-bordered
 text readouts. There are no icons or drawer popups; status is text only.
 
 The strip itself is transparent — the wallpaper shows through the gaps — and
-each module is a square translucent dark "glass" pill (`Theme.barGlass`, ~30%
+each module is a square translucent dark "glass" pill (`Theme.barPill`, ~55%
 tint, with a faint light hairline) so the text stays readable over any
-wallpaper.
+wallpaper. The lighter ~30% `Theme.barGlass` tint is used by the launcher and
+the overlays, whose larger text sits over app content.
 
 - Left: time and the current track.
 - Center: workspace tags `1..5`.
@@ -131,8 +132,8 @@ paths above.
 
 ### Launcher
 `Super+D` opens a plain dmenu-style panel: a `Launch:` prompt and cursor, one
-column of application text, and a `>` marker on the selected row, on the same
-translucent glass surface as the bar (`Theme.barGlass`) with a faint hairline.
+column of application text, and a `>` marker on the selected row, on the
+lighter translucent glass (`Theme.barGlass`) with a faint hairline.
 The list shows ten rows and scrolls through every match; type to filter, use
 Up/Down or scroll to move the selection, Enter to run, and Escape or a click
 outside to dismiss.

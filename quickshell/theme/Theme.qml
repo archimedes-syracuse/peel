@@ -16,8 +16,8 @@ QtObject {
     readonly property color border: "#40ffffff"
 
     // text
-    readonly property color fg: "#d6d6d6"
-    readonly property color fgDim: "#878787"
+    readonly property color fg: "#f0f0f0"
+    readonly property color fgDim: "#b8b8b8"
 
     // accents are deliberately desaturated; callers keep their old semantic
     // names so the rest of the shell does not need a parallel palette.
@@ -29,8 +29,8 @@ QtObject {
     readonly property color blue: "#a8a8a8"
 
     // Desktop-scene palette
-    readonly property color deskText: "#d6d6d6"
-    readonly property color deskTextDim: "#878787"
+    readonly property color deskText: "#f0f0f0"
+    readonly property color deskTextDim: "#b8b8b8"
     readonly property color deskInk: "#141414"
     readonly property color deskPanel: "#e6141414"
     readonly property color deskPanelSolid: "#161616"
@@ -39,9 +39,14 @@ QtObject {
     readonly property color deskShadow: "#99000000"
     readonly property color deskBlue: "#9a9a9a"
 
-    // Top-bar glass: the bar strip itself is fully transparent (the wallpaper
+    // Top-bar glass. The bar strip itself is fully transparent (the wallpaper
     // shows through) and each module is a square, translucent dark pill with a
     // faint light hairline so the text stays legible over any wallpaper.
+    // `barPill` is the stronger tint used by the top bar, whose tiny 14px text
+    // sits directly on the (often bright) wallpaper; `barGlass` is the lighter
+    // tint shared by the launcher and the overlays, which have larger text and
+    // sit over app content.
+    readonly property color barPill: "#8c0d0d0d"
     readonly property color barGlass: "#4d0d0d0d"
     readonly property color barGlassBorder: "#40ffffff"
 
