@@ -157,7 +157,7 @@ PanelWindow {
 
                 Text {
                     visible: Media.player && Media.player.length > 0
-                    text: root.clockText(Media.player ? Media.player.position : 0)
+                    text: root.clockText(Media.position)
                         + "/" + root.clockText(Media.player ? Media.player.length : 0)
                     color: Theme.deskTextDim
                     font.family: Theme.font

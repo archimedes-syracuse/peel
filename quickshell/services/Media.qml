@@ -159,4 +159,86 @@ Singleton {
             && lower !== "firefox"
             && lower !== "librewolf";
     }
+
+    // ── playback position ────────────────────────────────────────────────
+    // Firefox's MPRIS reports Position as 0 and never updates it, so reading
+    // the player directly leaves the bar clock frozen. Advance a local clock
+    // while the player reports playing, and snap to the player's own position
+    // whenever it actually moves (real players like mpv, or a seek).
+    property real position: 0
+    property bool _rawReliable: false
+    property real _lastRaw: 0
+    property real _lastMs: 0
+    property real _lastRawChangeMs: 0
+    property bool _wasPlaying: false
+
+    onPlayerChanged: resetPosition()
+
+    function resetPosition() {
+        position = player ? (player.position || 0) : 0;
+        _rawReliable = false;
+        _lastRaw = position;
+        _lastMs = Date.now();
+        _lastRawChangeMs = _lastMs;
+        _wasPlaying = player ? player.isPlaying : false;
+    }
+
+    function tickPosition() {
+        const p = player;
+        if (!p) {
+            position = 0;
+            return;
+        }
+
+        const now = Date.now();
+        const raw = p.position || 0;
+        const len = p.length || 0;
+
+        // A changing position means the player actually tracks time (mpv,
+        // Chromium, some Firefox sites); a frozen one is the Firefox case we
+        // have to estimate ourselves.
+        if (Math.abs(raw - _lastRaw) > 0.2) {
+            _rawReliable = true;
+            _lastRawChangeMs = now;
+        }
+        _lastRaw = raw;
+
+        if (p.isPlaying) {
+            if (_rawReliable)
+                // extrapolate from the last real sample so the clock is smooth
+                position = raw + (now - _lastRawChangeMs) / 1000;
+            else if (_wasPlaying)
+                position = position + (now - _lastMs) / 1000;
+        }
+
+        if (len > 0 && position > len)
+            position = len;
+        if (position < 0)
+            position = 0;
+
+        _lastMs = now;
+        _wasPlaying = p.isPlaying;
+    }
+
+    Timer {
+        interval: 500
+        repeat: true
+        running: root.player !== null && root.player.isPlaying
+        onTriggered: root.tickPosition()
+    }
+
+    Connections {
+        target: root.player
+        ignoreUnknownSignals: true
+
+        function onTrackTitleChanged() {
+            root.resetPosition();
+        }
+
+        function onPositionChanged() {
+            const raw = root.player ? (root.player.position || 0) : 0;
+            if (raw > root._lastRaw + 0.2)
+                root._rawReliable = true;
+        }
+    }
 }
