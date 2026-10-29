@@ -3,6 +3,7 @@ import QtQuick.Effects
 import Quickshell
 import "../theme"
 import "../services"
+import "../components"
 
 // Icons for the applications that have a window on the active tag, sitting
 // between the tag strip and the status readouts. One icon per application:
@@ -166,6 +167,8 @@ Item {
                     color: cell.hovered ? Theme.deskText : Theme.deskTextDim
                     font.family: Theme.font
                     font.pixelSize: 14
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
 
                 MouseArea {

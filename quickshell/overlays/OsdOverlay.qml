@@ -73,6 +73,8 @@ PanelWindow {
                     color: root.accentColor
                     font.family: Theme.font
                     font.pixelSize: Theme.iconSize
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
 
                 Text {
@@ -83,6 +85,8 @@ PanelWindow {
                     color: Theme.fgDim
                     font.family: Theme.font
                     font.pixelSize: Theme.sizeSmall
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
 
                 Text {
@@ -92,6 +96,8 @@ PanelWindow {
                     color: root.isVolume && Osd.muted ? Theme.fgDim : Theme.fg
                     font.family: Theme.font
                     font.pixelSize: Theme.sizeSmall
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
             }
 

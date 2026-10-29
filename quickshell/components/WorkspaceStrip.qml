@@ -1,6 +1,7 @@
 import QtQuick
 import "../theme"
 import "../services"
+import "../components"
 
 // Bare workspace numbers for the top bar. No boxes, no icons, no badges:
 // the active tag is white, occupied tags are grey, and empty tags recede into
@@ -56,6 +57,8 @@ Row {
                 opacity: item.selected || hover.hovered ? 1 : item.used ? 0.8 : 0.35
                 font.family: Theme.font
                 font.pixelSize: 14
+                layer.enabled: true
+                layer.effect: TextOutline {}
                 font.bold: item.selected
 
                 Behavior on color { ColorAnimation { duration: Theme.duration } }

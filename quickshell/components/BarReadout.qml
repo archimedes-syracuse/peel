@@ -1,5 +1,6 @@
 import QtQuick
 import "../theme"
+import "../components"
 
 // A square, hairline-bordered text readout for the top bar.
 Item {
@@ -32,6 +33,8 @@ Item {
             color: Theme.deskTextDim
             font.family: Theme.font
             font.pixelSize: 14
+            layer.enabled: true
+            layer.effect: TextOutline {}
         }
 
         Text {
@@ -42,6 +45,8 @@ Item {
             color: Theme.deskText
             font.family: Theme.font
             font.pixelSize: 14
+            layer.enabled: true
+            layer.effect: TextOutline {}
             elide: Text.ElideRight
         }
     }

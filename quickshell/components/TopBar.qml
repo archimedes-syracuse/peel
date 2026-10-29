@@ -98,6 +98,8 @@ PanelWindow {
                     color: Theme.deskTextDim
                     font.family: Theme.font
                     font.pixelSize: 14
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
 
                 Text {
@@ -105,6 +107,8 @@ PanelWindow {
                     color: Theme.deskText
                     font.family: Theme.font
                     font.pixelSize: 14
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
             }
 
@@ -135,6 +139,8 @@ PanelWindow {
                     color: Theme.deskTextDim
                     font.family: Theme.font
                     font.pixelSize: 14
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
 
                 Text {
@@ -143,6 +149,8 @@ PanelWindow {
                     color: Theme.deskText
                     font.family: Theme.font
                     font.pixelSize: 14
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                     font.bold: true
                     elide: Text.ElideRight
                 }
@@ -154,6 +162,8 @@ PanelWindow {
                     color: Theme.deskTextDim
                     font.family: Theme.font
                     font.pixelSize: 14
+                    layer.enabled: true
+                    layer.effect: TextOutline {}
                 }
 
                 Image {
