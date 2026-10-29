@@ -51,7 +51,9 @@ Singleton {
             if (typeof data.notesX === "number") root.notesX = data.notesX;
             if (typeof data.notesY === "number") root.notesY = data.notesY;
             if (typeof data.notesVisible === "boolean") root.notesVisible = data.notesVisible;
-            if (typeof data.barVisible === "boolean") root.barVisible = data.barVisible;
+            // The bar is always visible: never restore a hidden state, so a stray
+            // toggle can't leave it gone after a restart.
+            root.barVisible = true;
             if (typeof data.widgetsVisible === "boolean") root.widgetsVisible = data.widgetsVisible;
             if (typeof data.desktopIconsVisible === "boolean") root.desktopIconsVisible = data.desktopIconsVisible;
             if (typeof data.companionVisible === "boolean") root.companionVisible = data.companionVisible;
