@@ -705,14 +705,19 @@ private:
 
         // Live-preview, but coalesce the swaybg restarts while the user is
         // still scrolling; closing the picker flushes the final choice.
+        m_applyPending = true;
         m_applyTimer.start();
         update();
     }
 
     void flushApply()
     {
-        if (!m_applyTimer.isActive())
+        // A single-shot QTimer clears isActive() before it emits timeout, so
+        // the pending flag -- not the timer state -- decides whether there is
+        // anything to apply.
+        if (!m_applyPending)
             return;
+        m_applyPending = false;
         m_applyTimer.stop();
         if (m_selected >= 0 && m_selected < m_store->entries.size())
             m_store->apply(m_store->entries.at(m_selected));
@@ -813,6 +818,7 @@ private:
     qreal m_progress = 1.0;
     QVariantAnimation m_animation;
     QTimer m_applyTimer;
+    bool m_applyPending = false;
 };
 
 QString instanceKey()
