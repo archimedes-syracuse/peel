@@ -42,11 +42,12 @@
 
 namespace {
 
-constexpr int kVisibleSide = 2;
-constexpr qreal kSideHeight = 0.94;
-constexpr qreal kSideWidth = 0.11;
-constexpr qreal kSideShrink = 0.85;
-constexpr int kGap = 6;
+constexpr int kVisibleSide = 3;
+constexpr qreal kSideHeight = 0.92;
+constexpr qreal kSideWidth = 0.20;
+constexpr qreal kSideShrink = 0.78;
+constexpr qreal kSideSlant = 0.10;
+constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
 
 const QColor kAccent(0xe8, 0xb6, 0x4b);
@@ -415,20 +416,27 @@ protected:
             painter.save();
             painter.setOpacity(cell.opacity);
 
-            const QRectF frame = cell.rect;
             // The selected card is the raw wallpaper: no surface fill under
             // it, no border and no tint. Only the receding side slices keep a
-            // 1px hairline and a dark backing.
-            if (active)
-                painter.fillRect(frame, Qt::transparent);
-            else
-                painter.fillRect(frame, kSurface);
+            // 1px hairline, a dark backing, and the slight outward lean.
+            const QRectF frame = cell.rect;
+            const qreal slant = active
+                ? 0.0
+                : (frame.center().x() < width() / 2.0 ? -kSideSlant : kSideSlant);
+
+            painter.translate(frame.topLeft());
+            if (!qFuzzyIsNull(slant))
+                painter.shear(slant, 0);
+            const QRectF local(0, 0, frame.width(), frame.height());
+
+            if (!active)
+                painter.fillRect(local, kSurface);
 
             const QImage &image = m_images.value(m_store->entries.at(index));
             if (!image.isNull()) {
                 const int border = active ? 0 : 1;
-                const QRectF target = frame.adjusted(border, border, -border, -border);
-                painter.setClipRect(active ? frame : target);
+                const QRectF target = local.adjusted(border, border, -border, -border);
+                painter.setClipRect(target);
                 painter.drawImage(target, image, coverSource(image.size(), target));
                 painter.setClipping(false);
             }
@@ -436,7 +444,7 @@ protected:
             if (!active) {
                 painter.setPen(QPen(kSideBorder, 1.0));
                 painter.setBrush(Qt::NoBrush);
-                painter.drawRect(frame.adjusted(0.5, 0.5, -0.5, -0.5));
+                painter.drawRect(local.adjusted(0.5, 0.5, -0.5, -0.5));
             }
             painter.restore();
         }
@@ -572,8 +580,8 @@ private:
         if (n == 0)
             return layout;
 
-        const qreal cardH = std::round(height() * 0.56);
-        const qreal cardW = std::round(std::min(cardH * 16.0 / 9.0, width() * 0.78));
+        const qreal cardH = std::round(height() * 0.57);
+        const qreal cardW = std::round(cardH * 1.62);
         const qreal sideH = std::round(cardH * kSideHeight);
         const qreal centerX = width() / 2.0;
         const qreal centerY = height() / 2.0;

@@ -10,7 +10,8 @@ and other wlroots-based compositors.
 ## Features
 
 - Full-screen layer-shell overlay with a dimmed, full-bleed preview.
-- Centered active wallpaper shown bare — no frame, no badge, no tint — with two narrow slices per side.
+- Centered active wallpaper shown bare — no frame, no badge, no tint —
+  flanked by narrow slices (three per side) that fan out slightly at the bottom.
 - Animated geometry on every move (280 ms, cubic ease-out).
 - Arrow keys, `hjkl`, mouse wheel, side-slice clicks, Enter, and Escape.
 - Click the active card or press Enter to apply and close.
