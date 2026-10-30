@@ -78,11 +78,14 @@ systemctl --user restart niri-quickshell 2>/dev/null || qs -n -c niri -d
 The active layout is a single 32 px top strip of square, hairline-bordered
 text readouts. There are no icons or drawer popups; status is text only.
 
-The strip itself is transparent — the wallpaper shows through the gaps — and
-each module is a square translucent dark "glass" pill (`Theme.barPill`, ~55%
-tint, with a faint light hairline) so the text stays readable over any
-wallpaper. The lighter ~30% `Theme.barGlass` tint is used by the launcher and
-the overlays, whose larger text sits over app content.
+A soft vertical scrim spans the whole strip: it is darkest at the screen edge
+(`Theme.barScrimTop`, ~55% tint) and fades to fully transparent at the bar's
+bottom, so the wallpaper blends into the bar instead of meeting it at a hard
+line. Each module is a square translucent dark "glass" pill
+(`Theme.barPill`, the same ~55% tint, with a faint light hairline) so the text
+stays readable over any wallpaper. The lighter ~30% `Theme.barGlass` tint is
+used by the launcher and the overlays, whose larger text sits over app
+content.
 
 - Left: time and the current track.
 - Center: workspace tags `1..5`.
@@ -280,6 +283,7 @@ tar --zstd -cf ~/rice-backups/config-$(date +%Y%m%d-%H%M).tar.zst \
 | Super+Left/Right/Up/Down | focus window in direction |
 | Super+Shift+Left/Right/Up/Down | move window in direction |
 | Super+Ctrl+Left/Right | move window to previous/next tag |
+| Super+Shift+B | wallpaper carousel |
 | Super+Shift+H/L/K/J | resize floating window |
 | Super+Tab | previous tagset |
 | Super+Page_Up/Page_Down | previous/next tag |
@@ -292,6 +296,25 @@ Mango consumes `Super+1..5` as tag switches. Niri's column-width presets and
 tabbed-column bindings have no direct Mango equivalent; the dwindle layout
 plus mouse resizing replaces them.
 
+## Wallpaper picker
+
+`wallpaper-picker/` is a standalone C++20 + Qt 6 wallpaper carousel launched
+through a tcsh entry point. Unlike the Quickshell overlay, it is not tied to
+this shell: it uses `wlr-layer-shell` through LayerShellQt, so the same binary
+runs on niri, Hyprland, Sway, Mango, labwc, and other wlroots compositors.
+
+```sh
+cmake -S wallpaper-picker -B build/wallpaper-picker -G Ninja
+cmake --build build/wallpaper-picker
+cmake --install build/wallpaper-picker --prefix "$HOME/.local"
+```
+
+The Super+Shift+B binding runs `~/.local/bin/wallpaper-picker`. It supports
+arrow keys/`hjkl`, the wheel, side-slice clicks, Enter, and Escape, and
+auto-detects `hyprpaper`, `awww`, `swww`, or `swaybg` for applying the image.
+See [`wallpaper-picker/README.md`](wallpaper-picker/README.md) for the portable
+usage and compositor binding examples.
+
 ## Notes / next
 
 - The palette is terminal monochrome: near-black surfaces, grey hairlines,
@@ -300,6 +323,10 @@ plus mouse resizing replaces them.
   (`~/Pictures/wallpaper-scene-on-the-ice.jpg`, set by `swaybg` in
   `mango/config.conf`). Swap `quickshell/theme/Theme.qml` or generate a
   palette later with matugen.
+- The active wallpaper carousel is the standalone native picker described
+  above. The original Quickshell version remains available with
+  `qs -c niri ipc call shell toggleWallpaper` as a fallback; it shares the same
+  interaction model and persists through Quickshell's `wallpaper.json`.
 - Notifications are owned by Quickshell. The toast overlay and history panel
   share one `NotificationServer` singleton so they do not fight for the
   `org.freedesktop.Notifications` bus name. Caelestia is not started.

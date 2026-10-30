@@ -64,9 +64,11 @@ PanelWindow {
         onActivated: root.close()
     }
 
+    // Invisible click-catcher: closes the calendar on an outside click without
+    // dimming the wallpaper or the bar.
     Rectangle {
         anchors.fill: parent
-        color: "#33000000"
+        color: "transparent"
 
         MouseArea {
             anchors.fill: parent

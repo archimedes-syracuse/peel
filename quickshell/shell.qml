@@ -22,15 +22,18 @@ ShellRoot {
 
         TopBar {
             visible: Widgets.barVisible
+                && !wallpaperPicker.visible
                 && !(Mango.focusedClient && Mango.focusedClient.is_fullscreen)
         }
     }
 
-    Variants {
-        model: Quickshell.screens
+    // Window-close overlay disabled: the floating × lagged behind windows on
+    // move/resize and never blended with the frame. To restore, uncomment this.
+    // Variants {
+    //     model: Quickshell.screens
 
-        WindowCloseOverlay {}
-    }
+    //     WindowCloseOverlay {}
+    // }
 
     Variants {
         model: Quickshell.screens
@@ -60,6 +63,7 @@ ShellRoot {
     PowerMenu { id: power }
     NotificationCenter { id: notificationCenter }
     Calendar { id: calendar }
+    WallpaperPicker { id: wallpaperPicker }
     OsdOverlay {}
     NotificationDaemon {}
 
@@ -83,6 +87,7 @@ ShellRoot {
             power.close();
             notificationCenter.close();
             calendar.close();
+            wallpaperPicker.close();
             launcher.open();
         }
 
@@ -94,6 +99,7 @@ ShellRoot {
             launcher.close();
             notificationCenter.close();
             calendar.close();
+            wallpaperPicker.close();
             power.open();
         }
 
@@ -105,6 +111,7 @@ ShellRoot {
             launcher.close();
             power.close();
             calendar.close();
+            wallpaperPicker.close();
             notificationCenter.open();
         }
 
@@ -155,7 +162,20 @@ ShellRoot {
             launcher.close();
             power.close();
             notificationCenter.close();
+            wallpaperPicker.close();
             calendar.open();
+        }
+
+        function toggleWallpaper() {
+            if (wallpaperPicker.visible) {
+                wallpaperPicker.close();
+                return;
+            }
+            launcher.close();
+            power.close();
+            notificationCenter.close();
+            calendar.close();
+            wallpaperPicker.open();
         }
 
         function closeOverlays() {
@@ -163,6 +183,7 @@ ShellRoot {
             power.close();
             notificationCenter.close();
             calendar.close();
+            wallpaperPicker.close();
         }
 
         function clearNotifications() {

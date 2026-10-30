@@ -37,6 +37,10 @@ INSTALL_PKGS=(
     niri
     labwc
     quickshell
+    cmake
+    ninja
+    layer-shell-qt
+    qt6-base
     xwayland-satellite
     xdg-desktop-portal-gnome
     xdg-desktop-portal-wlr
@@ -151,6 +155,17 @@ chown -h "$USER_NAME:$USER_NAME" \
     "$USER_HOME/.config/mango" \
     "$USER_HOME/.config/labwc" \
     "$USER_HOME/.config/quickshell/niri"
+
+# Build and install the standalone native wallpaper picker. The tcsh launcher
+# lands in ~/.local/bin and the binary in ~/.local/lib/wallpaper-picker.
+runuser -u "$USER_NAME" -- env HOME="$USER_HOME" bash -c "
+    set -e
+    cmake -S '$REPO_DIR/wallpaper-picker' -B '$REPO_DIR/build/wallpaper-picker' \
+        -G Ninja -DCMAKE_BUILD_TYPE=Release
+    cmake --build '$REPO_DIR/build/wallpaper-picker'
+    cmake --install '$REPO_DIR/build/wallpaper-picker' \
+        --prefix '$USER_HOME/.local'
+"
 
 # ── 3. validate before removing anything ──────────────────────────────
 if ! runuser -u "$USER_NAME" -- env HOME="$USER_HOME" \

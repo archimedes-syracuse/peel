@@ -39,9 +39,10 @@ QtObject {
     readonly property color deskShadow: "#99000000"
     readonly property color deskBlue: "#9a9a9a"
 
-    // Top-bar glass. The bar strip itself is fully transparent (the wallpaper
-    // shows through) and each module is a square, translucent dark pill with a
-    // faint light hairline so the text stays legible over any wallpaper.
+    // Top-bar glass. A vertical scrim fades the wallpaper into the strip (see
+    // barScrimTop/barScrimMid below) and each module is a square, translucent
+    // dark pill with a faint light hairline so the text stays legible over any
+    // wallpaper.
     // `barPill` is the stronger tint used by the top bar, whose tiny 14px text
     // sits directly on the (often bright) wallpaper; `barGlass` is the lighter
     // tint shared by the launcher and the overlays, which have larger text and
@@ -49,6 +50,11 @@ QtObject {
     readonly property color barPill: "#8c0d0d0d"
     readonly property color barGlass: "#4d0d0d0d"
     readonly property color barGlassBorder: "#40ffffff"
+    // The top strip fades into the wallpaper with a scrim instead of a hard
+    // edge. `barScrimTop` is the same tint as the pills; it reaches zero
+    // opacity at the bottom of the bar.
+    readonly property color barScrimTop: "#8c0d0d0d"
+    readonly property color barScrimMid: "#380d0d0d"
 
     // geometry
     // The old rail is kept for reference; the active shell uses the top bar

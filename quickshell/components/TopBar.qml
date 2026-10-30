@@ -55,6 +55,23 @@ PanelWindow {
         ? Brightness.pct + "%"
         : "--"
 
+    // Soft scrim behind the whole strip. It is darkest at the screen edge and
+    // fades to fully transparent at the bar's bottom, so the wallpaper blends
+    // into the bar instead of meeting it at a hard horizontal line.
+    Rectangle {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+        height: parent.height
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Theme.barScrimTop }
+            GradientStop { position: 0.55; color: Theme.barScrimMid }
+            GradientStop { position: 1.0; color: "#000d0d0d" }
+        }
+    }
+
     function clockText(value) {
         if (!isFinite(value) || value <= 0)
             return "";
