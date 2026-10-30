@@ -31,11 +31,11 @@ QtObject {
     readonly property color deskShadow: "#99000000"
     readonly property color deskBlue: "#9a9a9a"
 
-    readonly property color barPill: "#8c0d0d0d"
+    readonly property color barPill: "#4f0d0d0d"
     readonly property color barGlass: "#4d0d0d0d"
     readonly property color barGlassBorder: "#40ffffff"
-    readonly property color barScrimTop: "#8c0d0d0d"
-    readonly property color barScrimMid: "#380d0d0d"
+    readonly property color barScrimTop: "#400d0d0d"
+    readonly property color barScrimMid: "#0d0d0d0d"
 
     readonly property int barWidth: 42
     readonly property int barHeight: 32
