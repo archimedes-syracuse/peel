@@ -4,8 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Current conditions from wttr.in. The service is intentionally quiet: if the
-// request fails, the weather segment disappears instead of showing stale data.
 Singleton {
     id: root
 
@@ -124,7 +122,6 @@ Singleton {
             root.icon = root.iconFor(weatherCode);
             root.available = true;
         } catch (e) {
-            // Keep the last good reading; a dropped request should not clear it.
         }
     }
 

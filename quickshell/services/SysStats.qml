@@ -4,8 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// One read of /proc per tick. CPU is a delta between samples; memory is
-// MemTotal - MemAvailable.
 Singleton {
     id: root
 

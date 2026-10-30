@@ -1,14 +1,3 @@
-#!/usr/bin/env bash
-# Install the mouse-button resize helper (Super+right-drag).
-#
-#   sudo ./scripts/install-mouse-resize.sh
-#   sudo ./scripts/install-mouse-resize.sh --button BTN_EXTRA|BTN_SIDE|BTN_RIGHT
-#   sudo ./scripts/install-mouse-resize.sh --uninstall
-#
-# The helper holds a real Super modifier (through a virtual keyboard) while a
-# chosen mouse button is down, then sends a right-button press. Mango sees
-# Super+right-drag and starts an interactive resize. Normal clicks are
-# untouched unless BTN_RIGHT is chosen.
 set -euo pipefail
 
 if [[ $EUID -ne 0 ]]; then
@@ -22,7 +11,6 @@ BINARY=/usr/local/bin/mouse-resize
 CONFIG=/etc/mouse-resize.conf
 BUTTON_VALUE=BTN_EXTRA
 
-# Migrate away from the old helper if it is still installed.
 if [[ -f /etc/systemd/system/razer-resize.service ]]; then
     systemctl disable --now razer-resize.service 2>/dev/null || true
     rm -f /etc/systemd/system/razer-resize.service \

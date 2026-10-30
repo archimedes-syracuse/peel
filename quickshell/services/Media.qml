@@ -4,8 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
 
-// One selection policy for every now-playing surface. Prefer a player that is
-// actually playing, otherwise use the first available player.
 Singleton {
     id: root
 
@@ -27,9 +25,6 @@ Singleton {
 
     readonly property var metadata: player && player.metadata ? player.metadata : ({})
 
-    // Codec resolution order: explicit metadata from the player, then a file
-    // extension (local files, HLS/DASH), and only then a truthful fallback.
-    // A browser player that exposes no codec shows "WEB".
     readonly property string format: {
         if (!player)
             return "";
@@ -72,15 +67,11 @@ Singleton {
         if (text === "")
             return "";
 
-        // Strip MIME parameters such as "; codecs=opus" and the media type.
         text = text.split(";")[0].trim();
         text = text.replace(/^audio\//, "").replace(/^video\//, "");
-        // "codecs=av01.0.05M.08,opus" -> keep a single recognisable token.
         text = text.split(",")[0].trim();
         const compact = text.replace(/[^a-z0-9]+/g, "");
 
-        // Order matters: match the more specific names before the generic ones
-        // (e.g. mpeg4 before mpeg, hevc before nothing-else).
         const table = [
             ["flac", "FLAC"], ["opus", "OPUS"], ["vorbis", "VORBIS"],
             ["alac", "ALAC"], ["mp4a", "AAC"], ["aac", "AAC"],
@@ -148,9 +139,6 @@ Singleton {
         return false;
     }
 
-    // Browser players often expose a generic "LibreWolf is playing media"
-    // title with no artist. Keep the desktop card on its illustrated demo
-    // state until a real track is available.
     readonly property bool hasTrack: {
         if (!available)
             return false;
@@ -160,11 +148,6 @@ Singleton {
             && lower !== "librewolf";
     }
 
-    // ── playback position ────────────────────────────────────────────────
-    // Firefox's MPRIS reports Position as 0 and never updates it, so reading
-    // the player directly leaves the bar clock frozen. Advance a local clock
-    // while the player reports playing, and snap to the player's own position
-    // whenever it actually moves (real players like mpv, or a seek).
     property real position: 0
     property bool _rawReliable: false
     property real _lastRaw: 0
@@ -194,9 +177,6 @@ Singleton {
         const raw = p.position || 0;
         const len = p.length || 0;
 
-        // A changing position means the player actually tracks time (mpv,
-        // Chromium, some Firefox sites); a frozen one is the Firefox case we
-        // have to estimate ourselves.
         if (Math.abs(raw - _lastRaw) > 0.2) {
             _rawReliable = true;
             _lastRawChangeMs = now;
@@ -205,7 +185,6 @@ Singleton {
 
         if (p.isPlaying) {
             if (_rawReliable)
-                // extrapolate from the last real sample so the clock is smooth
                 position = raw + (now - _lastRawChangeMs) / 1000;
             else if (_wasPlaying)
                 position = position + (now - _lastMs) / 1000;

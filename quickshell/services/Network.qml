@@ -4,8 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// NetworkManager status via nmcli. Enough for the bar indicator; the
-// network picker popup comes later.
 Singleton {
     id: root
 

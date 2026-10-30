@@ -3,8 +3,6 @@ import Quickshell
 import Quickshell.Wayland
 import "../theme"
 
-// Window buttons for the bottom taskbar. Uses the same foreign-toplevel data
-// that Quickshell exposes for labwc, Mango, and Niri.
 Row {
     id: root
 
@@ -93,8 +91,6 @@ Row {
                 }
             }
 
-            // A visible close affordance, matching the reference panel's ×.
-            // It appears on hover or on the active task so the bar stays calm.
             Item {
                 id: closeItem
 

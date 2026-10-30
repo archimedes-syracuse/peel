@@ -4,9 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Niri state for the shell. Quickshell 0.3.2 has no native Niri service,
-// so we poll the compositor's JSON IPC. 800 ms is fast enough for the bar
-// and much cheaper than an event-stream parser while the shell is young.
 Singleton {
     id: root
 

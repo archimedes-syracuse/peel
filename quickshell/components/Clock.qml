@@ -3,7 +3,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Two-line rail clock: weekday, hour, minute. Clicking it opens the calendar.
 MouseArea {
     id: root
 

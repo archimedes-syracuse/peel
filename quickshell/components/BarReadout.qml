@@ -2,7 +2,6 @@ import QtQuick
 import "../theme"
 import "../components"
 
-// A square, hairline-bordered text readout for the top bar.
 Item {
     id: root
 

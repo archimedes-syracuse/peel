@@ -1,10 +1,3 @@
-// wallpaper-picker — a standalone, compositor-portable wallpaper carousel.
-//
-// It uses wlr-layer-shell through LayerShellQt, so the same binary works on
-// niri, Hyprland, Sway, Mango and other wlroots-based compositors. The UI is
-// painted with QPainter; no compositor-specific QML or widget toolkit is
-// required.
-
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QCloseEvent>
@@ -54,23 +47,17 @@ constexpr qreal kSideShrink = 0.78;
 constexpr qreal kSideSlant = 0.06;
 constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
-// Scroll travel that advances the carousel by one card on a trackpad gesture.
 constexpr qreal kTrackpadStepPx = 80.0;
 
-// Decoded thumbnails are cached on disk so a cold start does not have to
-// decode the source PNGs again. Bump the version when the thumb geometry
-// changes, so stale entries are ignored instead of reused.
 constexpr int kThumbWidth = 1400;
 constexpr int kThumbHeight = 900;
+// Bump when the thumb geometry changes; stale cache entries are then ignored.
 constexpr int kThumbVersion = 1;
 
 const QColor kAccent(0xe8, 0xb6, 0x4b);
 const QColor kSideBorder(255, 255, 255, 89);
 const QColor kSurface(13, 13, 13);
 
-// Optional diagnostics: when WALLPAPER_PICKER_DEBUG_WHEEL names a file, every
-// wheel event and selection is appended there. Used to tune the scroll step
-// against the actual device deltas.
 void debugLog(const QString &line)
 {
     const QByteArray path = qgetenv("WALLPAPER_PICKER_DEBUG_WHEEL");
@@ -114,9 +101,6 @@ QString thumbCacheDir()
     return base + "/wallpaper-picker";
 }
 
-// Cache identity includes the source size, mtime and thumb geometry, so an
-// edited wallpaper or a changed target size misses the cache instead of
-// showing the old picture.
 QString thumbCacheFile(const QString &path)
 {
     const QFileInfo info(path);
@@ -149,7 +133,6 @@ QImage loadThumbnail(const QString &path)
     if (image.isNull())
         return {};
 
-    // QSaveFile keeps a half-written thumb from ever being read back.
     QDir().mkpath(thumbCacheDir());
     QSaveFile file(cacheFile);
     if (file.open(QIODevice::WriteOnly)) {
@@ -253,8 +236,6 @@ public:
     }
 
 private:
-    // Adopt the wallpaper that is already on screen (swaybg's -i argument)
-    // when this application has never persisted a choice.
     static QString runningSwaybgPath()
     {
         const QStringList processes = QDir(QStringLiteral("/proc")).entryList(
@@ -344,7 +325,6 @@ private:
             return;
         }
 
-        // swaybg is the common denominator for niri, Sway, Mango and labwc.
         QProcess::startDetached(
             "sh",
             {"-c",
@@ -371,10 +351,6 @@ public:
         : QWidget(parent)
         , m_store(store)
     {
-        // The picker always covers the whole output (backdrop + dim), so it is
-        // opaque on purpose. A translucent top-level here made Qt repaint only
-        // the damaged card rects after a hide/show, leaving the rest of the
-        // surface see-through until something else forced a full repaint.
         setAttribute(Qt::WA_OpaquePaintEvent);
         setAutoFillBackground(false);
         setWindowFlags(Qt::FramelessWindowHint);
@@ -402,10 +378,6 @@ public:
             update();
         });
 
-        // Scrolling applies the wallpaper continuously so the choice is
-        // previewed live, but restarting swaybg on every tick makes the
-        // carousel feel sticky. Coalesce the restarts and flush the final
-        // choice when the picker closes.
         m_applyTimer.setSingleShot(true);
         m_applyTimer.setInterval(200);
         connect(&m_applyTimer, &QTimer::timeout, this, [this]() { flushApply(); });
@@ -425,9 +397,6 @@ public:
         layer->setAnchors(LayerShellQt::Window::Anchors(
             LayerShellQt::Window::AnchorTop | LayerShellQt::Window::AnchorBottom
             | LayerShellQt::Window::AnchorLeft | LayerShellQt::Window::AnchorRight));
-        // -1 both ignores other panels' exclusive zones and asks the
-        // compositor to place this surface above them, so the top bar cannot
-        // show through the full-screen backdrop.
         layer->setExclusiveZone(-1);
         layer->setLayer(LayerShellQt::Window::LayerOverlay);
         layer->setKeyboardInteractivity(
@@ -450,8 +419,6 @@ public:
     }
 
 protected:
-    // Layer-shell surfaces can be re-exposed with only a partial damage
-    // region after hiding; force one whole-surface paint on every show.
     void showEvent(QShowEvent *event) override
     {
         QWidget::showEvent(event);
@@ -486,10 +453,8 @@ protected:
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-        // Opaque window: never leave a pixel of the previous buffer/blur.
         painter.fillRect(rect(), Qt::black);
 
-        // Full-screen, dimmed preview of the current choice.
         if (m_selected >= 0 && m_selected < m_store->entries.size()) {
             const QImage &backdrop = m_images.value(m_store->entries.at(m_selected));
             if (!backdrop.isNull()) {
@@ -513,7 +478,6 @@ protected:
             ? m_previous
             : m_selected;
 
-        // Far slices first, active card last.
         QList<int> order;
         for (auto it = current.cbegin(); it != current.cend(); ++it) {
             if (it.value().visible)
@@ -533,16 +497,9 @@ protected:
             painter.save();
             painter.setOpacity(cell.opacity);
 
-            // The selected card is the raw wallpaper: no surface fill under
-            // it, no border and no tint. Only the receding side slices keep a
-            // 1px hairline, a dark backing, and the slight outward lean.
             const QRectF frame = cell.rect;
-            // Every tile leans the same way (bottom to the left), the selected
-            // card included, like the mockup.
             const qreal slant = -kSideSlant;
 
-            // Shear about the slice's own centre so the tops lean inward and
-            // the bottoms outward, keeping the gaps between slices even.
             painter.translate(frame.center());
             if (!qFuzzyIsNull(slant))
                 painter.shear(slant, 0);
@@ -597,13 +554,6 @@ protected:
         }
     }
 
-    // A mouse wheel sends standalone notches: angleDelta 120 (and, on this
-    // device, also a 15px pixelDelta) with no scroll phase. A trackpad wraps
-    // its deltas in a gesture with Begin/Update/End phases and reports
-    // continuous pixel travel. Treating the mouse's pixelDelta as trackpad
-    // travel was the bug: one physical notch only counted 15 of the 80px
-    // needed, so a card took ~6 notches. Notches now step one card each;
-    // only real gestures accumulate pixels.
     void wheelEvent(QWheelEvent *event) override
     {
         event->accept();
@@ -621,15 +571,14 @@ protected:
         if (pixels == 0 && angle == 0)
             return;
 
+        // Wheel notches carry no scroll phase; trackpad gestures do.
         if (event->phase() == Qt::NoScrollPhase) {
-            // Wheel notch: direction comes from angleDelta when present.
             const int dy = angle != 0 ? angle : pixels;
             m_scrollAccum = 0;
             move(dy < 0 ? 1 : -1);
             return;
         }
 
-        // Touchpad gesture: accumulate real pixel travel.
         if (pixels == 0)
             return;
         m_scrollAccum += pixels;
@@ -674,10 +623,6 @@ protected:
     }
 
 private:
-    // Paint order: the selected card, then its visible neighbours outward,
-    // then everything else. The selected image is decoded synchronously so the
-    // very first frame already shows it; the rest stream in on a worker and
-    // every decode goes through the on-disk thumbnail cache.
     void loadImages()
     {
         const QStringList paths = m_store->entries;
@@ -756,16 +701,11 @@ private:
         m_to = layoutFor(m_selected);
         m_progress = 0.0;
         m_animation.stop();
-        // Never shorten the glide: select() rebuilds the animation while it is
-        // running, and reusing the old duration would slow every step after
-        // the first.
         m_animation.setDuration(kAnimationMs);
         m_animation.setStartValue(0.0);
         m_animation.setEndValue(1.0);
         m_animation.start();
 
-        // Live-preview, but coalesce the swaybg restarts while the user is
-        // still scrolling; closing the picker flushes the final choice.
         m_applyPending = true;
         m_applyTimer.start();
         update();
@@ -773,9 +713,6 @@ private:
 
     void flushApply()
     {
-        // A single-shot QTimer clears isActive() before it emits timeout, so
-        // the pending flag -- not the timer state -- decides whether there is
-        // anything to apply.
         if (!m_applyPending)
             return;
         m_applyPending = false;
@@ -896,7 +833,7 @@ QString instanceKey()
     return QStringLiteral("wallpaper-picker-") + display;
 }
 
-} // namespace
+}
 
 int main(int argc, char **argv)
 {
@@ -908,8 +845,6 @@ int main(int argc, char **argv)
         qputenv("QT_WAYLAND_SHELL_INTEGRATION", "layer-shell");
 
     QApplication app(argc, argv);
-    // The picker hides instead of closing. Keep the process (and its decoded
-    // images) resident so re-opening is instant.
     app.setQuitOnLastWindowClosed(false);
 
     QCommandLineParser parser;

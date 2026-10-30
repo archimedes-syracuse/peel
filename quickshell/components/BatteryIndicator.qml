@@ -2,7 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Battery glyph + percentage from sysfs.
 BarButton {
     id: root
 

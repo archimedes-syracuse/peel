@@ -5,9 +5,6 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 
-// Labwc state for the shell. Labwc has no scripting IPC, so the small
-// labwc-workspaces helper speaks ext-workspace-v1 for the rail. Focused-window
-// state comes from the standard foreign-toplevel protocol via Quickshell.
 Singleton {
     id: root
 
@@ -23,7 +20,6 @@ Singleton {
         : null
 
     function tagsFor(monitorName) {
-        // Labwc workspaces span all outputs; every rail shows the same set.
         return workspaces;
     }
 
@@ -59,7 +55,6 @@ Singleton {
                     if (Array.isArray(list))
                         root.workspaces = list;
                 } catch (e) {
-                    // Keep the last good workspace list on a transient failure.
                 }
             }
         }

@@ -3,10 +3,6 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// One façade so the shell works on Mango, Labwc, and Niri. Mango is the
-// primary session; Labwc and Niri remain selectable at the login screen.
-// Each backend reports availability from its own environment/IPC probe, so no
-// compositor-specific branch is needed in the bar components.
 Singleton {
     id: root
 

@@ -8,11 +8,9 @@ import "services"
 import "components"
 import "overlays"
 
-// Entry point. Run with: qs -c niri
 ShellRoot {
     id: root
 
-    // Keep the default sink alive even when no Volume widget is visible.
     PwObjectTracker {
         objects: [Pipewire.defaultAudioSink]
     }
@@ -27,8 +25,7 @@ ShellRoot {
         }
     }
 
-    // Window-close overlay disabled: the floating × lagged behind windows on
-    // move/resize and never blended with the frame. To restore, uncomment this.
+    // Disabled: the floating x lagged behind windows on move/resize.
     // Variants {
     //     model: Quickshell.screens
 

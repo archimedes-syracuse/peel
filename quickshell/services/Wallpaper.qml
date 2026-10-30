@@ -4,25 +4,17 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Wallpaper state and swaybg control. The picker and the IPC handler both go
-// through apply(), so every path that changes the wallpaper also updates the
-// persisted state and replaces the existing swaybg instance.
 Singleton {
     id: root
 
     readonly property string picturesDir: (Quickshell.env("HOME") || "") + "/Pictures"
     readonly property string stateFile: Quickshell.statePath("wallpaper.json")
 
-    // swaybg scaling mode. "fit" shows the whole image with letterbox bars;
-    // "fill" crops it to cover the output.
     readonly property string mode: "fill"
 
-    // Absolute image paths, sorted by the scan command.
     property var entries: []
     property string currentPath: ""
 
-    // The scan, saved state and running process are all asynchronous. Only
-    // reconcile once every piece is available.
     property bool _stateLoaded: false
     property bool _runningChecked: false
     property bool _scanDone: false
@@ -61,9 +53,7 @@ Singleton {
         root.currentPath = path;
         root.save();
 
-        // swaybg owns one background surface per output. Replace the old
-        // instance instead of stacking a second one, and give it a moment to
-        // release the layer surface before the replacement starts.
+        // One swaybg per output: replace the old instance instead of stacking.
         Quickshell.execDetached([
             "sh", "-c",
             "pkill -x swaybg; sleep 0.12; exec swaybg -i \"$1\" -m \"$2\"",
@@ -86,8 +76,6 @@ Singleton {
         if (!root._stateLoaded || !root._runningChecked || !root._scanDone)
             return;
 
-        // First run without a saved selection: adopt whatever the compositor
-        // launched so the picker highlights the real wallpaper.
         if (root.currentPath === "" && root._runningPath !== "") {
             root.currentPath = root._runningPath;
             root.save();
@@ -101,8 +89,6 @@ Singleton {
             return;
         }
 
-        // The saved wallpaper was deleted. Fall back to the running one, then
-        // to the first image in the directory.
         if (root.entries.indexOf(root.currentPath) === -1) {
             if (root.entries.indexOf(root._runningPath) !== -1) {
                 root.currentPath = root._runningPath;
@@ -116,8 +102,6 @@ Singleton {
             return;
         }
 
-        // At login the compositor starts swaybg with its own default before
-        // this shell exists. Restore the user's saved choice when they differ.
         if (root._runningPath !== root.currentPath)
             root.apply(root.currentPath);
     }
@@ -165,7 +149,6 @@ Singleton {
                 if (data && typeof data.path === "string")
                     root.currentPath = data.path;
             } catch (e) {
-                // A corrupt state file just means there is no saved choice.
             }
             root._stateLoaded = true;
             root.reconcile();
@@ -205,8 +188,6 @@ Singleton {
         }
     }
 
-    // Read swaybg's argv from /proc so paths containing spaces survive. The
-    // arguments are NUL-separated; tr turns them into lines for parsing.
     Process {
         id: runningProc
 

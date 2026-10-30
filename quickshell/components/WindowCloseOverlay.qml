@@ -5,47 +5,27 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 
-// A titlebar-style × sitting flush inside the focused Mango window's top-right
-// corner. Mango exposes per-window state through `mmsg`: id, appid, x/y/width/
-// height, monitor, tags, and the is_focused / is_visible / is_fullscreen /
-// is_floating flags. A specific window is closed with
-// `mmsg dispatch killclient client,<id>`. The surface is masked to the button,
-// so every other pointer event passes through to the application.
-//
-// Mango has no `mmsg` query for overview mode, so the button cannot be hidden
-// during the overview; every other case below is covered.
 PanelWindow {
     id: root
 
     property var modelData
 
-    // ── tunables ─────────────────────────────────────────────────────
     readonly property int buttonWidth: 46
     readonly property int buttonHeight: 34
-    readonly property int borderWidth: 1      // Mango border_px
-    readonly property int cornerRadius: 0     // Mango border_radius
-    readonly property int fadeDuration: 120   // ms
+    readonly property int borderWidth: 1
+    readonly property int cornerRadius: 0
+    readonly property int fadeDuration: 120
 
     readonly property color restGlyphColor: Theme.deskTextDim
     readonly property color hoverGlyphColor: Theme.deskHighlight
     readonly property color hoverFillColor: Theme.bgHover
 
-    // Apps that already draw their own control in this corner; the button is
-    // suppressed there so it never overlaps a native titlebar close. Mango has
-    // no server-side decorations, so anything with client-side decorations
-    // (editors, browsers, mail) belongs here. Matched as a lowercased substring
-    // of the app_id; edit this one list to taste.
     readonly property var ignoreAppIds: [
         "vscodium", "codium", "code-oss", "code",
         "firefox", "librewolf", "chrom", "chrome", "brave", "vivaldi",
         "opera", "edge", "thunderbird", "celluloid", "vlc"
     ]
 
-    // ── live geometry ────────────────────────────────────────────────
-    // `mmsg watch all-clients` streams the same JSON as `get all-clients`
-    // whenever a window changes, so the button stays glued during a move or
-    // resize. Mango's 500 ms poll is the fallback until the stream produces
-    // its first line.
     property var liveClients: []
 
     readonly property var client: {
@@ -85,7 +65,6 @@ PanelWindow {
         return false;
     }
 
-    // Close the window the button belongs to, not whichever is focused.
     function closeById(id) {
         if (id === undefined || id === null)
             return;
@@ -125,7 +104,6 @@ PanelWindow {
                     if (parsed && Array.isArray(parsed.clients))
                         root.liveClients = parsed.clients;
                 } catch (e) {
-                    // A partial or non-JSON line; wait for the next one.
                 }
             }
         }

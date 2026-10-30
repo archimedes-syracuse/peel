@@ -2,10 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Numeric workspace/tag strip for the vertical rail. Active is the only
-// accent; occupied workspaces are quieter, empty ones recede almost
-// completely. Mango reports every tag (1..5), so client_count distinguishes
-// occupied tags from empty ones.
 Column {
     id: root
 

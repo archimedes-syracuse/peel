@@ -2,7 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Focused window title, with app-id in the accent color.
 Row {
     id: root
 

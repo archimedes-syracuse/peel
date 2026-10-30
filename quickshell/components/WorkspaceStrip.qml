@@ -3,9 +3,6 @@ import "../theme"
 import "../services"
 import "../components"
 
-// Bare workspace numbers for the top bar. No boxes, no icons, no badges:
-// the active tag is white, occupied tags are grey, and empty tags recede into
-// the bar. The same tag data drives Mango, labwc and Niri.
 Row {
     id: root
 

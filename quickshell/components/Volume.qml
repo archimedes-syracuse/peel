@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell.Services.Pipewire
 import "../theme"
 
-// Default sink volume. Left click mutes, wheel adjusts.
 BarButton {
     id: root
 

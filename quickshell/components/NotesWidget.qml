@@ -2,9 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Editable retro notepad. The title bar is the drag handle; the body is a real
-// TextEdit and saves into Widgets state. The arrow buttons undo/redo, and X
-// hides the note until Mod+Shift+W (or the IPC toggleNotes) brings it back.
 Item {
     id: root
 

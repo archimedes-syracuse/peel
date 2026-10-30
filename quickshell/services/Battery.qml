@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Battery from sysfs: works regardless of UPower daemon quirks.
 Singleton {
     id: root
 

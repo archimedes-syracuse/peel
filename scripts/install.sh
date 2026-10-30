@@ -1,20 +1,10 @@
-#!/usr/bin/env bash
-# niri-rice install / teardown — Mango branch
-#
-#   sudo ./scripts/install.sh              # dry run, prints the removal plan
-#   sudo ./scripts/install.sh --yes        # install Mango + Niri fallback, switch login,
-#                                           # remove Hyprland/Plasma
-#
-# Three session files are installed: Mango is the default at the login screen,
-# and Labwc and Niri remain selectable if Mango fails to start.
-#
 set -euo pipefail
 
 ASSUME_YES=0
 for arg in "$@"; do
     case "$arg" in
         -y|--yes) ASSUME_YES=1 ;;
-        --with-mango) : ;; # compatibility no-op; Mango is installed by default now
+        --with-mango) : ;;
         *) echo "unknown argument: $arg"; exit 2 ;;
     esac
 done
@@ -87,16 +77,13 @@ if [[ $ASSUME_YES -ne 1 ]]; then
     exit 0
 fi
 
-# The backup is intentionally made before this script runs.
 if ! compgen -G "$USER_HOME/rice-backups/*.tar.zst" >/dev/null; then
     echo "No backup found in $USER_HOME/rice-backups — aborting."
     exit 1
 fi
 
-# ── 1. install ────────────────────────────────────────────────────────
 pacman -S --needed --noconfirm "${INSTALL_PKGS[@]}"
 
-# ── 2. symlinks ───────────────────────────────────────────────────────
 mkdir -p "$USER_HOME/.config/quickshell"
 install -d -o "$USER_NAME" -g "$USER_NAME" "$USER_HOME/Pictures/Screenshots"
 install -d -o "$USER_NAME" -g "$USER_NAME" "$USER_HOME/Pictures"
@@ -156,8 +143,6 @@ chown -h "$USER_NAME:$USER_NAME" \
     "$USER_HOME/.config/labwc" \
     "$USER_HOME/.config/quickshell/niri"
 
-# Build and install the standalone native wallpaper picker. The tcsh launcher
-# lands in ~/.local/bin and the binary in ~/.local/lib/wallpaper-picker.
 runuser -u "$USER_NAME" -- env HOME="$USER_HOME" bash -c "
     set -e
     cmake -S '$REPO_DIR/wallpaper-picker' -B '$REPO_DIR/build/wallpaper-picker' \
@@ -167,7 +152,6 @@ runuser -u "$USER_NAME" -- env HOME="$USER_HOME" bash -c "
         --prefix '$USER_HOME/.local'
 "
 
-# ── 3. validate before removing anything ──────────────────────────────
 if ! runuser -u "$USER_NAME" -- env HOME="$USER_HOME" \
         niri validate -c "$USER_HOME/.config/niri/config.kdl"; then
     echo "niri fallback config failed validation — aborting before removal."
@@ -180,22 +164,14 @@ if ! runuser -u "$USER_NAME" -- env HOME="$USER_HOME" \
     exit 1
 fi
 
-# ── 4. login manager ──────────────────────────────────────────────────
-# rlogin replaces greetd/tuigreet. It runs directly on tty1, so there is no
-# greeter/compositor handoff when a session exits. The installer builds it
-# from https://github.com/Beforov1337/rlogin and enables it for the next boot.
 systemctl disable plasmalogin.service 2>/dev/null || true
 rm -f /etc/systemd/system/display-manager.service
 "$REPO_DIR/scripts/install-rlogin.sh"
 
-# ── 5. remove Hyprland ────────────────────────────────────────────────
 pacman -Rns --noconfirm "${REMOVE_HYPR[@]}"
 pacman -Rns --noconfirm hyprpolkitagent 2>/dev/null || true
 
-# ── 6. remove Plasma ──────────────────────────────────────────────────
 pacman -Rns --noconfirm plasma-meta
-# Non-recursive: keeps capitaine-cursors, Fira Sans, and the Alacritty config
-# that cachyos-kde-settings happens to depend on.
 pacman -R --noconfirm cachyos-kde-settings 2>/dev/null || true
 
 systemctl daemon-reload

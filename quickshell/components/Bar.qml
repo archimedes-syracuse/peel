@@ -5,10 +5,6 @@ import "../theme"
 import "../components"
 import "../services"
 
-// Floating vertical rail on the right edge, inspired by gdots' Waybar. The
-// layer surface reserves the rail width so tiled windows stack to its left.
-// Top: launcher, workspaces, system counters. Bottom: sound/brightness,
-// drawers, clock and power.
 PanelWindow {
     id: root
 

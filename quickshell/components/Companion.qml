@@ -4,9 +4,6 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 
-// A small pixel companion that lives above the wallpaper and windows. The
-// layer surface is masked to the sprite only, so the rest of the screen stays
-// usable while the character can still sit over a window edge.
 PanelWindow {
     id: root
 

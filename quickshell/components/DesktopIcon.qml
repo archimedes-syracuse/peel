@@ -1,7 +1,6 @@
 import QtQuick
 import "../theme"
 
-// One desktop icon with a classic two-line label. Double-click to activate.
 Item {
     id: root
 

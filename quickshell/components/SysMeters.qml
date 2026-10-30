@@ -2,7 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Tiny CPU/MEM readouts with animated fill bars.
 Row {
     id: root
 

@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Adapter state + connected-device count via bluetoothctl.
 Singleton {
     id: root
 

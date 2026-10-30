@@ -6,9 +6,6 @@ import "../theme"
 import "../components"
 import "../services"
 
-// Bottom taskbar: the reference desktop's anchor. Pinned launchers and
-// workspaces live on the left, windows in the middle, system/clock on the
-// right. The old right rail remains available in Bar.qml for comparison.
 PanelWindow {
     id: root
 

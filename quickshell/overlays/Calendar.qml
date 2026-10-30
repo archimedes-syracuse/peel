@@ -4,8 +4,6 @@ import Quickshell.Wayland
 import "../theme"
 import "../components"
 
-// Month view opened by clicking the center clock. Keyboard-free by design:
-// arrows change month, "today" returns, Escape or the backdrop closes.
 PanelWindow {
     id: root
 
@@ -64,8 +62,6 @@ PanelWindow {
         onActivated: root.close()
     }
 
-    // Invisible click-catcher: closes the calendar on an outside click without
-    // dimming the wallpaper or the bar.
     Rectangle {
         anchors.fill: parent
         color: "transparent"

@@ -1,13 +1,6 @@
-// razer-resize: turn one mouse button into Super+right-drag.
-//
-// Mango and Niri both start an interactive resize on Super+right-click. This
-// daemon grabs the Basilisk, clones it as a virtual mouse with KEY_LEFTMETA
-// added, and replaces the chosen button with a Meta+right-button chord. When a
-// thumb button is chosen, normal right-clicks are untouched.
-//
-// Build: gcc -O2 -Wall -Wextra -o razer-resize razer-resize.c
-//            $(pkg-config --cflags --libs libevdev)
-
+// Button-triggered resize for the Razer Basilisk: holds Meta on a synthetic
+// keyboard while cloning the mouse, since Mango only reads hard keyboard mods.
+// Build: see scripts/install-razer-resize.sh.
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -129,8 +122,6 @@ static struct libevdev *clone_device(struct libevdev *source)
             libevdev_enable_property(clone, prop);
     }
 
-    // The physical mouse has no keyboard keys; add just the one Niri needs
-    // for its hardcoded Mod+right-drag resize gesture.
     if (libevdev_enable_event_type(clone, EV_KEY) < 0 ||
         libevdev_enable_event_code(clone, EV_KEY, KEY_LEFTMETA, NULL) < 0) {
         fprintf(stderr, "razer-resize: cannot add KEY_LEFTMETA\n");
@@ -168,7 +159,6 @@ static void handle_event(struct libevdev_uinput *uidev,
             return;
         }
 
-        // Mouse buttons do not autorepeat; ignore value 2 if one shows up.
         return;
     }
 

@@ -5,8 +5,6 @@ import "../theme"
 import "../components"
 import "../services"
 
-// Transient feedback for volume and backlight changes. It is a small,
-// non-focusable layer surface; no input is captured outside its own bounds.
 PanelWindow {
     id: root
 

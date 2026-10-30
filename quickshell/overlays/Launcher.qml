@@ -3,11 +3,6 @@ import Quickshell.Wayland
 import QtQuick
 import "../theme"
 
-// A plain dmenu-style application launcher: one black panel, a white prompt
-// and cursor at the top, and the matching applications listed below. The list
-// shows ten rows and scrolls through every match. No title bar, no footer, no
-// window chrome. Type to filter, arrows to move, Enter to launch, Escape to
-// dismiss.
 PanelWindow {
     id: root
 
@@ -32,19 +27,13 @@ PanelWindow {
     readonly property int visibleRows: 10
     readonly property int rowHeight: 20
     readonly property var results: {
-        // Read the revision so a late-loading desktop-entry model refreshes
-        // the filtered list instead of leaving it stuck on "No matches".
         entriesRevision;
         return filterApps(query);
     }
 
-    // Match the bar's glass: off-white text on the translucent dark pill with
-    // a faint light hairline, not a solid black panel.
     readonly property color launchText: Theme.deskText
     readonly property color launchBg: Theme.barGlass
     readonly property color launchBorder: Theme.barGlassBorder
-    // Selection highlight inverts text; use a solid dark ink so the selected
-    // glyphs stay readable even though the panel itself is translucent.
     readonly property color launchInk: Theme.bg
 
     function open() {
@@ -125,8 +114,6 @@ PanelWindow {
         onTriggered: input.forceActiveFocus()
     }
 
-    // Desktop entries can load after the shell starts or reloads. Refresh once
-    // they are available so typed queries do not get stuck on "No matches".
     Timer {
         interval: 300
         repeat: true
@@ -139,8 +126,6 @@ PanelWindow {
         }
     }
 
-    // Clicking outside the panel dismisses it without a scrim. The wheel
-    // handler here also keeps scrolling alive after the result card shrinks.
     MouseArea {
         anchors.fill: parent
         onClicked: root.close()
@@ -164,8 +149,6 @@ PanelWindow {
 
         MouseArea { anchors.fill: parent }
 
-        // Wheel/touchpad scrolling moves the selected row, including when the
-        // launcher first opens with the full list showing.
         WheelHandler {
             onWheel: (event) => root.wheelMove(event)
         }

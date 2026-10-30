@@ -1,6 +1,3 @@
-#!/usr/bin/env bash
-# Build the small ext-workspace helper used by the Quickshell rail. This is a
-# user-level install: no root needed. labwc itself must already be installed.
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

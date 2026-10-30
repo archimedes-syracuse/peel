@@ -1,13 +1,6 @@
 import QtQuick
 import "../theme"
 
-// Translucent surface: a hairline frame around a glass fill. Content goes in
-// the default property and is stacked above the fill.
-//
-// The frame is a single solid colour. A previous version filled the whole
-// panel with the primary -> tertiary gradient and then drew the fill inset on
-// top; that made an opaque backing underneath a translucent fill, so the panel
-// was never actually see-through. `borderEnd` is kept for API compatibility.
 Item {
     id: root
 

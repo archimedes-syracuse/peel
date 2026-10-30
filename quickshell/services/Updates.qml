@@ -4,8 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Package updates for the tiny PKG readout. `checkupdates` refreshes its own
-// temporary sync database, so the bar never blocks on a full system upgrade.
 Singleton {
     id: root
 

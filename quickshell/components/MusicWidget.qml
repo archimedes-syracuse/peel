@@ -2,8 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Compact now-playing window. When MPRIS only exposes a browser's generic
-// "playing media" stub, show the supplied cover/track as a demo instead.
 Item {
     id: root
 

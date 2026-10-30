@@ -4,7 +4,6 @@ import Quickshell.Wayland
 import "../theme"
 import "../components"
 
-// Session menu: lock, suspend, logout, reboot, shutdown.
 PanelWindow {
     id: root
 

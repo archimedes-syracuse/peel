@@ -4,10 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Mango state for the shell. Mango exposes a small JSON IPC through mmsg;
-// polling is deliberate here, matching the Niri backend's cadence and keeping
-// the bar logic identical on both compositors. The clients snapshot carries
-// geometry as well, which the floating close control uses.
 Singleton {
     id: root
 
@@ -18,8 +14,6 @@ Singleton {
     property bool available: false
     property bool canPoll: false
 
-    // Keep floating windows below the top bar. Tiled windows receive the
-    // layer-shell exclusive zone automatically; floating windows do not.
     readonly property int barInset: Widgets.barVisible ? 32 : 0
     property int lastClampClientId: -1
 

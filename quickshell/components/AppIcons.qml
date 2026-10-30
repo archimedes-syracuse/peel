@@ -5,16 +5,6 @@ import "../theme"
 import "../services"
 import "../components"
 
-// Icons for the applications that have a window on the active tag, sitting
-// between the tag strip and the status readouts. One icon per application:
-// two terminals show a single glyph. Click an icon to focus that window.
-//
-// Icon lookup has to be more forgiving than Quickshell.iconPath(icon, true).
-// The active icon theme here is WhiteSur-dark, which inherits hicolor,breeze,
-// and Qt only consults the active theme plus hicolor — so a breeze-only name
-// such as utilities-terminal resolves to nothing. Resolve appid -> .desktop
-// Icon= first, then fall back to searching the common themes by file name,
-// and finally to a Nerd Font glyph so an entry is never blank.
 Item {
     id: root
 
@@ -22,10 +12,8 @@ Item {
     readonly property int cellWidth: 24
     readonly property var windowClients: Mango.allClients
 
-    // Only show windows that live on this monitor's active tag.
     property string monitorName: ""
 
-    // One entry per application on the active tag, in client order.
     readonly property var apps: {
         const out = [];
         const seen = {};
@@ -48,8 +36,6 @@ Item {
         return out;
     }
 
-    // Active tag indices for this monitor only, so an app on another output's
-    // active tag never shows up in this bar.
     readonly property var activeTags: {
         const indices = [];
         const groups = Mango.allTags || [];
@@ -120,8 +106,6 @@ Item {
                     anchors.centerIn: parent
                     width: root.iconSize
                     height: root.iconSize
-                    // The theme index and the desktop-entry model both load
-                    // asynchronously, so re-resolve whenever either changes.
                     readonly property int revision: Icons.revision
                     source: {
                         if (revision < 0)
@@ -134,10 +118,6 @@ Item {
                     visible: false
                 }
 
-                // Monochrome: tint whatever the theme hands us to the bar's
-                // text colour so the strip stays grey rather than multicolour.
-                // ShaderEffectSource captures the hidden image; MultiEffect
-                // then colourises that capture.
                 ShaderEffectSource {
                     id: capture
 

@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import "../theme"
 
-// Horizontal taskbar clock. The old rail clock was intentionally vertical.
 Item {
     id: root
 

@@ -6,7 +6,6 @@ import "../theme"
 import "../components"
 import "../services"
 
-// Compact toasts for the shared notification server.
 Scope {
     id: root
 

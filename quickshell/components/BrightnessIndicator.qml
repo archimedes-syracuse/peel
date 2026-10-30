@@ -2,7 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Backlight percentage, shown only when brightnessctl finds a device.
 BarButton {
     visible: Brightness.available
     glyph: Theme.gBrightness

@@ -3,7 +3,6 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import "../theme"
 
-// StatusNotifierItems: Discord, Steam, nm-applet, etc.
 Row {
     id: root
 

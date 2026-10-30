@@ -1,8 +1,6 @@
 import QtQuick
 import "../theme"
 
-// Compact glyph/label button used by the vertical rail. The horizontal layout
-// is kept for any small shell surface that still uses the old bar language.
 Item {
     id: root
 

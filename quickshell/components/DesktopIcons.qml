@@ -4,9 +4,6 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 
-// Desktop icon layer. It is on the background layer, below application
-// windows, and is masked to the icon rectangles so empty desktop clicks stay
-// click-through.
 PanelWindow {
     id: root
 

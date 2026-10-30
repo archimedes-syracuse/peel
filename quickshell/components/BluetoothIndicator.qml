@@ -2,7 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Bluetooth glyph; the number is connected devices.
 BarButton {
     id: root
 

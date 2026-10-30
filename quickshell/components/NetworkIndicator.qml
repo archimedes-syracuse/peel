@@ -2,7 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Wi-Fi / Ethernet / offline glyph.
 BarButton {
     id: root
 

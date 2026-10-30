@@ -1,9 +1,6 @@
 import QtQuick
 import "../theme"
 
-// Shared framing for the small desktop windows. The references use a paper
-// fill, a slightly darker title strip, a hard 1px edge and a solid offset
-// shadow -- no rounded corners and no blur.
 Item {
     id: root
 
@@ -64,8 +61,6 @@ Item {
         color: root.ink
     }
 
-    // Title-bar drag. Declared below the window controls so their MouseAreas
-    // win the event, but above the title strip itself.
     MouseArea {
         id: titleDrag
         visible: root.draggable
@@ -85,9 +80,6 @@ Item {
         onPositionChanged: (mouse) => {
             if (!pressed)
                 return;
-            // The widget moves inside a stationary full-screen surface, so
-            // mapping the local pointer position to the scene gives stable
-            // coordinates even while the card itself moves.
             const point = titleDrag.mapToItem(null, mouse.x, mouse.y);
             const dx = point.x - lastSceneX;
             const dy = point.y - lastSceneY;
@@ -99,7 +91,6 @@ Item {
         onReleased: root.dragFinished()
     }
 
-    // Dithered application mark used by the Notes reference.
     Item {
         visible: root.showHatch
         x: 9
@@ -205,7 +196,6 @@ Item {
         }
     }
 
-    // Two tiny window buttons in the paper-strip windows.
     Row {
         visible: root.showSquares
         anchors.right: parent.right

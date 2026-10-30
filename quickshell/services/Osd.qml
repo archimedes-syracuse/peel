@@ -4,8 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
 
-// Shared state for the transient volume/brightness overlay. Audio changes
-// arrive immediately through Pipewire; brightness is sampled by its service.
 Singleton {
     id: root
 

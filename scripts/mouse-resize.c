@@ -1,20 +1,6 @@
-// mouse-resize: turn one mouse button into Super+right-drag.
-//
-// Mango starts an interactive resize on Super+right-drag. It reads modifiers
-// only from real keyboards (keyboard_hard_modifiers), so a modifier faked on
-// the mouse device is ignored. This daemon therefore grabs the mouse, clones it
-// as a virtual mouse without the trigger button, and creates a small virtual
-// KEYBOARD that holds Super for the duration of the drag:
-//
-//   physical button press -> virtual keyboard: Super down
-//                         -> virtual mouse: right button down
-//   physical button release -> reverse order
-//
-// Normal right-clicks are untouched unless BUTTON=BTN_RIGHT is set.
-//
-// Build: gcc -O2 -Wall -Wextra -o mouse-resize mouse-resize.c
-//            $(pkg-config --cflags --libs libevdev)
-
+// Turns one mouse button into Super+right-drag: clones the mouse and holds
+// Super on a virtual keyboard, because Mango only reads hard keyboard mods.
+// Build: gcc -O2 -Wall -Wextra -o mouse-resize mouse-resize.c $(pkg-config --cflags --libs libevdev)
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -86,8 +72,6 @@ static int parse_button(const char *value)
     return -1;
 }
 
-// Clone the physical mouse, minus the trigger button. The trigger is replaced
-// by the synthetic chord so a stray duplicate cannot reach the compositor.
 static struct libevdev *clone_device(struct libevdev *source, int resize_button)
 {
     struct libevdev *clone = libevdev_new();
@@ -122,7 +106,6 @@ static struct libevdev *clone_device(struct libevdev *source, int resize_button)
         for (unsigned int code = 0; code <= (unsigned int)max; code++) {
             if (!libevdev_has_event_code(source, type, code))
                 continue;
-            // The trigger button is never cloned: it becomes Super+right.
             if (type == EV_KEY && (int)code == resize_button)
                 continue;
 
@@ -146,10 +129,6 @@ static struct libevdev *clone_device(struct libevdev *source, int resize_button)
     return clone;
 }
 
-// A keyboard device exposing only KEY_LEFTMETA. Mango unions modifiers from
-// every non-virtual keyboard, so this counts as a real Super press.
-// Only EV_KEY, EV_SYN and EV_MSC are declared: the device must look like a
-// tiny keyboard, not a generic input node, or the compositor may ignore it.
 static struct libevdev *create_keyboard(void)
 {
     struct libevdev *kb = libevdev_new();
@@ -180,7 +159,6 @@ static void begin_resize(struct libevdev_uinput *keyboard,
     if (*resizing)
         return;
     *resizing = true;
-    // Super first, so Mango sees the chord when the right button arrives.
     write_event(keyboard, EV_KEY, KEY_LEFTMETA, 1);
     sync_device(keyboard);
     write_event(mouse, EV_KEY, BTN_RIGHT, 1);
@@ -210,7 +188,6 @@ static void handle_event(struct libevdev_uinput *keyboard,
             begin_resize(keyboard, mouse, resizing);
         else if (event->value == 0)
             end_resize(keyboard, mouse, resizing);
-        // Mouse buttons do not autorepeat; ignore value 2 if one shows up.
         return;
     }
 
@@ -321,7 +298,6 @@ int main(void)
                 break;
 
             if (rc == LIBEVDEV_READ_STATUS_SYNC) {
-                // Kernel dropped events (SYN_DROPPED); replay the delta.
                 while (rc == LIBEVDEV_READ_STATUS_SYNC) {
                     handle_event(keyboard, mouse, &event, resize_button,
                                  &resizing);

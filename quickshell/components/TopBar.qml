@@ -6,9 +6,6 @@ import "../theme"
 import "../components"
 import "../services"
 
-// A single line of square, hairline-bordered text readouts along the top edge.
-// Time and now-playing sit left, bare tag numbers center, and package, link,
-// Bluetooth, battery, volume, and backlight status sit right.
 PanelWindow {
     id: root
 
@@ -55,9 +52,6 @@ PanelWindow {
         ? Brightness.pct + "%"
         : "--"
 
-    // Soft scrim behind the whole strip. It is darkest at the screen edge and
-    // fades to fully transparent at the bar's bottom, so the wallpaper blends
-    // into the bar instead of meeting it at a hard horizontal line.
     Rectangle {
         anchors {
             top: parent.top
@@ -96,7 +90,6 @@ PanelWindow {
         }
         spacing: 2
 
-        // [ TIME  Aug 08, 02:46:50 ]
         Rectangle {
             width: timeRow.implicitWidth + 16
             height: 28
@@ -135,7 +128,6 @@ PanelWindow {
             }
         }
 
-        // [ FLAC/WEB  Artist - Title  mm:ss/mm:ss  art ]
         Rectangle {
             visible: Media.hasTrack
             width: visible ? musicRow.implicitWidth + 16 : 0
@@ -206,7 +198,6 @@ PanelWindow {
         }
     }
 
-    // [ 1 2 3 4 5 ]
     Rectangle {
         width: center.implicitWidth + 18
         height: 28

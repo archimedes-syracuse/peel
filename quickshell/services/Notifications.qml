@@ -4,9 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
 
-// Shared notification daemon. The toast overlay and the notification center
-// both read from this one server so the shell never fights itself for the
-// org.freedesktop.Notifications bus name.
 Singleton {
     id: root
 

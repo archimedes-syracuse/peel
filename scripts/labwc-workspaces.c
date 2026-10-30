@@ -1,12 +1,4 @@
-// labwc-workspaces: read and activate labwc workspaces through the standard
-// ext-workspace-v1 protocol.
-//
-//   labwc-workspaces list              print a JSON array for Quickshell
-//   labwc-workspaces activate <index>  switch to workspace 1..N
-//   labwc-workspaces step <delta>      move relative to the active workspace
-//
-// Build with scripts/build-labwc-workspaces.sh.
-
+// Exposes labwc workspaces over ext-workspace-v1 as JSON for the shell.
 #define _POSIX_C_SOURCE 200809L
 
 #include <stdbool.h>

@@ -1,12 +1,3 @@
-#!/usr/bin/env bash
-# Install the Razer Basilisk resize helper.
-#
-#   sudo ./scripts/install-razer-resize.sh
-#   sudo ./scripts/install-razer-resize.sh --uninstall
-#
-# By default the helper maps the forward thumb button (BTN_EXTRA) to
-# Meta+right-drag. Use --button BTN_SIDE for the back thumb, or
-# --button BTN_RIGHT for the normal right mouse button.
 set -euo pipefail
 
 if [[ $EUID -ne 0 ]]; then

@@ -1,12 +1,6 @@
-#!/usr/bin/env bash
-# Install rlogin as the TTY login manager and retire greetd/tuigreet.
-#
-# Usage:
-#   sudo ./scripts/install-rlogin.sh
-#
-# This only changes the next-boot login setup. It does not stop greetd or the
-# current graphical session while you are using it.
 set -euo pipefail
+
+# Install rlogin as the TTY login manager and retire greetd/tuigreet.
 
 if [[ $EUID -ne 0 ]]; then
     echo "Run this with sudo: sudo $0" >&2
@@ -18,8 +12,6 @@ RLOGIN_SRC="https://github.com/Beforov1337/rlogin.git"
 BUILD_ROOT="$(mktemp -d /var/tmp/rlogin-build.XXXXXX)"
 trap 'rm -rf "$BUILD_ROOT"' EXIT
 
-# rlogin is a Rust/PAM program. Pull in its build dependencies if they are not
-# already present; the main installer also lists them.
 missing=()
 for pkg in rust pam git; do
     pacman -Q "$pkg" >/dev/null 2>&1 || missing+=("$pkg")
@@ -30,10 +22,6 @@ fi
 
 git clone --depth=1 "$RLOGIN_SRC" "$BUILD_ROOT/rlogin"
 
-# Keep rlogin's PAM session open until the session process is exec'd. Without
-# this, rlogin closes the PAM session right after login, logind marks the
-# session as closing, and a later suspend can log the user out instead of
-# showing a lock screen.
 PAM_PATCH="$REPO_DIR/scripts/rlogin-pam-session.patch"
 if [[ ! -f "$PAM_PATCH" ]]; then
     echo "Missing patch: $PAM_PATCH" >&2
@@ -47,8 +35,6 @@ cargo build --release --locked \
     --target-dir "$BUILD_ROOT/target"
 install -m 0755 "$BUILD_ROOT/target/release/rlogin" /usr/local/bin/rlogin
 
-# Hostname is the default banner. Set banner = "gentoo" here if you want the
-# preview title rather than this machine's hostname.
 install -d -m 0755 /etc/rlogin
 cat > /etc/rlogin.toml <<'EOF'
 pam_service = "login"
@@ -59,8 +45,6 @@ clear_username_on_error = false
 # banner = "gentoo"
 EOF
 
-# Run on the primary VT. Keep the VT allocated when rlogin restarts; clearing
-# or disallocating it is what produces the white flash between sessions.
 cat > /etc/systemd/system/rlogin.service <<'EOF'
 [Unit]
 Description=rlogin TUI login manager
@@ -89,8 +73,6 @@ EOF
 systemctl daemon-reload
 systemctl set-default graphical.target
 
-# Do not stop greetd here: that would terminate the graphical session in which
-# this script was launched. It will simply not start on the next boot.
 systemctl disable greetd.service 2>/dev/null || true
 systemctl disable getty@tty1.service 2>/dev/null || true
 systemctl enable rlogin.service

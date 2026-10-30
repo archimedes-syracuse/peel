@@ -2,8 +2,6 @@ import QtQuick
 import "../theme"
 import "../services"
 
-// Weather window from the supplied desktop mockup. WidgetLayer puts it on the
-// wallpaper layer, below tiled windows, with live wttr.in data.
 Item {
     id: root
 

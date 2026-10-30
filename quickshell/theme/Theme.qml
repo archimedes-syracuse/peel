@@ -2,11 +2,7 @@ pragma Singleton
 
 import QtQuick
 
-// Terminal monochrome: near-black surfaces, grey hairlines, and plain text.
-// No color accents, no decorative imagery. The shell should read like a tiling
-// window manager with a text UI, not a themed desktop.
 QtObject {
-    // surfaces
     readonly property color bg: "#0b0b0b"
     readonly property color bgBar: "#ee111111"
     readonly property color bgPanel: "#f2161616"
@@ -15,12 +11,9 @@ QtObject {
     readonly property color accentSoft: "#2effffff"
     readonly property color border: "#40ffffff"
 
-    // text
     readonly property color fg: "#f0f0f0"
     readonly property color fgDim: "#b8b8b8"
 
-    // accents are deliberately desaturated; callers keep their old semantic
-    // names so the rest of the shell does not need a parallel palette.
     readonly property color accent: "#d8d8d8"
     readonly property color accent2: "#9a9a9a"
     readonly property color red: "#b8b8b8"
@@ -28,7 +21,6 @@ QtObject {
     readonly property color yellow: "#c8c8c8"
     readonly property color blue: "#a8a8a8"
 
-    // Desktop-scene palette
     readonly property color deskText: "#f0f0f0"
     readonly property color deskTextDim: "#b8b8b8"
     readonly property color deskInk: "#141414"
@@ -39,33 +31,18 @@ QtObject {
     readonly property color deskShadow: "#99000000"
     readonly property color deskBlue: "#9a9a9a"
 
-    // Top-bar glass. A vertical scrim fades the wallpaper into the strip (see
-    // barScrimTop/barScrimMid below) and each module is a square, translucent
-    // dark pill with a faint light hairline so the text stays legible over any
-    // wallpaper.
-    // `barPill` is the stronger tint used by the top bar, whose tiny 14px text
-    // sits directly on the (often bright) wallpaper; `barGlass` is the lighter
-    // tint shared by the launcher and the overlays, which have larger text and
-    // sit over app content.
     readonly property color barPill: "#8c0d0d0d"
     readonly property color barGlass: "#4d0d0d0d"
     readonly property color barGlassBorder: "#40ffffff"
-    // The top strip fades into the wallpaper with a scrim instead of a hard
-    // edge. `barScrimTop` is the same tint as the pills; it reaches zero
-    // opacity at the bottom of the bar.
     readonly property color barScrimTop: "#8c0d0d0d"
     readonly property color barScrimMid: "#380d0d0d"
 
-    // geometry
-    // The old rail is kept for reference; the active shell uses the top bar
-    // dimensions below. barHeight matches the real top-strip surface.
     readonly property int barWidth: 42
     readonly property int barHeight: 32
     readonly property int taskbarHeight: 32
     readonly property int radius: 0
     readonly property int gap: 8
 
-    // type
     readonly property string font: "JetBrainsMono Nerd Font"
     readonly property string fontRetro: "Nimbus Mono PS"
     readonly property int sizeSmall: 9
@@ -74,11 +51,9 @@ QtObject {
     readonly property int sizeTitle: 16
     readonly property int iconSize: 15
 
-    // motion
     readonly property int duration: 140
     readonly property int durationSlow: 260
 
-    // Nerd Font glyphs (same codepoints as the existing bar)
     readonly property string gApps: "\uF009"
     readonly property string gArch: "\uF303"
     readonly property string gPower: "\uF011"

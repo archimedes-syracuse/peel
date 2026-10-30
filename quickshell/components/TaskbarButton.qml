@@ -1,7 +1,6 @@
 import QtQuick
 import "../theme"
 
-// Small square button used by the bottom taskbar.
 Item {
     id: root
 

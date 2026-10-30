@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Screen backlight percentage from brightnessctl's machine-readable output.
 Singleton {
     id: root
 

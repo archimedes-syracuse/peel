@@ -5,7 +5,6 @@ import "../theme"
 import "../components"
 import "../services"
 
-// Notification history panel, opened from the bell in the bar.
 PanelWindow {
     id: root
 

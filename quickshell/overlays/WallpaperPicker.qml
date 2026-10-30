@@ -4,23 +4,14 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 
-// Wallpaper picker: a cover-flow carousel over ~/Pictures. The selected
-// wallpaper sits centred at full size with no frame, no badge and no tint --
-// it is just the image. Its neighbours recede to the sides as narrow,
-// rotated slices. The current choice is also shown dimmed and full-bleed
-// behind, so the whole screen previews it. Arrows (or the wheel) scroll, a
-// click applies, Escape closes. The choice is persisted by Wallpaper.
 PanelWindow {
     id: root
 
-    // ── look ────────────────────────────────────────────────────────────
-    readonly property int visibleSide: 3              // slices drawn per side
-    readonly property real sideHeight: 0.92           // slice height vs card
-    readonly property real sideWidth: 0.16            // first slice width vs card
-    readonly property real sideShrink: 0.78           // width falloff per step
-    readonly property int gap: 10                     // px between items
-    // Neighbours are sheared very slightly so they fan out toward the bottom
-    // instead of sitting as perfectly straight bars. Small on purpose.
+    readonly property int visibleSide: 3
+    readonly property real sideHeight: 0.92
+    readonly property real sideWidth: 0.16
+    readonly property real sideShrink: 0.78
+    readonly property int gap: 10
     readonly property real sideSlant: 0.06
 
     readonly property int cardH: Math.round(height * 0.57)
@@ -43,7 +34,6 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
     WlrLayershell.namespace: "niri-shell-wallpaper"
 
-    // ── geometry helpers ────────────────────────────────────────────────
     function sliceHeight() {
         return Math.round(cardH * sideHeight);
     }
@@ -52,14 +42,10 @@ PanelWindow {
         return Math.round(cardW * sideWidth * Math.pow(sideShrink, ad - 1));
     }
 
-    // Shear for every tile, the selected card included: the whole row leans
-    // the same way, bottom to the left, as in the mockup.
     function shearFor(d) {
         return -sideSlant;
     }
 
-    // Distance from screen centre to the inner edge of the |ad|-th slice,
-    // so slices pack outward edge-to-edge with a small gap.
     function sliceEdgeOffset(ad) {
         let x = cardW / 2 + gap;
         for (let k = 1; k < ad; k++)
@@ -67,7 +53,6 @@ PanelWindow {
         return x;
     }
 
-    // ── lifecycle ───────────────────────────────────────────────────────
     function open() {
         Wallpaper.scan();
         root._syncing = true;
@@ -93,7 +78,6 @@ PanelWindow {
         root.selectedIndex = index >= 0 ? index : 0;
     }
 
-    // Wrapping step through the images.
     function move(delta) {
         const n = Wallpaper.entries.length;
         if (n === 0)
@@ -139,7 +123,6 @@ PanelWindow {
         onActivated: root.close()
     }
 
-    // ── backdrop: the selected wallpaper, dimmed full-bleed ─────────────
     Image {
         anchors.fill: parent
         source: root.selectedIndex >= 0 && root.selectedIndex < Wallpaper.entries.length
@@ -161,7 +144,6 @@ PanelWindow {
         }
     }
 
-    // ── carousel ────────────────────────────────────────────────────────
     Repeater {
         model: Wallpaper.entries
 
@@ -197,8 +179,6 @@ PanelWindow {
             z: 1000 - ad
             visible: onScreen
             opacity: active ? 1 : Math.max(0.5, 1 - 0.14 * ad)
-            // Shear about the top edge: neighbours lean very slightly away
-            // from the centre at the bottom, so the row fans out a touch.
             transform: Matrix4x4 {
                 matrix: Qt.matrix4x4(
                     1, root.shearFor(d), 0, -root.shearFor(d) * height / 2,
@@ -231,9 +211,6 @@ PanelWindow {
                 }
             }
 
-            // The selected tile is the raw image: no background fill, no
-            // border, no highlight of any kind. Only the side slices keep the
-            // 1px hairline that separates them from the dimmed backdrop.
             Rectangle {
                 anchors.fill: parent
                 color: cell.active ? "transparent" : Theme.surface
@@ -265,7 +242,6 @@ PanelWindow {
         }
     }
 
-    // ── keyboard ────────────────────────────────────────────────────────
     Item {
         id: keyCatcher
 

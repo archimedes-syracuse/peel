@@ -4,9 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Persistent desktop-widget state: positions, visibility and the editable note.
-// Stored in Quickshell's per-shell state directory so config reloads and shell
-// restarts keep the desktop arrangement.
 Singleton {
     id: root
 
@@ -51,8 +48,6 @@ Singleton {
             if (typeof data.notesX === "number") root.notesX = data.notesX;
             if (typeof data.notesY === "number") root.notesY = data.notesY;
             if (typeof data.notesVisible === "boolean") root.notesVisible = data.notesVisible;
-            // The bar is always visible: never restore a hidden state, so a stray
-            // toggle can't leave it gone after a restart.
             root.barVisible = true;
             if (typeof data.widgetsVisible === "boolean") root.widgetsVisible = data.widgetsVisible;
             if (typeof data.desktopIconsVisible === "boolean") root.desktopIconsVisible = data.desktopIconsVisible;
@@ -61,7 +56,6 @@ Singleton {
             if (typeof data.companionY === "number") root.companionY = data.companionY;
             if (typeof data.noteText === "string") root.noteText = data.noteText;
         } catch (e) {
-            // Missing/corrupt state is fine: defaults are the initial layout.
         }
     }
 

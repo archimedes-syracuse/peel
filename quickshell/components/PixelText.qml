@@ -1,7 +1,5 @@
 import QtQuick
 
-// Courier-style pixel text used by the desktop widgets. Native rendering keeps
-// the small point sizes crisp instead of turning them into grey mush.
 Text {
     font.family: "Nimbus Mono PS"
     font.pixelSize: 10

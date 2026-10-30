@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Root filesystem usage from df -P. Used by the compact bar readout.
 Singleton {
     id: root
 

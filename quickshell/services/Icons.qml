@@ -2,16 +2,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// appid -> icon path, with the fallbacks the bar needs on this machine.
-//
-// Quickshell.iconPath(name, true) only consults the active icon theme plus
-// hicolor. The active theme here is WhiteSur-dark, which inherits breeze but
-// does not contain every breeze icon at every size, so names like
-// utilities-terminal resolve to nothing. Resolve the application's own Icon=
-// first, then search the installed themes, then draw a Nerd Font glyph.
-//
-// QML cannot stat files inside a binding, so the theme directories are indexed
-// once into a name -> path map. The map is rebuilt only if a lookup misses.
 pragma Singleton
 Singleton {
     id: root
@@ -20,8 +10,6 @@ Singleton {
     readonly property var iconSizes: [32, 48, 24, 64, 16, 128, 256, 22]
     readonly property string iconRoot: "/usr/share/icons"
 
-    // One shell pipeline, emitted most-preferred theme first. The reader keeps
-    // the first hit per name, so breeze wins over hicolor.
     readonly property string indexCommand:
         "for t in " + iconThemes.join(" ") + "; do for s in "
         + iconSizes.join(" ") + "; do for f in " + iconRoot + "/$t/apps/$s/*; do"
@@ -31,16 +19,11 @@ Singleton {
         + " [ -f \"$f\" ] && printf '%s\\t%s\\n' \"$(basename \"$f\" | sed 's/\\.[^.]*$//')\" \"$f\";"
         + " done; done"
 
-    // name -> absolute path, built by the indexer below.
     property var index: ({})
     property bool indexed: false
 
-    // Consumers bind to this so they re-resolve once the index and the
-    // desktop-entry model are both populated. Both load asynchronously, so a
-    // resolution attempted at startup legitimately returns nothing.
     property int revision: 0
 
-    // Desktop entries arrive late and only when something asks; poll briefly.
     property bool entriesReady: false
     Timer {
         interval: 300
@@ -66,8 +49,6 @@ Singleton {
         id: lister
 
         running: false
-        // The scan lives in a script: building it inline is easy to get wrong
-        // through sh -c quoting, and it only has to run once at startup.
         command: ["sh", "-c", root.indexCommand]
 
         stdout: StdioCollector {
@@ -83,7 +64,6 @@ Singleton {
                         continue;
                     const name = line.substring(0, tab);
                     const path = line.substring(tab + 1);
-                    // Keep the first hit: themes are emitted most-preferred first.
                     if (map[name] === undefined)
                         map[name] = path;
                 }
@@ -94,7 +74,6 @@ Singleton {
         }
     }
 
-    // appid -> the Icon= name from its desktop entry.
     function desktopIconName(appid) {
         if (appid === "")
             return "";
@@ -116,12 +95,10 @@ Singleton {
         if (name === "")
             return "";
 
-        // Qt's own resolution covers the active theme and hicolor.
         const direct = Quickshell.iconPath(name, true);
         if (direct !== "")
             return direct;
 
-        // Then the prebuilt index for breeze/WhiteSur and friends.
         const hit = index[name];
         return hit !== undefined ? hit : "";
     }
@@ -140,7 +117,6 @@ Singleton {
         if (direct !== "")
             return direct;
 
-        // org.kde.konsole -> konsole
         const tail = clean.indexOf(".") !== -1 ? clean.substring(clean.lastIndexOf(".") + 1) : "";
         if (tail !== "") {
             const tailFound = lookup(tail);
@@ -151,7 +127,6 @@ Singleton {
         return "";
     }
 
-    // Last resort: a Nerd Font glyph so the entry still reads as something.
     function glyph(appid) {
         const id = String(appid || "").toLowerCase();
         if (id.indexOf("konsole") !== -1 || id.indexOf("terminal") !== -1
