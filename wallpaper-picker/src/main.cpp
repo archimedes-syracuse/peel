@@ -7,6 +7,8 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QCloseEvent>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -22,12 +24,15 @@
 #include <QLocalSocket>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPointer>
 #include <QProcess>
 #include <QRandomGenerator>
 #include <QResizeEvent>
+#include <QSaveFile>
 #include <QScreen>
 #include <QSet>
 #include <QStandardPaths>
+#include <QThreadPool>
 #include <QTimer>
 #include <QVariantAnimation>
 #include <QWidget>
@@ -49,6 +54,13 @@ constexpr qreal kSideShrink = 0.78;
 constexpr qreal kSideSlant = 0.06;
 constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
+
+// Decoded thumbnails are cached on disk so a cold start does not have to
+// decode the source PNGs again. Bump the version when the thumb geometry
+// changes, so stale entries are ignored instead of reused.
+constexpr int kThumbWidth = 1400;
+constexpr int kThumbHeight = 900;
+constexpr int kThumbVersion = 1;
 
 const QColor kAccent(0xe8, 0xb6, 0x4b);
 const QColor kSideBorder(255, 255, 255, 89);
@@ -75,6 +87,59 @@ QRectF coverSource(const QSize &image, const QRectF &target)
     const qreal w = target.width() / scale;
     const qreal h = target.height() / scale;
     return QRectF((image.width() - w) / 2.0, (image.height() - h) / 2.0, w, h);
+}
+
+QString thumbCacheDir()
+{
+    QString base = qEnvironmentVariable("XDG_CACHE_HOME");
+    if (base.isEmpty())
+        base = QDir::homePath() + "/.cache";
+    return base + "/wallpaper-picker";
+}
+
+// Cache identity includes the source size, mtime and thumb geometry, so an
+// edited wallpaper or a changed target size misses the cache instead of
+// showing the old picture.
+QString thumbCacheFile(const QString &path)
+{
+    const QFileInfo info(path);
+    const QByteArray seed = path.toUtf8() + '|'
+        + QByteArray::number(info.size()) + '|'
+        + QByteArray::number(info.lastModified().toMSecsSinceEpoch()) + '|'
+        + QByteArray::number(kThumbWidth) + 'x'
+        + QByteArray::number(kThumbHeight) + 'v'
+        + QByteArray::number(kThumbVersion);
+    const QString name = QString::fromLatin1(
+        QCryptographicHash::hash(seed, QCryptographicHash::Sha1).toHex());
+    return thumbCacheDir() + '/' + name + ".jpg";
+}
+
+QImage loadThumbnail(const QString &path)
+{
+    const QString cacheFile = thumbCacheFile(path);
+    QImage cached(cacheFile);
+    if (!cached.isNull())
+        return cached;
+
+    QImageReader reader(path);
+    reader.setAutoTransform(true);
+    const QSize original = reader.size();
+    if (original.isValid()) {
+        reader.setScaledSize(
+            original.scaled(kThumbWidth, kThumbHeight, Qt::KeepAspectRatio));
+    }
+    QImage image = reader.read();
+    if (image.isNull())
+        return {};
+
+    // QSaveFile keeps a half-written thumb from ever being read back.
+    QDir().mkpath(thumbCacheDir());
+    QSaveFile file(cacheFile);
+    if (file.open(QIODevice::WriteOnly)) {
+        image.save(&file, "JPEG", 88);
+        file.commit();
+    }
+    return image;
 }
 
 QString quoteForShell(const QString &path)
@@ -266,7 +331,7 @@ private:
         QProcess::startDetached(
             "sh",
             {"-c",
-             "pkill -x swaybg 2>/dev/null; sleep 0.12; exec swaybg -i \"$1\" -m fill",
+             "pkill -x swaybg 2>/dev/null; exec swaybg -i \"$1\" -m fill",
              "wallpaper-picker", path});
     }
 };
@@ -289,8 +354,11 @@ public:
         : QWidget(parent)
         , m_store(store)
     {
-        setAttribute(Qt::WA_TranslucentBackground);
-        setAttribute(Qt::WA_NoSystemBackground);
+        // The picker always covers the whole output (backdrop + dim), so it is
+        // opaque on purpose. A translucent top-level here made Qt repaint only
+        // the damaged card rects after a hide/show, leaving the rest of the
+        // surface see-through until something else forced a full repaint.
+        setAttribute(Qt::WA_OpaquePaintEvent);
         setAutoFillBackground(false);
         setWindowFlags(Qt::FramelessWindowHint);
         setMouseTracking(true);
@@ -303,7 +371,7 @@ public:
             m_selected = index >= 0 ? index : 0;
         }
 
-        loadImagesAsync();
+        loadImages();
 
         m_animation.setDuration(kAnimationMs);
         m_animation.setEasingCurve(QEasingCurve::OutCubic);
@@ -316,6 +384,14 @@ public:
             m_progress = 1.0;
             update();
         });
+
+        // Scrolling applies the wallpaper continuously so the choice is
+        // previewed live, but restarting swaybg on every tick makes the
+        // carousel feel sticky. Coalesce the restarts and flush the final
+        // choice when the picker closes.
+        m_applyTimer.setSingleShot(true);
+        m_applyTimer.setInterval(200);
+        connect(&m_applyTimer, &QTimer::timeout, this, [this]() { flushApply(); });
     }
 
     void configureLayerShell()
@@ -346,6 +422,7 @@ public:
     void toggleVisibility()
     {
         if (isVisible()) {
+            flushApply();
             hide();
             return;
         }
@@ -356,6 +433,26 @@ public:
     }
 
 protected:
+    // Layer-shell surfaces can be re-exposed with only a partial damage
+    // region after hiding; force one whole-surface paint on every show.
+    void showEvent(QShowEvent *event) override
+    {
+        QWidget::showEvent(event);
+        m_to = layoutFor(m_selected);
+        m_from = m_to;
+        m_progress = 1.0;
+        QTimer::singleShot(0, this, [this]() {
+            update();
+            repaint();
+        });
+    }
+
+    void closeEvent(QCloseEvent *event) override
+    {
+        flushApply();
+        QWidget::closeEvent(event);
+    }
+
     void resizeEvent(QResizeEvent *event) override
     {
         QWidget::resizeEvent(event);
@@ -371,6 +468,9 @@ protected:
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
+        // Opaque window: never leave a pixel of the previous buffer/blur.
+        painter.fillRect(rect(), Qt::black);
 
         // Full-screen, dimmed preview of the current choice.
         if (m_selected >= 0 && m_selected < m_store->entries.size()) {
@@ -519,33 +619,65 @@ protected:
     }
 
 private:
-    void loadImagesAsync()
+    // Paint order: the selected card, then its visible neighbours outward,
+    // then everything else. The selected image is decoded synchronously so the
+    // very first frame already shows it; the rest stream in on a worker and
+    // every decode goes through the on-disk thumbnail cache.
+    void loadImages()
     {
-        QStringList paths = m_store->entries;
-        auto *watcher = new QFutureWatcher<QHash<QString, QImage>>(this);
-        connect(watcher, &QFutureWatcher<QHash<QString, QImage>>::finished, this,
-                [this, watcher]() {
-                    const auto loaded = watcher->result();
-                    for (auto it = loaded.cbegin(); it != loaded.cend(); ++it)
-                        m_images.insert(it.key(), it.value());
-                    watcher->deleteLater();
-                    update();
-                });
+        const QStringList paths = m_store->entries;
+        if (paths.isEmpty())
+            return;
 
-        watcher->setFuture(QtConcurrent::run([paths]() {
-            QHash<QString, QImage> loaded;
-            for (const QString &path : paths) {
-                QImageReader reader(path);
-                reader.setAutoTransform(true);
-                const QSize original = reader.size();
-                if (original.isValid())
-                    reader.setScaledSize(original.scaled(1400, 900, Qt::KeepAspectRatio));
-                QImage image = reader.read();
-                if (!image.isNull())
-                    loaded.insert(path, image);
+        QList<int> order = loadOrder();
+        if (m_selected >= 0 && m_selected < paths.size()) {
+            const QImage first = loadThumbnail(paths.at(m_selected));
+            if (!first.isNull())
+                m_images.insert(paths.at(m_selected), first);
+            order.removeAll(m_selected);
+        }
+
+        QPointer<WallpaperWindow> guard(this);
+        QThreadPool::globalInstance()->start([guard, paths, order]() {
+            for (int index : order) {
+                const QImage image = loadThumbnail(paths.at(index));
+                if (image.isNull())
+                    continue;
+                if (!guard)
+                    return;
+                QMetaObject::invokeMethod(
+                    guard.data(),
+                    [guard, path = paths.at(index), image]() {
+                        if (!guard)
+                            return;
+                        guard->m_images.insert(path, image);
+                        guard->update();
+                    },
+                    Qt::QueuedConnection);
             }
-            return loaded;
-        }));
+        });
+    }
+
+    QList<int> loadOrder() const
+    {
+        const int n = m_store->entries.size();
+        QList<int> order;
+        QSet<int> seen;
+        auto push = [&](int index) {
+            if (index < 0 || index >= n || seen.contains(index))
+                return;
+            seen.insert(index);
+            order.append(index);
+        };
+
+        push(m_selected);
+        for (int d = 1; d <= kVisibleSide; ++d) {
+            push(m_selected - d);
+            push(m_selected + d);
+        }
+        for (int i = 0; i < n; ++i)
+            push(i);
+        return order;
     }
 
     void move(int delta)
@@ -571,9 +703,19 @@ private:
         m_animation.setEndValue(1.0);
         m_animation.start();
 
-        // Live-preview and persist immediately, matching the shell picker.
-        m_store->apply(m_store->entries.at(index));
+        // Live-preview, but coalesce the swaybg restarts while the user is
+        // still scrolling; closing the picker flushes the final choice.
+        m_applyTimer.start();
         update();
+    }
+
+    void flushApply()
+    {
+        if (!m_applyTimer.isActive())
+            return;
+        m_applyTimer.stop();
+        if (m_selected >= 0 && m_selected < m_store->entries.size())
+            m_store->apply(m_store->entries.at(m_selected));
     }
 
     Layout layoutFor(int selected) const
@@ -657,8 +799,7 @@ private:
 
     void applyAndClose()
     {
-        if (m_selected >= 0 && m_selected < m_store->entries.size())
-            m_store->apply(m_store->entries.at(m_selected));
+        flushApply();
         close();
     }
 
@@ -671,6 +812,7 @@ private:
     Layout m_to;
     qreal m_progress = 1.0;
     QVariantAnimation m_animation;
+    QTimer m_applyTimer;
 };
 
 QString instanceKey()
@@ -694,6 +836,9 @@ int main(int argc, char **argv)
         qputenv("QT_WAYLAND_SHELL_INTEGRATION", "layer-shell");
 
     QApplication app(argc, argv);
+    // The picker hides instead of closing. Keep the process (and its decoded
+    // images) resident so re-opening is instant.
+    app.setQuitOnLastWindowClosed(false);
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
