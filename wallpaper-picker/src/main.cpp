@@ -422,6 +422,19 @@ protected:
     void showEvent(QShowEvent *event) override
     {
         QWidget::showEvent(event);
+
+        // Rescan on every show: the process stays resident while hidden, so
+        // images added from a file manager would otherwise never appear.
+        m_store->scan();
+        const int index = m_store->currentIndex();
+        m_selected = index >= 0 ? index
+                                : (m_store->entries.isEmpty() ? -1 : 0);
+        m_previous = -1;
+        loadImages();
+        debugLog(QStringLiteral("show entries=%1 selected=%2")
+                     .arg(m_store->entries.size())
+                     .arg(m_selected));
+
         m_to = layoutFor(m_selected);
         m_from = m_to;
         m_progress = 1.0;
