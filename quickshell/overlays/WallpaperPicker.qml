@@ -14,15 +14,17 @@ PanelWindow {
     id: root
 
     // ── look ────────────────────────────────────────────────────────────
-    readonly property int visibleSide: 4          // neighbours drawn per side
-    readonly property real baseAngle: 78          // first neighbour rotation (deg)
-    readonly property real angleStep: 2           // extra rotation per further item
-    readonly property real maxAngle: 82           // clamp
-    readonly property real shrink: 0.20           // scale falloff per step
-    readonly property int gap: 8                  // px between items
+    readonly property int visibleSide: 3              // slices drawn per side
+    readonly property real sideHeight: 0.92           // slice height vs card
+    readonly property real sideWidth: 0.20            // first slice width vs card
+    readonly property real sideShrink: 0.78           // width falloff per step
+    readonly property int gap: 10                     // px between items
+    // Neighbours are sheared very slightly so they fan out toward the bottom
+    // instead of sitting as perfectly straight bars. Small on purpose.
+    readonly property real sideSlant: 0.10
 
-    readonly property int cardH: Math.round(height * 0.56)
-    readonly property int cardW: Math.round(cardH * 16 / 9)
+    readonly property int cardH: Math.round(height * 0.57)
+    readonly property int cardW: Math.round(cardH * 1.62)
 
     property int selectedIndex: 0
     property bool _syncing: false
@@ -42,31 +44,20 @@ PanelWindow {
     WlrLayershell.namespace: "niri-shell-wallpaper"
 
     // ── geometry helpers ────────────────────────────────────────────────
-    function scaleFor(ad) {
-        return 1 / (1 + ad * shrink);
+    function sliceHeight() {
+        return Math.round(cardH * sideHeight);
     }
 
-    function angleFor(d) {
-        const ad = Math.abs(d);
-        if (ad === 0)
-            return 0;
-        return (d < 0 ? 1 : -1) * Math.min(maxAngle, baseAngle + angleStep * (ad - 1));
+    function sliceWidth(ad) {
+        return Math.round(cardW * sideWidth * Math.pow(sideShrink, ad - 1));
     }
 
-    // Half of an item's on-screen width once rotated (orthographic projection).
-    function halfWidthAt(ad) {
-        if (ad === 0)
-            return cardW / 2;
-        const a = Math.min(maxAngle, baseAngle + angleStep * (ad - 1));
-        return cardW / 2 * scaleFor(ad) * Math.abs(Math.cos(a * Math.PI / 180));
-    }
-
-    // Distance from screen centre to the centre of an item |d| steps away.
-    // Items are packed edge-to-edge with a gap, so the widths accumulate.
-    function centerOffsetAt(ad) {
-        let x = 0;
-        for (let k = 1; k <= ad; k++)
-            x += halfWidthAt(k - 1) + gap + halfWidthAt(k);
+    // Distance from screen centre to the inner edge of the |ad|-th slice,
+    // so slices pack outward edge-to-edge with a small gap.
+    function sliceEdgeOffset(ad) {
+        let x = cardW / 2 + gap;
+        for (let k = 1; k < ad; k++)
+            x += sliceWidth(k) + gap;
         return x;
     }
 
@@ -189,26 +180,25 @@ PanelWindow {
             readonly property bool onScreen: ad <= root.visibleSide
             readonly property bool active: ad === 0
 
-            property real rot: root.angleFor(d)
-
-            width: root.cardW
-            height: root.cardH
-            x: root.width / 2 + (d < 0 ? -1 : 1) * root.centerOffsetAt(ad) - width / 2
+            width: active ? root.cardW : root.sliceWidth(ad)
+            height: active ? root.cardH : root.sliceHeight()
+            x: active
+                ? root.width / 2 - width / 2
+                : (d < 0
+                    ? root.width / 2 - root.sliceEdgeOffset(ad) - width
+                    : root.width / 2 + root.sliceEdgeOffset(ad))
             y: root.height / 2 - height / 2
             z: 1000 - ad
-            visible: onScreen || opacity > 0.01
-            opacity: onScreen ? Math.max(0.3, 1 - 0.18 * ad) : 0
-            scale: root.scaleFor(ad)
-
-            transform: Rotation {
-                origin.x: cell.width / 2
-                origin.y: cell.height / 2
-                axis {
-                    x: 0
-                    y: 1
-                    z: 0
-                }
-                angle: cell.rot
+            visible: onScreen
+            opacity: active ? 1 : Math.max(0.5, 1 - 0.14 * ad)
+            // Shear about the top edge: neighbours lean very slightly away
+            // from the centre at the bottom, so the row fans out a touch.
+            transform: Matrix4x4 {
+                matrix: Qt.matrix4x4(
+                    1, active ? 0 : (d < 0 ? -root.sideSlant : root.sideSlant), 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1)
             }
 
             Behavior on x {
@@ -217,13 +207,13 @@ PanelWindow {
                     easing.type: Easing.OutCubic
                 }
             }
-            Behavior on scale {
+            Behavior on width {
                 NumberAnimation {
                     duration: 260
                     easing.type: Easing.OutCubic
                 }
             }
-            Behavior on rot {
+            Behavior on height {
                 NumberAnimation {
                     duration: 260
                     easing.type: Easing.OutCubic
@@ -242,7 +232,7 @@ PanelWindow {
                 anchors.fill: parent
                 color: cell.active ? "transparent" : Theme.surface
                 border.width: cell.active ? 0 : 1
-                border.color: Theme.border
+                border.color: cell.active ? "transparent" : "#59ffffff"
                 clip: true
 
                 Image {
@@ -288,27 +278,4 @@ PanelWindow {
         }
     }
 
-    // ── footer ──────────────────────────────────────────────────────────
-    Text {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 28
-        text: Wallpaper.entries.length > 0
-            ? Wallpaper.basename(Wallpaper.entries[root.selectedIndex])
-                + "   ·   " + (root.selectedIndex + 1) + " / " + Wallpaper.entries.length
-            : "No images in ~/Pictures"
-        color: Theme.fgDim
-        font.family: Theme.font
-        font.pixelSize: Theme.size
-    }
-
-    Text {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10
-        text: "← →  browse    ·    click  apply    ·    esc  close"
-        color: Theme.border
-        font.family: Theme.font
-        font.pixelSize: Theme.sizeSmall
-    }
 }
