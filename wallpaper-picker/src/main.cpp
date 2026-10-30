@@ -54,8 +54,11 @@ constexpr qreal kSideShrink = 0.78;
 constexpr qreal kSideSlant = 0.06;
 constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
-// Scroll distance that advances the carousel by one card.
-constexpr qreal kScrollStepPx = 100.0;
+// Scroll travel that advances the carousel by one card. Mouse wheels arrive
+// in 120-unit notches, so one notch is kMouseStepPx; a trackpad gesture
+// accumulates raw pixels up to kTrackpadStepPx.
+constexpr qreal kMouseStepPx = 100.0;
+constexpr qreal kTrackpadStepPx = 80.0;
 
 // Decoded thumbnails are cached on disk so a cold start does not have to
 // decode the source PNGs again. Bump the version when the thumb geometry
@@ -582,26 +585,29 @@ protected:
         }
     }
 
-    // Trackpads emit many small deltas per swipe, and a single delta can span
-    // several steps when the user flicks. Accumulate the pixels and step once
-    // per kScrollStepPx in either direction -- but never more than one step
-    // per event, so a fast trackpad swipe glides card by card instead of
-    // skipping the whole carousel.
+    // Mouse wheels arrive as 120-unit notches and step one card per notch.
+    // Trackpads emit many small deltas per swipe, so they accumulate raw
+    // pixels and step once kTrackpadStepPx of travel has built up. Capping at
+    // one step per event stops a fast flick from skipping the whole carousel.
     void wheelEvent(QWheelEvent *event) override
     {
         event->accept();
 
-        qreal pixels = 0;
-        if (!event->pixelDelta().isNull())
-            pixels = event->pixelDelta().y();
-        else if (event->angleDelta().y() != 0)
-            pixels = event->angleDelta().y() / 120.0 * kScrollStepPx;
+        qreal delta = 0;
+        qreal threshold = 0;
+        if (!event->pixelDelta().isNull()) {
+            delta = event->pixelDelta().y();
+            threshold = kTrackpadStepPx;
+        } else if (event->angleDelta().y() != 0) {
+            delta = event->angleDelta().y() / 120.0 * kMouseStepPx;
+            threshold = kMouseStepPx;
+        }
 
-        if (qFuzzyIsNull(pixels))
+        if (qFuzzyIsNull(delta))
             return;
 
-        m_scrollAccum += pixels;
-        if (std::abs(m_scrollAccum) < kScrollStepPx)
+        m_scrollAccum += delta;
+        if (std::abs(m_scrollAccum) < threshold)
             return;
 
         const int dir = m_scrollAccum > 0 ? -1 : 1;
