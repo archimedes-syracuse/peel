@@ -21,7 +21,7 @@ PanelWindow {
     readonly property int gap: 10                     // px between items
     // Neighbours are sheared very slightly so they fan out toward the bottom
     // instead of sitting as perfectly straight bars. Small on purpose.
-    readonly property real sideSlant: 0.10
+    readonly property real sideSlant: 0.06
 
     readonly property int cardH: Math.round(height * 0.57)
     readonly property int cardW: Math.round(cardH * 1.62)
@@ -50,6 +50,15 @@ PanelWindow {
 
     function sliceWidth(ad) {
         return Math.round(cardW * sideWidth * Math.pow(sideShrink, ad - 1));
+    }
+
+    // Shear factor for a neighbour d steps away: nothing for the selected
+    // card. Every slice leans the same way, bottom to the left, the way the
+    // mockup does -- it is not a mirrored fan.
+    function shearFor(d) {
+        if (d === 0)
+            return 0;
+        return -sideSlant;
     }
 
     // Distance from screen centre to the inner edge of the |ad|-th slice,
@@ -195,7 +204,7 @@ PanelWindow {
             // from the centre at the bottom, so the row fans out a touch.
             transform: Matrix4x4 {
                 matrix: Qt.matrix4x4(
-                    1, active ? 0 : (d < 0 ? -root.sideSlant : root.sideSlant), 0, 0,
+                    1, root.shearFor(d), 0, -root.shearFor(d) * height / 2,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
                     0, 0, 0, 1)

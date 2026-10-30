@@ -46,7 +46,7 @@ constexpr int kVisibleSide = 3;
 constexpr qreal kSideHeight = 0.92;
 constexpr qreal kSideWidth = 0.20;
 constexpr qreal kSideShrink = 0.78;
-constexpr qreal kSideSlant = 0.10;
+constexpr qreal kSideSlant = 0.06;
 constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
 
@@ -420,13 +420,16 @@ protected:
             // it, no border and no tint. Only the receding side slices keep a
             // 1px hairline, a dark backing, and the slight outward lean.
             const QRectF frame = cell.rect;
-            const qreal slant = active
-                ? 0.0
-                : (frame.center().x() < width() / 2.0 ? -kSideSlant : kSideSlant);
+            // Every slice leans the same way (bottom to the left), like the
+            // mockup; the fan is not mirrored across the centre.
+            const qreal slant = active ? 0.0 : -kSideSlant;
 
-            painter.translate(frame.topLeft());
+            // Shear about the slice's own centre so the tops lean inward and
+            // the bottoms outward, keeping the gaps between slices even.
+            painter.translate(frame.center());
             if (!qFuzzyIsNull(slant))
                 painter.shear(slant, 0);
+            painter.translate(-frame.width() / 2.0, -frame.height() / 2.0);
             const QRectF local(0, 0, frame.width(), frame.height());
 
             if (!active)
