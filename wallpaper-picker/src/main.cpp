@@ -54,10 +54,7 @@ constexpr qreal kSideShrink = 0.78;
 constexpr qreal kSideSlant = 0.06;
 constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
-// Scroll travel that advances the carousel by one card. Mouse wheels arrive
-// in 120-unit notches, so one notch is kMouseStepPx; a trackpad gesture
-// accumulates raw pixels up to kTrackpadStepPx.
-constexpr qreal kMouseStepPx = 100.0;
+// Scroll travel that advances the carousel by one card on a trackpad gesture.
 constexpr qreal kTrackpadStepPx = 80.0;
 
 // Decoded thumbnails are cached on disk so a cold start does not have to
@@ -70,6 +67,21 @@ constexpr int kThumbVersion = 1;
 const QColor kAccent(0xe8, 0xb6, 0x4b);
 const QColor kSideBorder(255, 255, 255, 89);
 const QColor kSurface(13, 13, 13);
+
+// Optional diagnostics: when WALLPAPER_PICKER_DEBUG_WHEEL names a file, every
+// wheel event and selection is appended there. Used to tune the scroll step
+// against the actual device deltas.
+void debugLog(const QString &line)
+{
+    const QByteArray path = qgetenv("WALLPAPER_PICKER_DEBUG_WHEEL");
+    if (path.isEmpty())
+        return;
+    if (FILE *f = std::fopen(path.constData(), "a")) {
+        std::fputs(line.toUtf8().constData(), f);
+        std::fputc('\n', f);
+        std::fclose(f);
+    }
+}
 
 qreal lerp(qreal a, qreal b, qreal t)
 {
@@ -585,29 +597,43 @@ protected:
         }
     }
 
-    // Mouse wheels arrive as 120-unit notches and step one card per notch.
-    // Trackpads emit many small deltas per swipe, so they accumulate raw
-    // pixels and step once kTrackpadStepPx of travel has built up. Capping at
-    // one step per event stops a fast flick from skipping the whole carousel.
+    // A mouse wheel sends standalone notches: angleDelta 120 (and, on this
+    // device, also a 15px pixelDelta) with no scroll phase. A trackpad wraps
+    // its deltas in a gesture with Begin/Update/End phases and reports
+    // continuous pixel travel. Treating the mouse's pixelDelta as trackpad
+    // travel was the bug: one physical notch only counted 15 of the 80px
+    // needed, so a card took ~6 notches. Notches now step one card each;
+    // only real gestures accumulate pixels.
     void wheelEvent(QWheelEvent *event) override
     {
         event->accept();
 
-        qreal delta = 0;
-        qreal threshold = 0;
-        if (!event->pixelDelta().isNull()) {
-            delta = event->pixelDelta().y();
-            threshold = kTrackpadStepPx;
-        } else if (event->angleDelta().y() != 0) {
-            delta = event->angleDelta().y() / 120.0 * kMouseStepPx;
-            threshold = kMouseStepPx;
-        }
+        debugLog(QStringLiteral("wheel pixel=%1,%2 angle=%3,%4 phase=%5 inverted=%6")
+                     .arg(event->pixelDelta().x())
+                     .arg(event->pixelDelta().y())
+                     .arg(event->angleDelta().x())
+                     .arg(event->angleDelta().y())
+                     .arg(int(event->phase()))
+                     .arg(event->inverted()));
 
-        if (qFuzzyIsNull(delta))
+        const int pixels = event->pixelDelta().y();
+        const int angle = event->angleDelta().y();
+        if (pixels == 0 && angle == 0)
             return;
 
-        m_scrollAccum += delta;
-        if (std::abs(m_scrollAccum) < threshold)
+        if (event->phase() == Qt::NoScrollPhase) {
+            // Wheel notch: direction comes from angleDelta when present.
+            const int dy = angle != 0 ? angle : pixels;
+            m_scrollAccum = 0;
+            move(dy < 0 ? 1 : -1);
+            return;
+        }
+
+        // Touchpad gesture: accumulate real pixel travel.
+        if (pixels == 0)
+            return;
+        m_scrollAccum += pixels;
+        if (std::abs(m_scrollAccum) < kTrackpadStepPx)
             return;
 
         const int dir = m_scrollAccum > 0 ? -1 : 1;
@@ -722,6 +748,8 @@ private:
         if (index < 0 || index >= m_store->entries.size() || index == m_selected)
             return;
 
+        debugLog(QStringLiteral("select index=%1").arg(index));
+
         m_from = currentLayout();
         m_previous = m_selected;
         m_selected = index;
@@ -752,8 +780,12 @@ private:
             return;
         m_applyPending = false;
         m_applyTimer.stop();
-        if (m_selected >= 0 && m_selected < m_store->entries.size())
+        if (m_selected >= 0 && m_selected < m_store->entries.size()) {
+            debugLog(QStringLiteral("apply index=%1 path=%2")
+                         .arg(m_selected)
+                         .arg(m_store->entries.at(m_selected)));
             m_store->apply(m_store->entries.at(m_selected));
+        }
     }
 
     Layout layoutFor(int selected) const
