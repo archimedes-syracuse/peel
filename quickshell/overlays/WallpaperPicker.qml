@@ -16,7 +16,7 @@ PanelWindow {
     // ── look ────────────────────────────────────────────────────────────
     readonly property int visibleSide: 3              // slices drawn per side
     readonly property real sideHeight: 0.92           // slice height vs card
-    readonly property real sideWidth: 0.20            // first slice width vs card
+    readonly property real sideWidth: 0.16            // first slice width vs card
     readonly property real sideShrink: 0.78           // width falloff per step
     readonly property int gap: 10                     // px between items
     // Neighbours are sheared very slightly so they fan out toward the bottom
