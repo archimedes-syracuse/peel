@@ -12,8 +12,13 @@ and other wlroots-based compositors.
 - Full-screen layer-shell overlay with a dimmed, full-bleed preview.
 - Centered active wallpaper shown bare — no frame, no badge, no tint —
   flanked by narrow slices (three per side) that fan out slightly at the bottom.
+  Slice width (0.16 of the card) is chosen so both outer slices stay on a
+  1920-wide screen.
 - Animated geometry on every move (280 ms, cubic ease-out).
-- Arrow keys, `hjkl`, mouse wheel, side-slice clicks, Enter, and Escape.
+- Arrow keys, `hjkl`, mouse wheel, trackpad scroll, side-slice clicks, Enter,
+  and Escape. Scrolling is incremental: the wheel/trackpad moves exactly one
+  card per 55 px of travel (touchpads step once per ~0.5 cm swipe) instead of
+  jumping the whole row on a single event.
 - Click the active card or press Enter to apply and close.
 - Live preview while browsing; selection is persisted immediately.
 - Single-instance toggle: running `wallpaper-picker` again hides/shows the

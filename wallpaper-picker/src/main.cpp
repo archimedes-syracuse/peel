@@ -49,11 +49,13 @@ namespace {
 
 constexpr int kVisibleSide = 3;
 constexpr qreal kSideHeight = 0.92;
-constexpr qreal kSideWidth = 0.20;
+constexpr qreal kSideWidth = 0.16;
 constexpr qreal kSideShrink = 0.78;
 constexpr qreal kSideSlant = 0.06;
 constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
+// Scroll distance that advances the carousel by one card.
+constexpr qreal kScrollStepPx = 55.0;
 
 // Decoded thumbnails are cached on disk so a cold start does not have to
 // decode the source PNGs again. Bump the version when the thumb geometry
@@ -580,10 +582,31 @@ protected:
         }
     }
 
+    // Trackpads emit many small deltas per swipe, and a single delta can span
+    // several steps when the user flicks. Accumulate the pixels and step once
+    // per kScrollStepPx in either direction -- but never more than one step
+    // per event, so a fast trackpad swipe glides card by card instead of
+    // skipping the whole carousel.
     void wheelEvent(QWheelEvent *event) override
     {
-        move(event->angleDelta().y() < 0 ? 1 : -1);
         event->accept();
+
+        qreal pixels = 0;
+        if (!event->pixelDelta().isNull())
+            pixels = event->pixelDelta().y();
+        else if (event->angleDelta().y() != 0)
+            pixels = event->angleDelta().y() / 120.0 * kScrollStepPx;
+
+        if (qFuzzyIsNull(pixels))
+            return;
+
+        m_scrollAccum += pixels;
+        if (std::abs(m_scrollAccum) < kScrollStepPx)
+            return;
+
+        const int dir = m_scrollAccum > 0 ? -1 : 1;
+        m_scrollAccum = 0;
+        move(dir);
     }
 
     void mousePressEvent(QMouseEvent *event) override
@@ -699,6 +722,10 @@ private:
         m_to = layoutFor(m_selected);
         m_progress = 0.0;
         m_animation.stop();
+        // Never shorten the glide: select() rebuilds the animation while it is
+        // running, and reusing the old duration would slow every step after
+        // the first.
+        m_animation.setDuration(kAnimationMs);
         m_animation.setStartValue(0.0);
         m_animation.setEndValue(1.0);
         m_animation.start();
@@ -819,6 +846,7 @@ private:
     QVariantAnimation m_animation;
     QTimer m_applyTimer;
     bool m_applyPending = false;
+    qreal m_scrollAccum = 0;
 };
 
 QString instanceKey()
