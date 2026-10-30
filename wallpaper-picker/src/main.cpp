@@ -420,9 +420,9 @@ protected:
             // it, no border and no tint. Only the receding side slices keep a
             // 1px hairline, a dark backing, and the slight outward lean.
             const QRectF frame = cell.rect;
-            // Every slice leans the same way (bottom to the left), like the
-            // mockup; the fan is not mirrored across the centre.
-            const qreal slant = active ? 0.0 : -kSideSlant;
+            // Every tile leans the same way (bottom to the left), the selected
+            // card included, like the mockup.
+            const qreal slant = -kSideSlant;
 
             // Shear about the slice's own centre so the tops lean inward and
             // the bottoms outward, keeping the gaps between slices even.

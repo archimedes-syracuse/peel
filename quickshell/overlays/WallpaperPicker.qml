@@ -52,12 +52,9 @@ PanelWindow {
         return Math.round(cardW * sideWidth * Math.pow(sideShrink, ad - 1));
     }
 
-    // Shear factor for a neighbour d steps away: nothing for the selected
-    // card. Every slice leans the same way, bottom to the left, the way the
-    // mockup does -- it is not a mirrored fan.
+    // Shear for every tile, the selected card included: the whole row leans
+    // the same way, bottom to the left, as in the mockup.
     function shearFor(d) {
-        if (d === 0)
-            return 0;
         return -sideSlant;
     }
 
