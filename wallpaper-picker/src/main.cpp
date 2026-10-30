@@ -55,7 +55,7 @@ constexpr qreal kSideSlant = 0.06;
 constexpr int kGap = 10;
 constexpr int kAnimationMs = 280;
 // Scroll distance that advances the carousel by one card.
-constexpr qreal kScrollStepPx = 80.0;
+constexpr qreal kScrollStepPx = 100.0;
 
 // Decoded thumbnails are cached on disk so a cold start does not have to
 // decode the source PNGs again. Bump the version when the thumb geometry
