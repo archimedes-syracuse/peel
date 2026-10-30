@@ -217,6 +217,19 @@ public:
         return entries.indexOf(currentPath);
     }
 
+    // The running swaybg is the ground truth. state.json can be stale (a
+    // deleted file, or another tool changing the wallpaper), so adopt what is
+    // actually on screen whenever it is one of our entries.
+    void adoptRunningPath()
+    {
+        const QString running = runningSwaybgPath();
+        if (running.isEmpty() || !entries.contains(running)
+            || running == currentPath)
+            return;
+        currentPath = running;
+        saveState();
+    }
+
     void apply(const QString &path)
     {
         if (path.isEmpty())
@@ -426,6 +439,7 @@ protected:
         // Rescan on every show: the process stays resident while hidden, so
         // images added from a file manager would otherwise never appear.
         m_store->scan();
+        m_store->adoptRunningPath();
         const int index = m_store->currentIndex();
         m_selected = index >= 0 ? index
                                 : (m_store->entries.isEmpty() ? -1 : 0);
