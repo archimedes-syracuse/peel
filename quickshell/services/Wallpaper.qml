@@ -8,7 +8,13 @@ Singleton {
     id: root
 
     readonly property string picturesDir: (Quickshell.env("HOME") || "") + "/Pictures"
-    readonly property string stateFile: Quickshell.statePath("wallpaper.json")
+    // Shared with the C++ wallpaper-picker so the last selection carries over
+    // no matter which picker UI changed it.
+    readonly property string stateFile: {
+        const stateHome = Quickshell.env("XDG_STATE_HOME")
+            || (Quickshell.env("HOME") || "") + "/.local/state";
+        return stateHome + "/wallpaper-picker/state.json";
+    }
 
     readonly property string mode: "fill"
 

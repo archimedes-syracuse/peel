@@ -1,0 +1,27 @@
+#!/bin/sh
+# Restore the wallpaper last selected with wallpaper-picker.
+#
+# Reads the picker's state file (shared with the Quickshell Wallpaper service)
+# and starts swaybg with it. Falls back to the old default only when the state
+# file is missing/unreadable or the image no longer exists.
+
+set -u
+
+state_home=${XDG_STATE_HOME:-"$HOME/.local/state"}
+state_file="$state_home/wallpaper-picker/state.json"
+fallback="$HOME/Pictures/winter-landscape-friedrich.jpg"
+
+path=""
+if [ -r "$state_file" ]; then
+    if command -v jq >/dev/null 2>&1; then
+        path=$(jq -r '.path // empty' "$state_file" 2>/dev/null)
+    elif command -v python3 >/dev/null 2>&1; then
+        path=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("path",""))' \
+            "$state_file" 2>/dev/null)
+    fi
+fi
+
+[ -n "$path" ] && [ -f "$path" ] || path=$fallback
+
+pkill -x swaybg 2>/dev/null
+exec swaybg -i "$path" -m fill

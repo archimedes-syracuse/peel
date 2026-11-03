@@ -108,6 +108,9 @@ install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
 install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
     "$REPO_DIR/scripts/screenshot-file.sh" \
     "$USER_HOME/.local/bin/screenshot-file"
+install -m 0755 -o "$USER_NAME" -g "$USER_NAME" \
+    "$REPO_DIR/scripts/wallpaper-restore" \
+    "$USER_HOME/.local/bin/wallpaper-restore"
 
 if [[ ! -f "$USER_HOME/Pictures/wallpaper-scene-on-the-ice.jpg" ]]; then
     echo "WARN: $USER_HOME/Pictures/wallpaper-scene-on-the-ice.jpg is missing; swaybg will have nothing to show."
